@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: mainApp.MainApp
+Class-Path: controlsfx-8.40.14.jar
+
