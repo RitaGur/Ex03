@@ -1,7 +1,9 @@
 package utils;
 
 import DTO.client.ClientInformationDTO;
+import DTO.loan.scramble.InvestmentLoanInformationDTO;
 import bankingSystem.BankingSystem;
+import com.google.gson.Gson;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -11,9 +13,10 @@ import java.util.List;
 import static constants.Constants.INT_PARAMETER_ERROR;
 
 public class ServletUtils {
-
+	public final static Gson GSON_INSTANCE = new Gson();
 	private static final String BANK_ATTRIBUTE_NAME = "BankingSystem";
 	private static final String CUSTOMER_LIST_ATTRIBUTE_NAME = "CustomerList";
+	private static final String INLAYS_ATTRIBUTE_NAME = "inlaysList";
 
 	/*
 	Note how the synchronization is done only on the question and\or creation of the relevant managers and once they exists -
@@ -45,5 +48,14 @@ public class ServletUtils {
 			}
 		}
 		return INT_PARAMETER_ERROR;
+	}
+
+	public static ArrayList<InvestmentLoanInformationDTO> getInvestmentsListInfo(ServletContext servletContext) {
+		synchronized (bankManagerLock) {
+			if (servletContext.getAttribute(INLAYS_ATTRIBUTE_NAME) == null) {
+				servletContext.setAttribute(INLAYS_ATTRIBUTE_NAME, new ArrayList<InvestmentLoanInformationDTO>());
+			}
+		}
+		return (ArrayList<InvestmentLoanInformationDTO>)servletContext.getAttribute(INLAYS_ATTRIBUTE_NAME);
 	}
 }

@@ -1,30 +1,25 @@
 package DTO.loan;
 
-import bankingSystem.timeline.loan.Loan;
-import bankingSystem.timeline.loan.PartInLoan;
-import bankingSystem.timeline.loan.PaymentInfo;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class LoanInformationDTO {
-    private final int loanNumber;
-    private final String loanNameID;
-    private final String borrowerName;
-    private final String loanCategory;
-    private final int loanStartSum;
-    private final int loanSumOfTimeUnit;
-    private final int loanInterest;
-    private final int timeUnitsBetweenPayments;
+    private int loanNumber;
+    private String loanNameID;
+    private String borrowerName;
+    private String loanCategory;
+    private int loanStartSum;
+    private int loanSumOfTimeUnit;
+    private int loanInterest;
+    private int timeUnitsBetweenPayments;
     private String loanStatus;
     private List<PartInLoanDTO> lenderSetAndAmounts;
     private int pendingMoney;
     private int missingMoneyToActive;
-    private final int beginningTimeUnit;
-    private final int endingTimeUnit;
-    private final int fundAmount;
-    private final int interestAmount;
-    private final int sumAmount;
+    private int beginningTimeUnit;
+    private int endingTimeUnit;
+    private int fundAmount;
+    private int interestAmount;
+    private int sumAmount;
     private int paidFund;
     private int paidInterest;
     private int fundLeftToPay;
@@ -39,7 +34,11 @@ public class LoanInformationDTO {
     private int numberOfUnpaidPayments;
     private int debt;
 
-    public LoanInformationDTO(Loan loan, int loanNumberI) {
+    public LoanInformationDTO() {
+
+    }
+
+   /* public LoanInformationDTO(Loan loan, int loanNumberI) {
         loanNumber = loanNumberI;
         loanNameID = loan.getLoanNameID();
         borrowerName = loan.getLoanOwner().getClientName();
@@ -70,30 +69,7 @@ public class LoanInformationDTO {
         interestToPayNextPayment = (int)Math.round(loan.interestOfNextPayment());
         numberOfUnpaidPayments = loan.howManyUnpaidPayments();
         debt = loan.getDebt();
-    }
-
-    private List<PaymentsDTO> paymentsListInDTO(List<PaymentInfo> i_paymentsInfoSet) {
-        List<PaymentsDTO> listToReturn = new ArrayList<>();
-        int count = 1;
-
-        for (PaymentInfo i_PaymentInfo : i_paymentsInfoSet) {
-            listToReturn.add(new PaymentsDTO(i_PaymentInfo.getPaymentTimeUnit(), i_PaymentInfo.getFundPayment(),
-                    i_PaymentInfo.getInterestPayment(), i_PaymentInfo.getPaymentSum(), i_PaymentInfo.isWasItPaid(), count++));
-        }
-
-        return listToReturn;
-    }
-
-    private List<PartInLoanDTO> lenderSetAndAmountInDTO(List<PartInLoan> i_LenderSetAndAmount) {
-        List<PartInLoanDTO> setToReturn = new ArrayList<>();
-        int count = 1;
-
-        for (PartInLoan i_PartInLoan : i_LenderSetAndAmount) {
-            setToReturn.add(new PartInLoanDTO(i_PartInLoan.getLender().getClientName(), i_PartInLoan.getAmountOfLoan(), count++));
-        }
-
-        return setToReturn;
-    }
+    }*/
 
     public int getLastPaymentTimeunit() {
         return lastPaymentTimeunit;
@@ -151,27 +127,27 @@ public class LoanInformationDTO {
         return fundAmount;
     }
 
-    public double getInterestAmount() {
+    public int getInterestAmount() {
         return interestAmount;
     }
 
-    public double getSumAmount() {
+    public int getSumAmount() {
         return sumAmount;
     }
 
-    public double getPaidFund() {
+    public int getPaidFund() {
         return paidFund;
     }
 
-    public double getPaidInterest() {
+    public int getPaidInterest() {
         return paidInterest;
     }
 
-    public double getFundLeftToPay() {
+    public int getFundLeftToPay() {
         return fundLeftToPay;
     }
 
-    public double getInterestLeftToPay() {
+    public int getInterestLeftToPay() {
         return interestLeftToPay;
     }
 
@@ -179,7 +155,7 @@ public class LoanInformationDTO {
         return nextPaymentTimeUnit;
     }
 
-    public double getSumAmountToPayEveryTimeUnit() {
+    public int getSumAmountToPayEveryTimeUnit() {
         return sumAmountToPayEveryTimeUnit;
     }
 
@@ -187,15 +163,15 @@ public class LoanInformationDTO {
         return paymentsListInDTO;
     }
 
-    public double getAmountToPayNextPayment() {
+    public int getAmountToPayNextPayment() {
         return amountToPayNextPayment;
     }
 
-    public double getFundToPayNextPayment() {
+    public int getFundToPayNextPayment() {
         return fundToPayNextPayment;
     }
 
-    public double getInterestToPayNextPayment() {
+    public int getInterestToPayNextPayment() {
         return interestToPayNextPayment;
     }
 
@@ -211,7 +187,7 @@ public class LoanInformationDTO {
         return loanNumber;
     }
 
-    public double amountOfUnPaidPayments() {
+    public int amountOfUnPaidPayments() {
         int sum = 0;
 
         for (PaymentsDTO singlePayment : paymentsListInDTO) {
@@ -229,5 +205,125 @@ public class LoanInformationDTO {
 
     public int getDebt() {
         return debt;
+    }
+
+    public void setLoanStatus(String loanStatus) {
+        this.loanStatus = loanStatus;
+    }
+
+    public void setLenderSetAndAmounts(List<PartInLoanDTO> lenderSetAndAmounts) {
+        this.lenderSetAndAmounts = lenderSetAndAmounts;
+    }
+
+    public void setPendingMoney(int pendingMoney) {
+        this.pendingMoney = pendingMoney;
+    }
+
+    public void setMissingMoneyToActive(int missingMoneyToActive) {
+        this.missingMoneyToActive = missingMoneyToActive;
+    }
+
+    public void setPaidFund(int paidFund) {
+        this.paidFund = paidFund;
+    }
+
+    public void setPaidInterest(int paidInterest) {
+        this.paidInterest = paidInterest;
+    }
+
+    public void setFundLeftToPay(int fundLeftToPay) {
+        this.fundLeftToPay = fundLeftToPay;
+    }
+
+    public void setInterestLeftToPay(int interestLeftToPay) {
+        this.interestLeftToPay = interestLeftToPay;
+    }
+
+    public void setNextPaymentTimeUnit(int nextPaymentTimeUnit) {
+        this.nextPaymentTimeUnit = nextPaymentTimeUnit;
+    }
+
+    public void setSumAmountToPayEveryTimeUnit(int sumAmountToPayEveryTimeUnit) {
+        this.sumAmountToPayEveryTimeUnit = sumAmountToPayEveryTimeUnit;
+    }
+
+    public void setPaymentsListInDTO(List<PaymentsDTO> paymentsListInDTO) {
+        this.paymentsListInDTO = paymentsListInDTO;
+    }
+
+    public void setLastPaymentTimeunit(int lastPaymentTimeunit) {
+        this.lastPaymentTimeunit = lastPaymentTimeunit;
+    }
+
+    public void setAmountToPayNextPayment(int amountToPayNextPayment) {
+        this.amountToPayNextPayment = amountToPayNextPayment;
+    }
+
+    public void setFundToPayNextPayment(int fundToPayNextPayment) {
+        this.fundToPayNextPayment = fundToPayNextPayment;
+    }
+
+    public void setInterestToPayNextPayment(int interestToPayNextPayment) {
+        this.interestToPayNextPayment = interestToPayNextPayment;
+    }
+
+    public void setNumberOfUnpaidPayments(int numberOfUnpaidPayments) {
+        this.numberOfUnpaidPayments = numberOfUnpaidPayments;
+    }
+
+    public void setDebt(int debt) {
+        this.debt = debt;
+    }
+
+    public void setLoanNumber(int loanNumber) {
+        this.loanNumber = loanNumber;
+    }
+
+    public void setLoanNameID(String loanNameID) {
+        this.loanNameID = loanNameID;
+    }
+
+    public void setBorrowerName(String borrowerName) {
+        this.borrowerName = borrowerName;
+    }
+
+    public void setLoanCategory(String loanCategory) {
+        this.loanCategory = loanCategory;
+    }
+
+    public void setLoanStartSum(int loanStartSum) {
+        this.loanStartSum = loanStartSum;
+    }
+
+    public void setLoanSumOfTimeUnit(int loanSumOfTimeUnit) {
+        this.loanSumOfTimeUnit = loanSumOfTimeUnit;
+    }
+
+    public void setLoanInterest(int loanInterest) {
+        this.loanInterest = loanInterest;
+    }
+
+    public void setTimeUnitsBetweenPayments(int timeUnitsBetweenPayments) {
+        this.timeUnitsBetweenPayments = timeUnitsBetweenPayments;
+    }
+
+    public void setBeginningTimeUnit(int beginningTimeUnit) {
+        this.beginningTimeUnit = beginningTimeUnit;
+    }
+
+    public void setEndingTimeUnit(int endingTimeUnit) {
+        this.endingTimeUnit = endingTimeUnit;
+    }
+
+    public void setFundAmount(int fundAmount) {
+        this.fundAmount = fundAmount;
+    }
+
+    public void setInterestAmount(int interestAmount) {
+        this.interestAmount = interestAmount;
+    }
+
+    public void setSumAmount(int sumAmount) {
+        this.sumAmount = sumAmount;
     }
 }

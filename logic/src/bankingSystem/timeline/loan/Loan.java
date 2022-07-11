@@ -223,6 +223,7 @@ public class Loan {
             f_LoanOwner.addMoneyToAccount(m_PendingMoney, i_CurrentTimeUnit); //pay to borrower
             m_PendingMoney = 0;
             m_BeginningTimeUnit = i_CurrentTimeUnit;
+            //TODO: update ending timeunit
             timeunitOfFirstUnPaidPayment = i_CurrentTimeUnit;
             checkIfPaymentNeededAndAddPaymentNotification(i_CurrentTimeUnit);
         }

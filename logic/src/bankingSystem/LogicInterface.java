@@ -4,10 +4,11 @@ import DTO.client.ClientInformationDTO;
 import DTO.loan.LoanInformationDTO;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 public interface LogicInterface {
-    public void readFromFile(File file) throws Exception;
+    public void readFromFile(String contentType, InputStream inputStream, String customerName) throws Exception;
     public List<LoanInformationDTO> showLoansInformation();
     public List<ClientInformationDTO> showClientsInformation();
     public void addMoneyToAccount(String i_ClientAccount, int i_AmountToAdd) throws Exception;

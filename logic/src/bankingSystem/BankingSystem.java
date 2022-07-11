@@ -2,22 +2,32 @@ package bankingSystem;
 
 import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
+import DTO.client.RecentTransactionDTO;
 import DTO.loan.LoanInformationDTO;
+import DTO.loan.PartInLoanDTO;
+import DTO.loan.PaymentsDTO;
 import bankingSystem.generated.AbsCustomer;
 import bankingSystem.generated.AbsDescriptor;
 import bankingSystem.generated.AbsLoan;
 import bankingSystem.timeline.TimeUnit;
 import bankingSystem.timeline.bankAccount.BankAccount;
+import bankingSystem.timeline.bankAccount.RecentTransaction;
 import bankingSystem.timeline.bankClient.BankClient;
 import bankingSystem.timeline.bankClient.PaymentNotification;
 import bankingSystem.timeline.loan.Loan;
 import bankingSystem.timeline.loan.LoanStatus;
+import bankingSystem.timeline.loan.PartInLoan;
+import bankingSystem.timeline.loan.PaymentInfo;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class BankingSystem implements LogicInterface {
     private List<BankClient> m_BankAccountList;
@@ -49,8 +59,13 @@ public class BankingSystem implements LogicInterface {
         m_BankAccountList.add(new BankClient(i_AccountBalance, i_ClientName));
     }
 
+    public void addBankClientByClient(BankClient newBankClient) {
+        m_BankAccountList.add(newBankClient);
+    }
+
     public void addLoan(String i_LoanID, String i_BorrowerName, int i_LoanStartSum, int i_SumOfTimeUnit, int i_HowOftenToPay, double i_Interest, String i_LoanCategory) throws Exception {
         BankAccount borrowerAccount = findBankAccountByName(i_BorrowerName);
+
         if (checkIfCategoryExists(i_LoanCategory)) {
             Loan loanToAdd = new Loan(i_LoanID, borrowerAccount, i_LoanStartSum, i_SumOfTimeUnit, i_HowOftenToPay, i_Interest, i_LoanCategory);
             m_LoanList.add(loanToAdd);
@@ -113,30 +128,28 @@ public class BankingSystem implements LogicInterface {
     }
 
     @Override
-    public void readFromFile(File file) throws Exception {
-        if (!file.exists()) {
-            throw new FileNotFoundException();
+    public void readFromFile(String contentType, InputStream inputStream, String customerName) throws Exception {
+        if (!contentType.endsWith("/xml"))
+        {
+            throw new Exception("not an xml file.");
         }
 
         JAXBContext jaxbContext = JAXBContext.newInstance(AbsDescriptor.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        AbsDescriptor descriptor = (AbsDescriptor) jaxbUnmarshaller.unmarshal(file);
+        AbsDescriptor descriptor = (AbsDescriptor) jaxbUnmarshaller.unmarshal(inputStream);
 
         // Categories:
         List<String> categoriesList = descriptor.getAbsCategories().getAbsCategory();
         fromListToSetCategories(categoriesList); //filling m_LoanCategoryList
 
-        // BankClients:
-        fillBankClientsList(descriptor.getAbsCustomers().getAbsCustomer());
-
         // Loans:
-        fillLoanList(descriptor.getAbsLoans().getAbsLoan());
+        fillLoanList(descriptor.getAbsLoans().getAbsLoan(), customerName);
 
         // Timeunit:
         m_CurrentTimeUnit.setCurrentTimeUnit();
     }
 
-    private void fillLoanList(List<AbsLoan> absLoan) throws Exception {
+    private void fillLoanList(List<AbsLoan> absLoan, String customerName) throws Exception {
         m_LoanList = new ArrayList<>();
         for (AbsLoan i_Loan : absLoan) {
             if (i_Loan.getAbsTotalYazTime() % i_Loan.getAbsPaysEveryYaz() != 0) {
@@ -148,7 +161,7 @@ public class BankingSystem implements LogicInterface {
             if(checkIfLoanExist(m_LoanList, i_Loan.getId())) {
                 throw new Exception("The loan: " + i_Loan.getId() + " already exist.");
             }
-            addLoan(i_Loan.getId(), i_Loan.getAbsOwner(), i_Loan.getAbsCapital(), i_Loan.getAbsTotalYazTime(), i_Loan.getAbsPaysEveryYaz(),
+            addLoan(i_Loan.getId(), customerName, i_Loan.getAbsCapital(), i_Loan.getAbsTotalYazTime(), i_Loan.getAbsPaysEveryYaz(),
                     i_Loan.getAbsIntristPerPayment(), i_Loan.getAbsCategory());
         }
     }
@@ -162,7 +175,6 @@ public class BankingSystem implements LogicInterface {
             m_BankAccountList.add(new BankClient(i_Customer.getAbsBalance(), i_Customer.getName()));
         }
     }
-    //private boolean checkIfLoanOwnerExist()
 
     private boolean checkIfLoanExist(List<Loan> loanList, String loanID) {
         for (Loan loan : loanList) {
@@ -199,10 +211,71 @@ public class BankingSystem implements LogicInterface {
         int counter = 1;
 
         for (Loan i_Loan : m_LoanList) {
-            loanListToReturn.add(new LoanInformationDTO(i_Loan, counter++));
+            loanListToReturn.add(buildLoanDTO(i_Loan, counter++));
+            //loanListToReturn.add(new LoanInformationDTO(i_Loan, counter++));
         }
 
         return loanListToReturn;
+    }
+
+    private LoanInformationDTO buildLoanDTO(Loan loan, int loanNumber) {
+        LoanInformationDTO loanDTO = new LoanInformationDTO();
+
+        loanDTO.setLoanNumber(loanNumber);
+        loanDTO.setLoanNameID(loan.getLoanNameID());
+        loanDTO.setBorrowerName(loan.getLoanOwner().getClientName());
+        loanDTO.setLoanCategory(loan.getLoanCategory());
+        loanDTO.setLoanStartSum(loan.getLoanStartSum());
+        loanDTO.setLoanSumOfTimeUnit(loan.getSumOfTimeUnit());
+        loanDTO.setLoanInterest((int)(loan.getInterest() * 100));
+        loanDTO.setTimeUnitsBetweenPayments(loan.getTimeUnitsBetweenPayment());
+        loanDTO.setStatus(loan.getLoanStatus().toString());
+        loanDTO.setLenderSetAndAmounts(lenderSetAndAmountInDTO(loan.getLendersSet()));
+        loanDTO.setBeginningTimeUnit(loan.getBeginningTimeUnit());
+        loanDTO.setEndingTimeUnit(loan.getBeginningTimeUnit() + loan.getSumOfTimeUnit() - 1);
+        loanDTO.setFundAmount(loan.getLoanStartSum());
+        loanDTO.setInterestAmount((int) Math.round(loan.interestLoanToPayAmount()));
+        loanDTO.setSumAmount(loanDTO.getFundAmount() + loanDTO.getInterestAmount());
+        loanDTO.setPaidFund((int)Math.round(loan.loanPaidFund()));
+        loanDTO.setPaidInterest((int)Math.round(loan.loanPaidInterest()));
+        loanDTO.setFundLeftToPay((int)Math.round(loan.loanFundLeftToPay()));
+        loanDTO.setInterestLeftToPay((int)Math.round(loan.loanInterestLeftToPay()));
+        loanDTO.setPendingMoney(loan.getPendingMoney());
+        loanDTO.setMissingMoneyToActive((loanDTO.getFundAmount() + loanDTO.getPendingMoney()));
+        loanDTO.setNextPaymentTimeUnit(loan.getLastPaidTimeUnit() + loan.getTimeUnitsBetweenPayment());
+        loanDTO.setSumAmountToPayEveryTimeUnit((int)Math.round(loan.sumAmountToPayEveryTimeUnit()));
+        loanDTO.setPaymentsListInDTO(paymentsListInDTO(loan.getPaymentInfoList()));
+        loanDTO.setLastPaymentTimeunit(loan.getLastPaidTimeUnit());
+        loanDTO.setAmountToPayNextPayment((int)Math.round(loan.amountOfNextPayment()));
+        loanDTO.setFundToPayNextPayment((int)Math.round(loan.fundOfNextPayment()));
+        loanDTO.setInterestToPayNextPayment((int)Math.round(loan.interestOfNextPayment()));
+        loanDTO.setNumberOfUnpaidPayments(loan.howManyUnpaidPayments());
+        loanDTO.setDebt(loan.getDebt());
+
+        return loanDTO;
+    }
+
+    private List<PartInLoanDTO> lenderSetAndAmountInDTO(List<PartInLoan> i_LenderSetAndAmount) {
+        List<PartInLoanDTO> setToReturn = new ArrayList<>();
+        int count = 1;
+
+        for (PartInLoan i_PartInLoan : i_LenderSetAndAmount) {
+            setToReturn.add(new PartInLoanDTO(i_PartInLoan.getLender().getClientName(), i_PartInLoan.getAmountOfLoan(), count++));
+        }
+
+        return setToReturn;
+    }
+
+    private List<PaymentsDTO> paymentsListInDTO(List<PaymentInfo> i_paymentsInfoSet) {
+        List<PaymentsDTO> listToReturn = new ArrayList<>();
+        int count = 1;
+
+        for (PaymentInfo i_PaymentInfo : i_paymentsInfoSet) {
+            listToReturn.add(new PaymentsDTO(i_PaymentInfo.getPaymentTimeUnit(), i_PaymentInfo.getFundPayment(),
+                    i_PaymentInfo.getInterestPayment(), i_PaymentInfo.getPaymentSum(), i_PaymentInfo.isWasItPaid(), count++));
+        }
+
+        return listToReturn;
     }
 
     @Override
@@ -211,10 +284,79 @@ public class BankingSystem implements LogicInterface {
         int counter = 1;
 
         for (BankClient bankClient : m_BankAccountList) {
-            clientsListToReturn.add(new ClientInformationDTO(bankClient, counter++));
+            clientsListToReturn.add(buildClientDTO(bankClient, counter++));
         }
 
         return clientsListToReturn;
+    }
+
+    private ClientInformationDTO buildClientDTO(BankClient bankClient, int clientNumber) {
+        ClientInformationDTO clientDTO = new ClientInformationDTO();
+
+        clientDTO.setClientNumber(clientNumber);
+        clientDTO.setClientName(bankClient.getClientName());
+        clientDTO.setRecentTransactionList(recentTransactionListDTO(bankClient.getLastTransactions()));
+        clientDTO.setClientAsBorrowerLoanList(clientLoanListDTO(bankClient.getClientAsBorrowerSet()));
+        clientDTO.setClientAsLenderLoanList(clientLoanListDTO(bankClient.getClientAsLenderSet()));
+        clientDTO.setPaymentsNotificationsList(paymentsNotificationListDTO(bankClient.getPaymentsNotificationList()));
+        clientDTO.setClientBalance((int)Math.round(bankClient.getAccountBalance()));
+        clientDTO.setNewBorrower(bankClient.howManyInBorrower("NEW"));
+        clientDTO.setPendingBorrower(bankClient.howManyInBorrower("PENDING"));
+        clientDTO.setActiveBorrower(bankClient.howManyInBorrower("ACTIVE"));
+        clientDTO.setRiskBorrower(bankClient.howManyInBorrower("RISK"));
+        clientDTO.setFinishedBorrower(bankClient.howManyInBorrower("FINISHED"));
+        clientDTO.setNewLender(bankClient.howManyInLender("NEW"));
+        clientDTO.setPendingLender(bankClient.howManyInLender("PENDING"));
+        clientDTO.setActiveLender(bankClient.howManyInLender("ACTIVE"));
+        clientDTO.setRiskLender(bankClient.howManyInLender("RISK"));
+        clientDTO.setFinishedLender(bankClient.howManyInLender("FINISHED"));
+
+        return clientDTO;
+    }
+
+    private List<PaymentsNotificationsDTO> paymentsNotificationListDTO(List<PaymentNotification> paymentsNotificationList) {
+        List<PaymentsNotificationsDTO> paymentsNotificationListInDTO = new ArrayList<>();
+        int counter = 1;
+
+        for (PaymentNotification paymentNotification : paymentsNotificationList) {
+            paymentsNotificationListInDTO.add(buildPayment(paymentNotification, counter++));
+        }
+
+        return paymentsNotificationListInDTO;
+    }
+
+    private PaymentsNotificationsDTO buildPayment(PaymentNotification paymentNotification, int paymentNotificationNumber) {
+        PaymentsNotificationsDTO paymentsNotificationsDTO = new PaymentsNotificationsDTO();
+
+        paymentsNotificationsDTO.setPaymentNotificationNumber(paymentNotificationNumber);
+        paymentsNotificationsDTO.setLoanID(paymentNotification.getLoanID());
+        paymentsNotificationsDTO.setPaymentYaz(paymentNotification.getPaymentYaz());
+        paymentsNotificationsDTO.setSum(paymentNotification.getSum());
+
+        return paymentsNotificationsDTO;
+    }
+
+    private List<LoanInformationDTO> clientLoanListDTO(List<Loan> clientSet) {
+        List<LoanInformationDTO> setToReturn = new ArrayList<>();
+        int counter = 1;
+
+        for (Loan loan : clientSet) {
+            setToReturn.add(buildLoanDTO(loan, counter++));
+        }
+
+        return setToReturn;
+    }
+
+    private List<RecentTransactionDTO> recentTransactionListDTO(List<RecentTransaction> lastTransactions) {
+        List<RecentTransactionDTO> setToReturn = new ArrayList<>();
+        int count = 1;
+
+        for (RecentTransaction recentTransaction : lastTransactions) {
+            setToReturn.add(new RecentTransactionDTO(recentTransaction.getAmountOfTransaction(),recentTransaction.getBalanceBeforeTransaction(),
+                    recentTransaction.getBalanceAfterTransaction(), recentTransaction.getTransactionTimeUnit(), recentTransaction.getKindOfTransaction(), count++));
+        }
+
+        return setToReturn;
     }
 
     public List<PaymentsNotificationsDTO> getPaymentsNotificationInDTO(String customerName) throws Exception {
@@ -224,7 +366,7 @@ public class BankingSystem implements LogicInterface {
         List<PaymentNotification> paymentsNotificationList = customer.getPaymentsNotificationList();
 
         for (PaymentNotification paymentNotification : paymentsNotificationList) {
-            paymentsNotificationsDTOList.add(new PaymentsNotificationsDTO(paymentNotification, counter++));
+            paymentsNotificationsDTOList.add(buildPayment(paymentNotification, counter++));
         }
 
         return paymentsNotificationsDTOList;
@@ -326,6 +468,18 @@ public class BankingSystem implements LogicInterface {
         return account;
     }
 
+    public LoanInformationDTO getLoanDTOByLoanID(String loanID, int numberOfLoanDTO) {
+        LoanInformationDTO loanInformationDTO = null;
+
+        for (Loan loan : m_LoanList) {
+            if (loan.getLoanNameID().equals(loanID)) {
+                loanInformationDTO = buildLoanDTO(loan, numberOfLoanDTO);
+            }
+        }
+
+        return loanInformationDTO;
+    }
+
     private boolean checkIfCategoryExists(String i_CategoryToCheck) {
         boolean categoryExist = false;
 
@@ -362,7 +516,7 @@ public class BankingSystem implements LogicInterface {
                         if (interest <= (loanOfBankingSystem.getInterest() * 100) || interest == 0) {
                             if (maxOpenLoans >= openLoansOfCustomer || maxOpenLoans == 0) {
                                 if (minimumTotalTimeunits <= loanOfBankingSystem.getSumOfTimeUnit()) {
-                                    optionLoansSet.add(new LoanInformationDTO(loanOfBankingSystem, counter++));
+                                    optionLoansSet.add(buildLoanDTO(loanOfBankingSystem, counter++));
                                 }
                             }
                         }
@@ -418,7 +572,7 @@ public class BankingSystem implements LogicInterface {
     public ClientInformationDTO getClientInformationByName(String customerName) {
         for (BankClient bankClient : m_BankAccountList) {
             if (bankClient.getClientName().equals(customerName)) {
-                return new ClientInformationDTO(bankClient, -1);
+                return buildClientDTO(bankClient, -1);
             }
         }
 
@@ -432,7 +586,7 @@ public class BankingSystem implements LogicInterface {
         for (Loan loan : customer.getClientAsBorrowerSet()) {
             if (loan.getLoanStatus().toString().equals("ACTIVE") ||
                     loan.getLoanStatus().toString().equals("RISK")) {
-                customerOpenLoansToPay.add(new LoanInformationDTO(loan, -1));
+                customerOpenLoansToPay.add(buildLoanDTO(loan, -1));
             }
         }
 

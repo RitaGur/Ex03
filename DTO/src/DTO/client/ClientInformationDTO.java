@@ -1,17 +1,11 @@
 package DTO.client;
 
 import DTO.loan.LoanInformationDTO;
-import bankingSystem.timeline.bankAccount.RecentTransaction;
-import bankingSystem.timeline.bankClient.BankClient;
-import bankingSystem.timeline.bankClient.PaymentNotification;
-import bankingSystem.timeline.loan.Loan;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class ClientInformationDTO {
-    private final int clientNumber;
-    private final String clientName;
+    private int clientNumber;
+    private String clientName;
     private List<RecentTransactionDTO> recentTransactionList;
     private List<LoanInformationDTO> clientAsBorrowerLoanList;
     private List<PaymentsNotificationsDTO> paymentsNotificationsList;
@@ -28,7 +22,11 @@ public class ClientInformationDTO {
     private int finishedLender;
     private int clientBalance;
 
-    public ClientInformationDTO(BankClient bankClient, int clientNumberI) {
+    public ClientInformationDTO() {
+
+    }
+
+ /*   public ClientInformationDTO(BankClient bankClient, int clientNumberI) {
         clientNumber = clientNumberI;
         this.clientName = bankClient.getClientName();
         this.recentTransactionList = recentTransactionListDTO(bankClient.getLastTransactions());
@@ -46,41 +44,7 @@ public class ClientInformationDTO {
         activeLender = bankClient.howManyInLender("ACTIVE");
         riskLender = bankClient.howManyInLender("RISK");
         finishedLender = bankClient.howManyInLender("FINISHED");
-    }
-
-    private List<PaymentsNotificationsDTO> paymentsNotificationListDTO(List<PaymentNotification> paymentsNotificationList) {
-        List<PaymentsNotificationsDTO> paymentsNotificationListInDTO = new ArrayList<>();
-        int counter = 1;
-
-        for (PaymentNotification paymentNotification : paymentsNotificationList) {
-            paymentsNotificationListInDTO.add(new PaymentsNotificationsDTO(paymentNotification, counter++));
-        }
-
-        return paymentsNotificationListInDTO;
-    }
-
-    private List<LoanInformationDTO> clientLoanListDTO(List<Loan> clientSet) {
-        List<LoanInformationDTO> setToReturn = new ArrayList<>();
-        int counter = 1;
-
-        for (Loan loan : clientSet) {
-            setToReturn.add(new LoanInformationDTO(loan, counter++));
-        }
-
-        return setToReturn;
-    }
-
-    private List<RecentTransactionDTO> recentTransactionListDTO(List<RecentTransaction> lastTransactions) {
-        List<RecentTransactionDTO> setToReturn = new ArrayList<>();
-        int count = 1;
-
-        for (RecentTransaction recentTransaction : lastTransactions) {
-            setToReturn.add(new RecentTransactionDTO(recentTransaction.getAmountOfTransaction(),recentTransaction.getBalanceBeforeTransaction(),
-                    recentTransaction.getBalanceAfterTransaction(), recentTransaction.getTransactionTimeUnit(), recentTransaction.getKindOfTransaction(), count++));
-        }
-
-        return setToReturn;
-    }
+    }*/
 
     public String getClientName() {
         return clientName;
@@ -149,5 +113,73 @@ public class ClientInformationDTO {
 
     public List<PaymentsNotificationsDTO> getPaymentsNotificationsList() {
         return paymentsNotificationsList;
+    }
+
+    public void setClientNumber(int clientNumber) {
+        this.clientNumber = clientNumber;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
+    }
+
+    public void setRecentTransactionList(List<RecentTransactionDTO> recentTransactionList) {
+        this.recentTransactionList = recentTransactionList;
+    }
+
+    public void setClientAsBorrowerLoanList(List<LoanInformationDTO> clientAsBorrowerLoanList) {
+        this.clientAsBorrowerLoanList = clientAsBorrowerLoanList;
+    }
+
+    public void setPaymentsNotificationsList(List<PaymentsNotificationsDTO> paymentsNotificationsList) {
+        this.paymentsNotificationsList = paymentsNotificationsList;
+    }
+
+    public void setNewBorrower(int newBorrower) {
+        this.newBorrower = newBorrower;
+    }
+
+    public void setPendingBorrower(int pendingBorrower) {
+        this.pendingBorrower = pendingBorrower;
+    }
+
+    public void setActiveBorrower(int activeBorrower) {
+        this.activeBorrower = activeBorrower;
+    }
+
+    public void setRiskBorrower(int riskBorrower) {
+        this.riskBorrower = riskBorrower;
+    }
+
+    public void setFinishedBorrower(int finishedBorrower) {
+        this.finishedBorrower = finishedBorrower;
+    }
+
+    public void setClientAsLenderLoanList(List<LoanInformationDTO> clientAsLenderLoanList) {
+        this.clientAsLenderLoanList = clientAsLenderLoanList;
+    }
+
+    public void setNewLender(int newLender) {
+        this.newLender = newLender;
+    }
+
+    public void setPendingLender(int pendingLender) {
+        this.pendingLender = pendingLender;
+    }
+
+    public void setActiveLender(int activeLender) {
+        this.activeLender = activeLender;
+    }
+
+    public void setRiskLender(int riskLender) {
+        this.riskLender = riskLender;
+    }
+
+    public void setFinishedLender(int finishedLender) {
+        this.finishedLender = finishedLender;
+    }
+
+    public void setClientBalance(int clientBalance) {
+        this.clientBalance = clientBalance;
     }
 }
