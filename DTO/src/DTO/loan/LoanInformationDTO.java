@@ -199,8 +199,8 @@ public class LoanInformationDTO {
         return sum;
     }
 
-    public void setStatus(String pending) {
-        loanStatus = "PENDING";
+    public void setStatus(String status) {
+        loanStatus = status;
     }
 
     public int getDebt() {

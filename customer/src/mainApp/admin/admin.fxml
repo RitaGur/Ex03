@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane fx:id="adminScrollPane" fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.admin.AdminController">
+   <content>
+      <GridPane id="adminGridPane" fx:id="adminBottomGridPane" prefHeight="790.0" prefWidth="1300.0" styleClass="admin-GridPane">
+         <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="NEVER" maxWidth="20.0" minWidth="20.0" prefWidth="20.0" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints maxHeight="59.0" minHeight="30.0" prefHeight="45.0" vgrow="NEVER" />
+            <RowConstraints maxHeight="30.0" minHeight="1.0" prefHeight="15.0" vgrow="NEVER" />
+            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints maxHeight="20.0" minHeight="10.0" prefHeight="20.0" vgrow="NEVER" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+         </rowConstraints>
+         <children>
+            <ScrollPane fx:id="loansScrollPane" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <ScrollPane fx:id="customersInformationScrollPane" styleClass="customers-info-scrollPane" GridPane.columnIndex="1" GridPane.rowIndex="6">
+               <content>
+                  <TableView fx:id="customersInfoTableView" prefHeight="331.0" prefWidth="1600.0" styleClass="customers-info-tableView">
+                     <columns>
+                        <TableColumn fx:id="CINumberCol" prefWidth="66.0" text="Number" />
+                        <TableColumn fx:id="CINameCol" prefWidth="111.0" text="Name" />
+                        <TableColumn fx:id="CIBalanceCol" prefWidth="76.0" text="Balance " />
+                        <TableColumn fx:id="CINewBorrowerCol" prefWidth="125.0" text="New - Borrower" />
+                        <TableColumn fx:id="CIPendingActiveBorrowerCol" prefWidth="153.0" text="Pending - Borrower" />
+                        <TableColumn fx:id="CIActiveBorrowerCol" prefWidth="136.0" text="Active - Borrower" />
+                        <TableColumn fx:id="CIRiskBorrower" prefWidth="133.0" text="Risk - Borrower" />
+                        <TableColumn fx:id="CIFinishedBorrowerCol" prefWidth="147.0" text="Finished - Borrower" />
+                        <TableColumn fx:id="CINewLenderCol" prefWidth="110.0" text="New - Lender" />
+                        <TableColumn fx:id="CIPendingLenderCol" prefWidth="141.0" text="Pending - Lender" />
+                        <TableColumn fx:id="CIActiveLenderCol" minWidth="0.0" prefWidth="118.0" text="Active - Lender" />
+                        <TableColumn fx:id="CIRiskLender" prefWidth="144.0" text="Risk - Lender" />
+                        <TableColumn fx:id="CIFinishedLenderCol" prefWidth="139.0" text="Finished - Lender" />
+                     </columns>
+                  </TableView>
+               </content>
+            </ScrollPane>
+            <ScrollPane id="status-info-scroll-pane1" fx:id="topInfoScrollPane" styleClass="status-info-scroll-pane" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Label fx:id="loanLabel" styleClass="admin-labels" text="Loans" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label fx:id="customersInfoLabel" styleClass="admin-labels" text="Customers Information" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Label fx:id="topInfoLabel" styleClass="admin-labels" text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Button fx:id="increaseYazButton" disable="true" mnemonicParsing="false" onAction="#increaseYazButtonActionListener" prefHeight="50.0" prefWidth="200.0" styleClass="admin-Buttons" text="Increase Yaz" GridPane.columnIndex="1" />
+            <Button fx:id="loadFileButton" mnemonicParsing="false" onAction="#loadFileButtonActionListener" prefHeight="50.0" prefWidth="206.0" styleClass="admin-Buttons" text="Load File" GridPane.columnIndex="3" GridPane.halignment="RIGHT" />
+            <AnchorPane fx:id="animationAnchorPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+            <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="7">
+              <buttons>
+                  <Button fx:id="clickMeButton" mnemonicParsing="false" onAction="#clickMeOnActionListener" prefHeight="31.0" prefWidth="735.0" text="Click Me!" />
+              </buttons>
+            </ButtonBar>
+         </children>
+      </GridPane>
+   </content>
+</ScrollPane>

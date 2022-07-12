@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="330.0" prefWidth="930.0" styleClass="finished-gridPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.admin.loan.finished.FinishedInfoController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="267.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="473.0" />
+      <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints maxHeight="62.0" minHeight="34.0" prefHeight="50.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="91.0" minHeight="44.0" prefHeight="54.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="96.0" minHeight="44.0" prefHeight="56.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="73.0" minHeight="37.0" prefHeight="53.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="64.0" minHeight="43.0" prefHeight="57.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+   </rowConstraints>
+   <children>
+      <Button fx:id="finishedLendersButton" mnemonicParsing="false" onAction="#LendersClicked" text="Lenders" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <ScrollPane fx:id="infoScrollPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="5">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+         </content>
+      </ScrollPane>
+      <Label fx:id="finishedBeginningYazLabel" text="Beginning Yaz:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label fx:id="finishedEndingYazLabel" text="Ending Yaz" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Button fx:id="finishedPaymentButton" mnemonicParsing="false" onAction="#paymentsClicked" text="Payments" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+   </children>
+</GridPane>

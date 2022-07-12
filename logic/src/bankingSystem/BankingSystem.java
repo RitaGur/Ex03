@@ -242,7 +242,8 @@ public class BankingSystem implements LogicInterface {
         loanDTO.setInterestLeftToPay((int)Math.round(loan.loanInterestLeftToPay()));
         loanDTO.setPendingMoney(loan.getPendingMoney());
         loanDTO.setMissingMoneyToActive((loanDTO.getFundAmount() + loanDTO.getPendingMoney()));
-        loanDTO.setNextPaymentTimeUnit(loan.getLastPaidTimeUnit() + loan.getTimeUnitsBetweenPayment());
+        loanDTO.setNextPaymentTimeUnit(calculateNextPaymentOfLoan(loan));
+       // loanDTO.setNextPaymentTimeUnit(loan.getBeginningTimeUnit() + loan.getTimeUnitsBetweenPayment() - 1);
         loanDTO.setSumAmountToPayEveryTimeUnit((int)Math.round(loan.sumAmountToPayEveryTimeUnit()));
         loanDTO.setPaymentsListInDTO(paymentsListInDTO(loan.getPaymentInfoList()));
         loanDTO.setLastPaymentTimeunit(loan.getLastPaidTimeUnit());
@@ -253,6 +254,20 @@ public class BankingSystem implements LogicInterface {
         loanDTO.setDebt(loan.getDebt());
 
         return loanDTO;
+    }
+
+    private int calculateNextPaymentOfLoan(Loan loan) {
+        int nextPaymentYaz = loan.getBeginningTimeUnit() + loan.getTimeUnitsBetweenPayment() - 1;
+
+        while (nextPaymentYaz < m_CurrentTimeUnit.getCurrentTimeUnit()) {
+            nextPaymentYaz += loan.getTimeUnitsBetweenPayment();
+
+            if (nextPaymentYaz >= m_CurrentTimeUnit.getCurrentTimeUnit()) {
+                return nextPaymentYaz;
+            }
+        }
+
+        return nextPaymentYaz;
     }
 
     private List<PartInLoanDTO> lenderSetAndAmountInDTO(List<PartInLoan> i_LenderSetAndAmount) {
@@ -593,15 +608,22 @@ public class BankingSystem implements LogicInterface {
         return customerOpenLoansToPay;
     }
 
-    public void addPaymentToActiveLoan(LoanInformationDTO selectedLoan) throws Exception {
+    public void addPayment(LoanInformationDTO selectedLoan, int amountToPay) throws Exception {
         Loan loan = findLoanById(selectedLoan.getLoanNameID());
 
+        if (loan.getLoanStatus().toString().equals("RISK")) {
+            addPaymentToRiskLoan(loan, amountToPay);
+        }
+        else {
+            addPaymentToActiveLoan(loan);
+        }
+    }
+
+    public void addPaymentToActiveLoan(Loan loan) throws Exception {
         loan.addPaymentToActiveLoan(m_CurrentTimeUnit.getCurrentTimeUnit());
     }
 
-    public void addPaymentToRiskLoan(LoanInformationDTO selectedLoan, int amountToPay) throws Exception {
-        Loan loan = findLoanById(selectedLoan.getLoanNameID());
-
+    public void addPaymentToRiskLoan(Loan loan, int amountToPay) throws Exception {
         loan.addPaymentToRiskLoan(m_CurrentTimeUnit.getCurrentTimeUnit(), amountToPay);
     }
 

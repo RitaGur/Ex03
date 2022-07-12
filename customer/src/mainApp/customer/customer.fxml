@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.customer.CustomerController">
+   <content>
+      <BorderPane fx:id="customerBorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1250.0">
+         <center>
+            <TabPane fx:id="customerTabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="700.0" prefWidth="1250.0" styleClass="my-tabPane" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab fx:id="informationTab" styleClass="information-tab-pane" text="Information">
+                     <content>
+                        <GridPane prefHeight="660.0">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" prefWidth="500.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="500.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="NEVER" prefWidth="200.0" />
+                              <ColumnConstraints hgrow="NEVER" prefWidth="200.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="30.0" prefHeight="30.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="30.0" prefHeight="30.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="30.0" prefHeight="30.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="40.0" prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                           </rowConstraints>
+                           <children>
+                              <Button fx:id="chargeButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#chargeOnActionListener" prefHeight="31.0" prefWidth="170.0" text="Charge" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+                              <Button fx:id="withdrawButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#withdrawOnActionListener" prefHeight="31.0" prefWidth="163.0" text="Withdraw" GridPane.columnIndex="6" GridPane.rowIndex="6">
+                                 <GridPane.margin>
+                                    <Insets left="15.0" />
+                                 </GridPane.margin>
+                              </Button>
+                              <Label fx:id="currentBalanceLabel" contentDisplay="CENTER" prefHeight="21.0" prefWidth="366.0" text="Current Balance:" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="5" />
+                              <ScrollPane GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="3">
+                                 <content>
+                                    <TableView fx:id="accountTransactionsTableView" prefHeight="800.0" prefWidth="610.0">
+                                       <columns>
+                                          <TableColumn fx:id="lastTransactionNumberCol" prefWidth="82.0" text="Number" />
+                                          <TableColumn fx:id="transactionYazCol" prefWidth="134.0" text="Transaction Yaz" />
+                                          <TableColumn fx:id="transactionAmountCol" prefWidth="75.0" text="Amount" />
+                                          <TableColumn fx:id="transactionKindCol" prefWidth="75.0" text="Kind" />
+                                          <TableColumn fx:id="transactionBalanceBeforeCol" prefWidth="120.0" text="Balance Before" />
+                                          <TableColumn fx:id="transactionBalanceAfterCol" prefWidth="125.0" text="Balance After" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </ScrollPane>
+                              <Label fx:id="accountTransactionsLabel" text="Account Transactions" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                              <ScrollPane fx:id="loanerLoansScrollPane" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <ScrollPane fx:id="lenderLoansScrollPane" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <Label fx:id="loanerLoansLabel" text="Loaner Loans" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label fx:id="lenderLoansLabel" text="Lender Loans" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <ScrollPane fx:id="topInfoScrollPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="233.0" prefWidth="429.0" />
+                                </content>
+                              </ScrollPane>
+                              <ScrollPane fx:id="bottomInfoScrollPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="4">
+                                <content>
+                                  <AnchorPane fx:id="bottomAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="232.0" prefWidth="430.0" />
+                                </content>
+                              </ScrollPane>
+                              <Label text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                              <Label text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                              <Button fx:id="clickMe2Button" mnemonicParsing="false" onAction="#secondAnimationClickOnActionListener" text="Click me!" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                           </children>
+                        </GridPane>
+                     </content>
+                </Tab>
+                <Tab fx:id="scrambleTab" styleClass="scramble-tab" text="Scramble">
+                     <content>
+                        <GridPane hgap="20.0" vgap="10.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="15.0" minWidth="15.0" prefWidth="15.0" />
+                              <ColumnConstraints hgrow="NEVER" prefWidth="382.0" />
+                              <ColumnConstraints hgrow="NEVER" prefWidth="240.0" />
+                              <ColumnConstraints hgrow="ALWAYS" prefWidth="300.0" />
+                              <ColumnConstraints hgrow="ALWAYS" prefWidth="300.0" />
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                              <RowConstraints prefHeight="30.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                            <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                              <RowConstraints prefHeight="40.0" vgrow="ALWAYS" />
+                            <RowConstraints maxHeight="50.0" minHeight="37.0" prefHeight="37.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                          </rowConstraints>
+                           <children>
+                              <Label fx:id="scrambleMoneyToInvestLabel" prefWidth="297.0" text="Amount of money you would like to invest:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <TextField fx:id="scrambleMoneyAmountTextField" prefHeight="31.0" prefWidth="134.0" GridPane.columnIndex="3" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS" />
+                              <Label text="Categories for your investment:" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.valignment="CENTER" />
+                              <Label fx:id="scrambleCurrentBalanceLabel" text="(Current Balance:  " GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <Label text="Minimum interest you would like to get:" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                              <TextField fx:id="scrambleMinOfTotalYazTextField" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+                              <Label fx:id="scrambleMinTotalYazLabel" text="Minimum of total yaz for a loan:" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                              <Label fx:id="scrambleMaxOpenLoansLabel" text="Max open loans of the borrower:" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+                              <Label text="Max ownership percentages:" GridPane.columnIndex="2" GridPane.rowIndex="12" />
+                              <TextField fx:id="scrambleMaxOpenLoansTextField" GridPane.columnIndex="3" GridPane.rowIndex="10" />
+                              <Label text="1." GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label text="2." GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <Label text="5." GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                              <Label text="3." GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <Label text="4." GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                              <Label text="6." GridPane.columnIndex="1" GridPane.rowIndex="12" />
+                              <Label text="Please fill the fields below:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Label text="(Optional, you can choose as many as you would like to)" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                              <Label text="*Required Field" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                              <Label text="(Optional, Integer between 0-100)" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                              <Label text="(Optional, Integer bigger than 0)" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                              <Label text="(Optional, Integer bigger than 0)" GridPane.columnIndex="2" GridPane.rowIndex="11" />
+                              <Label text="(Optional, Integer between 0-100)" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+                              <Button fx:id="submitButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#submitOnActionListener" prefHeight="31.0" prefWidth="291.0" text="Submit" GridPane.columnIndex="3" GridPane.rowIndex="14" />
+                              <ScrollPane GridPane.columnIndex="3" GridPane.rowIndex="4" GridPane.rowSpan="2">
+                                 <content>
+                                    <ListView fx:id="scrambleCategoriesListView" prefHeight="300.0" prefWidth="240.0" />
+                                 </content>
+                              </ScrollPane>
+                              <ScrollPane fx:id="loansOptionsScrollPane" prefHeight="200.0" prefWidth="500.0" GridPane.columnIndex="4" GridPane.rowIndex="2" GridPane.rowSpan="5">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="271.0" />
+                                </content>
+                              </ScrollPane>
+                              <ScrollPane fx:id="statusInfoScrollPane" prefHeight="165.0" prefWidth="369.0" GridPane.columnIndex="5" GridPane.rowIndex="2" GridPane.rowSpan="5">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="167.0" prefWidth="271.0" />
+                                </content>
+                              </ScrollPane>
+                              <Label fx:id="scrambleLoansOptionsLabel" text="Loans Options:" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                              <Label fx:id="scrambleErrorLabel" text="Label" visible="false" GridPane.columnIndex="2" GridPane.rowIndex="15" />
+                              <Label fx:id="scrambleInterestRangeLabel" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                              <Slider fx:id="scrambleOwnershipPercentageSlider" blockIncrement="1.0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="3" GridPane.rowIndex="12" />
+                              <Slider fx:id="scrambleInterestSlider" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                              <Label fx:id="scrambleOwnershipPercentageRangeLabel" GridPane.columnIndex="3" GridPane.rowIndex="13" />
+                              <Button fx:id="scrambleChooseLoansToInvestButton" mnemonicParsing="false" onAction="#chooseLoansOnActionListener" prefHeight="31.0" prefWidth="260.0" text="Choose Loans to Invest" GridPane.columnIndex="4" GridPane.rowIndex="7" />
+                              <Label fx:id="scrambleSuccessMessageLabel" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER" />
+                              <ProgressBar fx:id="scrambleProgressBar" prefHeight="23.0" prefWidth="566.0" progress="0.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="10" />
+                              <Label fx:id="scrambleProgressMessage" text="label" GridPane.columnIndex="4" GridPane.rowIndex="9" />
+                           </children>
+                        </GridPane>
+                     </content>
+                </Tab>
+                  <Tab fx:id="paymentTab" styleClass="payment-tab" text="Payment">
+                     <content>
+                        <GridPane>
+                          <columnConstraints>
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="500.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="500.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="400.0" />
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                          </rowConstraints>
+                           <children>
+                              <Label fx:id="loanerLoansPaymentLabel" text="Loaner Loans" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ScrollPane GridPane.columnIndex="5" GridPane.rowIndex="2" GridPane.rowSpan="3">
+                                 <content>
+                                    <TableView fx:id="notificationAreaTable" prefHeight="850.0" prefWidth="700.0">
+                                       <columns>
+                                          <TableColumn fx:id="messagePaymentNumberCol" prefWidth="75.0" text="Number" />
+                                          <TableColumn fx:id="messageLoanIDCol" prefWidth="208.0" text="ID" />
+                                          <TableColumn fx:id="messagePaymentYaz" prefWidth="158.0" text="Payment Yaz" />
+                                          <TableColumn fx:id="messageSumCol" prefWidth="120.0" text="Sum" />
+                                       </columns>
+                                    </TableView>
+                                 </content>
+                              </ScrollPane>
+                              <ScrollPane fx:id="paymentLoanerLoansScrollPane" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <GridPane GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="4">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Button fx:id="payPaymentButton" mnemonicParsing="false" onAction="#payPaymentOnActionListener" prefHeight="100.0" prefWidth="150.0" text="Pay Payment" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                                    <Button fx:id="paymentCloseLoanButton" mnemonicParsing="false" onAction="#closeLoanOnActionListener" prefHeight="100.0" prefWidth="150.0" text="Close Loan" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" />
+                                    <Label fx:id="paymentControlsLabel" text="Payment Controls" />
+                                 </children>
+                              </GridPane>
+                              <Label fx:id="notificationAreaLabel" text="Notifications Area" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                              <ScrollPane fx:id="paymentInfoScrollPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="269.0" prefWidth="407.0" />
+                                </content>
+                              </ScrollPane>
+                           </children>
+                        </GridPane>
+                     </content>
+                  </Tab>
+              </tabs>
+            </TabPane>
+         </center>
+      </BorderPane>
+   </content>
+</ScrollPane>

@@ -42,7 +42,7 @@ public class Loan {
         f_LoanCategory = i_LoanCategory;
         m_PaymentInfoList = new ArrayList<>();
         m_EndingTimeunit = m_BeginningTimeUnit + f_SumOfTimeUnit - 1;
-        timeunitOfFirstUnPaidPayment = m_BeginningTimeUnit;
+        timeunitOfFirstUnPaidPayment = m_BeginningTimeUnit + f_TimeUnitsBetweenPayment - 1;
     }
 
 
@@ -205,13 +205,13 @@ public class Loan {
         m_LoanStatus = i_LoanStatus;
     }
 
-    public void addToPendingMoney(int i_AmountToAdd, int i_BeginningTimeUnit) throws Exception {
+    public void addToPendingMoney(int i_AmountToAdd, int i_CurrentTimeUnit) throws Exception {
         if (m_PendingMoney == 0 && m_LoanStatus == LoanStatus.NEW) {
             m_LoanStatus = LoanStatus.PENDING;
         }
         if (m_LoanStatus == LoanStatus.PENDING) {
             m_PendingMoney += i_AmountToAdd;
-            updateLoanStatusToActive(i_BeginningTimeUnit);
+            updateLoanStatusToActive(i_CurrentTimeUnit);
         } else {
             throw new Exception("Loan status is not pending or new");
         }
@@ -223,8 +223,8 @@ public class Loan {
             f_LoanOwner.addMoneyToAccount(m_PendingMoney, i_CurrentTimeUnit); //pay to borrower
             m_PendingMoney = 0;
             m_BeginningTimeUnit = i_CurrentTimeUnit;
-            //TODO: update ending timeunit
-            timeunitOfFirstUnPaidPayment = i_CurrentTimeUnit;
+            m_EndingTimeunit = m_BeginningTimeUnit + f_SumOfTimeUnit - 1;
+            timeunitOfFirstUnPaidPayment = m_BeginningTimeUnit + f_TimeUnitsBetweenPayment - 1;
             checkIfPaymentNeededAndAddPaymentNotification(i_CurrentTimeUnit);
         }
     }
@@ -337,7 +337,7 @@ public class Loan {
         m_LastPaidTimeUnit = currentTimeUnit;
         takePaymentsFromBorrowerToLenders(currentTimeUnit, (int) sumAmountToPayEveryTimeUnit());
 
-        timeunitOfFirstUnPaidPayment += f_TimeUnitsBetweenPayment;
+        timeunitOfFirstUnPaidPayment += f_TimeUnitsBetweenPayment; //TODO: check
     }
 
     public void checkIfPaymentNeededAndPay(int i_CurrentTimeUnit) throws Exception {
@@ -442,10 +442,8 @@ public class Loan {
 
         m_PaymentInfoList.add(new PaymentInfo(currentTimeUnit, m_Payment.getFundLeftToPay(), m_Payment.getInterestLeftToPay(), (int) m_Payment.getSumLeftToPay(), true));
         takePaymentsFromBorrowerToLendersCloseLoan(currentTimeUnit, (int) m_Payment.getSumLeftToPay());
-        //updatePaymentsNotificationCloseLoan();
         m_Payment.addPaymentToCloseLoan();
         m_Payment.updateNextPaymentCloseLoan();
-        //m_Payment.takeDownFromDebt((int) m_Payment.getSumLeftToPay());
         m_LastPaidTimeUnit = currentTimeUnit;
         m_LoanStatus = LoanStatus.FINISHED;
         m_EndingTimeunit = currentTimeUnit;
@@ -457,6 +455,7 @@ public class Loan {
         m_Payment.updateNextPaymentRisk();
         m_Payment.addToDebt((int) m_Payment.getSumToPayEveryTimeUnit());
         updateNextPaymentsOfLendersRisk();
+        timeunitOfFirstUnPaidPayment = currentTimeUnit - 1;
     }
 
     public void loanInRisk(int currentTimeUnit) {

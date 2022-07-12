@@ -63,8 +63,6 @@ public class LoadFileServlet extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             Gson gson = new Gson();
             BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
-            /*List<ClientInformationDTO> customersList = bankingSystem.showClientsInformation();
-            String json = gson.toJson(customersList);*/
             InvestmentLoanInformationDTO investmentLoanInformationDTO = new InvestmentLoanInformationDTO();
             investmentLoanInformationDTO.setAmountOfMoneyToInvest(2000);
             investmentLoanInformationDTO.setCustomerOfInvestmentName("avrum");
