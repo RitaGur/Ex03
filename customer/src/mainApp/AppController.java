@@ -5,7 +5,6 @@ import DTO.loan.LoanInformationDTO;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
@@ -243,10 +242,6 @@ public class AppController implements Initializable {
         adminComponentController.addMoney(customerName, moneyToWithdraw);
     }
 
-    public List<LoanInformationDTO> getCustomerOpenLoansToPay(String customerName) throws Exception {
-        return adminComponentController.getCustomerOpenLoansToPay(customerName);
-    }
-
     public void addPaymentToActiveLoan(LoanInformationDTO selectedLoan) throws Exception {
         adminComponentController.addPaymentToActiveLoan(selectedLoan);
     }
@@ -346,10 +341,13 @@ public class AppController implements Initializable {
         finishedInfoComponentController.setFinishedInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
     }
 
-    public void updateUserName(String userName) throws IOException {
+    public void afterCustomerLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName);
         updateCurrentYaz();
         loadCustomerViewAfterLoginSucceeded();
+        customerComponentController.makeLoanTablesVisible();
+        customerComponentController.setCustomerNameInCustomerController(userName);
+        customerComponentController.setCustomerDTOInCustomerController(userName);
     }
 
     private void loadCustomerViewAfterLoginSucceeded() throws IOException {
@@ -375,6 +373,4 @@ public class AppController implements Initializable {
     public void updateCurrentYaz() {
         headerComponentController.updateCurrentYaz();
     }
-
-
 }

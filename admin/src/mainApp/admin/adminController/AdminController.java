@@ -14,8 +14,9 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,7 +34,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import mainApp.AdminAppController;
-import mainApp.admin.CustomerRefresher;
 import mainApp.admin.LendersController;
 import mainApp.admin.LoanInfoController;
 import mainApp.admin.PaymentsController;
@@ -69,11 +69,10 @@ public class AdminController implements Initializable {
     private AdminAppController mainController;
     private ScrollPane adminView;
 
-   /* private Timer timer;
+    private Timer timer;
     private TimerTask listRefresher;
-    private final BooleanProperty autoUpdate;
-    private final IntegerProperty totalCustomers;
-    private HttpStatusUpdate httpStatusUpdate;*/
+    private HttpStatusUpdate httpStatusUpdate;
+    private TableView adminLoansTableView;
 
     @FXML
     private ScrollPane adminScrollPane;
@@ -165,10 +164,11 @@ public class AdminController implements Initializable {
     @FXML
     private AnchorPane animationAnchorPane;
 
- /*   public AdminController(BooleanProperty autoUpdate, IntegerProperty totalCustomers) {
-        this.autoUpdate = autoUpdate;
-        this.totalCustomers = totalCustomers;
-    }*/
+
+    public void setHttpStatusUpdate(HttpStatusUpdate httpStatusUpdate) {
+        this.httpStatusUpdate = httpStatusUpdate;
+
+    }
 
     @FXML
     void clickMeOnActionListener(ActionEvent event) {
@@ -211,9 +211,7 @@ public class AdminController implements Initializable {
 
     @FXML
     void increaseYazButtonActionListener(ActionEvent event) throws Exception {
-        //todo: to yaz servlet
         mainController.increaseYaz();
-
 /*
         //todo: notification area
         // load Notification Area again
@@ -428,28 +426,25 @@ public class AdminController implements Initializable {
     public void setCustomerStyleSheet(String value) {
 
     }*/
-   private void updateCustomersList(List<String> usersNames) {
+   private void updateCustomersList(List<ClientInformationDTO> customersList) {
        Platform.runLater(() -> {
            try {
-               mainController.setAllTables();
+               //todo: setCustomers tables
+               //setCustomerTableColumns();
+               customersInfoTableView.setItems(FXCollections.observableList(customersList));
            } catch (Exception e) {
                e.printStackTrace();
            }
-          /* ObservableList<String> items = usersListView.getItems();
-           items.clear();
-           items.addAll(usersNames);
-           totalCustomers.set(usersNames.size());*/
        });
    }
 
-/*    public void startListRefresher() {
+    public void startListRefresher() {
         listRefresher = new CustomerRefresher(
-                httpStatusUpdate::updateHttpLine,
-                this::updateCustomersList,
-                autoUpdate);
+                this::updateCustomersList
+               );
         timer = new Timer();
         timer.schedule(listRefresher, REFRESH_RATE, REFRESH_RATE);
-    }*/
+    }
 
     public void fillLoanTablesInformation() throws IOException {
         String finalUrl = HttpUrl
@@ -559,6 +554,7 @@ public class AdminController implements Initializable {
         mainController.setLoanInfoController(loanInfoController);
         loansScrollPane.setContent(loansTable);
         loansScrollPane.setVisible(true); //todo: delete?
+        adminLoansTableView = loansTable;
     }
 
     public void increaseYaz() throws Exception {

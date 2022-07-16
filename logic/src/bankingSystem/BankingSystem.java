@@ -129,11 +129,6 @@ public class BankingSystem implements LogicInterface {
 
     @Override
     public void readFromFile(String contentType, InputStream inputStream, String customerName) throws Exception {
-        /*if (!contentType.endsWith("/xml"))
-        {
-            throw new Exception("not an xml file.");
-        }*/
-
         JAXBContext jaxbContext = JAXBContext.newInstance(AbsDescriptor.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         AbsDescriptor descriptor = (AbsDescriptor) jaxbUnmarshaller.unmarshal(inputStream);
@@ -150,7 +145,6 @@ public class BankingSystem implements LogicInterface {
     }
 
     private void fillLoanList(List<AbsLoan> absLoan, String customerName) throws Exception {
-        m_LoanList = new ArrayList<>();
         for (AbsLoan i_Loan : absLoan) {
             if (i_Loan.getAbsTotalYazTime() % i_Loan.getAbsPaysEveryYaz() != 0) {
                 throw new Exception("The division between totalYazNumber to paysEveryYaz is not an integer.");
@@ -168,6 +162,7 @@ public class BankingSystem implements LogicInterface {
 
     private void fillBankClientsList(List<AbsCustomer> absCustomerList) throws Exception {
         m_BankAccountList = new ArrayList<>();
+
         for (AbsCustomer i_Customer : absCustomerList) {
             if (checkIfClientExist(m_BankAccountList, i_Customer.getName())) {
                 throw new Exception("This client " + i_Customer.getName() + " already exist.");
@@ -195,8 +190,6 @@ public class BankingSystem implements LogicInterface {
     }
 
     private void fromListToSetCategories(List<String> i_ListToConvert) throws Exception {
-        m_LoanCategoryList = new ArrayList<>();
-
         for (String i_CategoryInList : i_ListToConvert) {
             if (!i_ListToConvert.contains(i_CategoryInList)) {
                 throw new Exception("This category does not exist.");
@@ -208,6 +201,7 @@ public class BankingSystem implements LogicInterface {
     @Override
     public List<LoanInformationDTO> showLoansInformation() {
         List<LoanInformationDTO> loanListToReturn = new ArrayList<>();
+
         int counter = 1;
 
         for (Loan i_Loan : m_LoanList) {

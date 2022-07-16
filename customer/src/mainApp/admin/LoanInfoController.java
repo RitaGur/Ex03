@@ -76,8 +76,7 @@ public class LoanInfoController implements Initializable {
         numberCol.setVisible(isNumberLoanVisible);
         OwnerCol.setVisible(isOwnerVisible);
 
-        loanTableView.setItems(FXCollections.observableList(listToShow));
-        loanTableView.refresh();
+        loanTableView.setItems(FXCollections.observableArrayList(listToShow));
     }
 
     public void setMainController(AppController appController) {

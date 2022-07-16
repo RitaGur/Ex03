@@ -88,7 +88,7 @@ public class LoginController {
                 } else {
                     Platform.runLater(() -> {
                         try {
-                            appController.updateUserName(userName);
+                            appController.afterCustomerLogin(userName);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

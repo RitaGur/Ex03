@@ -17,22 +17,11 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Admin App");
 
-/*        // load admin component and controller from fxml
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("admin/admin.fxml");
-        fxmlLoader.setLocation(url);
-        ScrollPane adminComponent = fxmlLoader.load(url.openStream());
-        AdminController adminController = fxmlLoader.getController();*/
-
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource("login/login.fxml");
         fxmlLoader.setLocation(url);
         ScrollPane loginComponent = fxmlLoader.load(url.openStream());
         LoginController loginController = fxmlLoader.getController();
-
-        //TODO: styleCSS
-        //adminComponent.getStylesheets().add(getClass().getResource("admin/adminCSS2.css").toExternalForm());
-        //adminComponent.getStylesheets().add(getClass().getResource("admin/adminCSS.css").toExternalForm());
 
         //load header component
         fxmlLoader = new FXMLLoader();
@@ -52,12 +41,10 @@ public class MainApp extends Application {
         root.setCenter(loginComponent);
 
         // connect between controllers
-        //adminAppController.setAdminController(adminController);
         adminAppController.setLoginController(loginController);
         adminAppController.setHeaderController(headerController);
 
         // set initial components
-        //adminAppController.setAdminComponent(adminComponent);
         adminAppController.setHeaderComponent(headerComponent);
 
         Scene scene = new Scene(root, 1300, 900);

@@ -2,6 +2,7 @@ package mainApp;
 
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.loan.LoanInformationDTO;
+import client.util.api.HttpStatusUpdate;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -25,7 +26,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class AdminAppController implements Initializable {
+public class AdminAppController implements Initializable, HttpStatusUpdate {
     @FXML private GridPane headerComponent;
     @FXML private HeaderController headerComponentController;
     @FXML private GridPane adminComponent;
@@ -364,6 +365,7 @@ public class AdminAppController implements Initializable {
         adminComponentController.fillCustomerTableInformation();
         adminComponentController.makeIncreaseYazButtonAble();
         updateCurrentYaz();
+        setActive();
     }
 
     public void increaseYaz() throws Exception {
@@ -376,5 +378,15 @@ public class AdminAppController implements Initializable {
 
     public void updateCurrentYazByNumber(String currentYaz) {
         headerComponentController.updateCurrentYazByNumber(currentYaz);
+    }
+
+    public void setActive() {
+        adminComponentController.startListRefresher();
+        //chatAreaComponentController.startListRefresher();
+    }
+
+    @Override
+    public void updateHttpLine(String line) {
+
     }
 }
