@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="330.0" prefWidth="930.0" styleClass="active-gridPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.admin.loan.active.ActiveInfoController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="267.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="473.0" />
+      <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+      <RowConstraints maxHeight="43.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="57.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="57.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="62.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="62.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="51.0" minHeight="10.0" prefHeight="39.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="39.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="45.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="45.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+   </rowConstraints>
+   <children>
+      <Button fx:id="activeLendersButton" mnemonicParsing="false" onAction="#LendersClicked" text="Lenders" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <ScrollPane fx:id="infoScrollPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="9">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+         </content>
+      </ScrollPane>
+      <Label fx:id="activeBeginningYazLabel" text="Begininng Yaz:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label fx:id="activeNextPaymentYazLabel" text="Next Payment Yaz:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      <Label fx:id="activePaidFundLabel" text="Paid Fund:" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      <Label fx:id="activePaidInterestLabel" text="Paid Interest:" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+      <Label fx:id="activeFundLeftToPayLabel" text="Fund Left To Pay:" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <Label fx:id="activeInterestLeftToPayLabel" text="Interest Left To Pay:" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+      <Button fx:id="paymentsButton" mnemonicParsing="false" onAction="#paymentsClicked" text="Payments" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+   </children>
+</GridPane>

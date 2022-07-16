@@ -129,10 +129,10 @@ public class BankingSystem implements LogicInterface {
 
     @Override
     public void readFromFile(String contentType, InputStream inputStream, String customerName) throws Exception {
-        if (!contentType.endsWith("/xml"))
+        /*if (!contentType.endsWith("/xml"))
         {
             throw new Exception("not an xml file.");
-        }
+        }*/
 
         JAXBContext jaxbContext = JAXBContext.newInstance(AbsDescriptor.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();

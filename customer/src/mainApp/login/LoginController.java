@@ -1,8 +1,8 @@
 package mainApp.login;
 
 
-import chat.client.util.http.HttpClientUtil;
 import client.util.Constants;
+import client.util.http.HttpClientUtil;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -53,7 +53,6 @@ public class LoginController {
 
     @FXML
     private void loginButtonClicked(ActionEvent event) {
-
         String userName = userNameTextField.getText();
         if (userName.isEmpty()) {
             errorMessageProperty.set("User name is empty. You can't login with empty user name");
@@ -62,7 +61,7 @@ public class LoginController {
 
         //noinspection ConstantConditions
         String finalUrl = HttpUrl
-                        .parse(Constants.LOGIN_PAGE)
+                        .parse(Constants.CUSTOMER_LOGIN_PAGE)
                         .newBuilder()
                         .addQueryParameter("username", userName)
                         .build()
@@ -70,7 +69,7 @@ public class LoginController {
 
         updateHttpStatusLine("New request is launched for: " + finalUrl);
 
-        HttpClientUtil.runAsync(finalUrl, new Callback() {
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {

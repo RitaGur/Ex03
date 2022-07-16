@@ -1,6 +1,5 @@
 package mainApp;
 
-import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.loan.LoanInformationDTO;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import mainApp.admin.AdminController;
 import mainApp.admin.LoanInfoController;
 import mainApp.admin.loan.active.ActiveInfoController;
 import mainApp.admin.loan.finished.FinishedInfoController;
@@ -29,8 +27,8 @@ import java.util.ResourceBundle;
 public class AppController implements Initializable {
     @FXML private GridPane headerComponent;
     @FXML private HeaderController headerComponentController;
-    @FXML private GridPane adminComponent;
-    @FXML private AdminController adminComponentController;
+   /* @FXML private GridPane adminComponent;
+    @FXML private AdminController adminComponentController;*/
     @FXML private GridPane pendingInfoComponent;
     @FXML private PendingInfoController pendingInfoComponentController;
     @FXML private GridPane activeInfoComponent;
@@ -54,9 +52,9 @@ public class AppController implements Initializable {
         if (headerComponentController != null) {
             headerComponentController.setMainController(this);
         }
-        if (adminComponentController != null) {
+        /*if (adminComponentController != null) {
             adminComponentController.setMainController(this);
-        }
+        }*/
         if (pendingInfoComponentController != null) {
             pendingInfoComponentController.setMainController(this);
         }
@@ -77,10 +75,10 @@ public class AppController implements Initializable {
         }
     }
 
-    public void setAdminController(AdminController adminController) {
+    /*public void setAdminController(AdminController adminController) {
         this.adminComponentController = adminController;
         adminController.setMainController(this);
-    }
+    }*/
 
     public void setLoginController(LoginController loginController) {
         this.loginComponentController = loginController;
@@ -126,24 +124,24 @@ public class AppController implements Initializable {
        // headerComponentController.updateLabels(currentTimeUnit, filePath);
     }
 
-    public void insertAdminView(Parent adminView) {
+ /*   //public void insertAdminView(Parent adminView) {
         mainBorderpane.setCenter(adminComponentController.getAdminView());
-    }
+    }*/
 
-    public void putCustomerView(String customer, ScrollPane customerScrollPane) throws Exception {
+   /* public void putCustomerView(String customer, ScrollPane customerScrollPane) throws Exception {
         adminComponentController.makeIncreaseYazAble();
         mainBorderpane.setCenter(customerScrollPane);
         //loadCustomerInformation(customer, adminComponentController.getCategoriesList(), adminComponentController.getPaymentNotificationList(customer));
-    }
+    }*/
 
     public void loadCustomerInformation(String customer, List<String> categoriesList, List<PaymentsNotificationsDTO> paymentsNotificationsDTOList) throws Exception {
         //customerComponentController.loadCustomerInformation(customer, categoriesList, paymentsNotificationsDTOList);
     }
 
-    public void setAdminComponent(ScrollPane adminComponent) {
+  /*  public void setAdminComponent(ScrollPane adminComponent) {
          adminComponentController.setAdminView(adminComponent);
     }
-
+*/
     public void showPendingInfo(LoanInformationDTO currentLoan) {
         pendingInfoComponentController.showPendingInfo(currentLoan);
     }
@@ -152,9 +150,9 @@ public class AppController implements Initializable {
         headerComponentController.addCustomersToComboBox(clientsInformationList);
     }*/
 
-    public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
+   /* public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
         adminComponentController.showLendersTable(currentLoan);
-    }
+    }*/
 
     public void setLendersTable(TableView lenders, String loanStatus) {
         if (loanStatus.equals("PENDING")) {
@@ -176,7 +174,7 @@ public class AppController implements Initializable {
     }
 
     public void showPaymentsTable(LoanInformationDTO currentLoan) throws IOException {
-        adminComponentController.showPaymentsTable(currentLoan);
+        //adminComponentController.showPaymentsTable(currentLoan);
     }
 
     public void setPaymentsTable(TableView payments, String loanStatus) {
@@ -281,9 +279,9 @@ public class AppController implements Initializable {
     }*/
 
     public void setAllStylesheets(String value) {
-        if (adminComponentController != null) {
+      /*  if (adminComponentController != null) {
            // adminComponentController.setAdminStyleSheet(value);
-        }
+        }*/
         if (headerComponentController != null) {
             headerComponentController.setHeaderStyleSheet(value);
         }
@@ -350,14 +348,14 @@ public class AppController implements Initializable {
 
     public void updateUserName(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName);
+        updateCurrentYaz();
         loadCustomerViewAfterLoginSucceeded();
-        // load fxml customer
-        // after login ends
     }
 
     private void loadCustomerViewAfterLoginSucceeded() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("/mainApp/customer/customer.fxml");
+        URL url = getClass().getResource("customer/customer.fxml");
+        //URL url = getClass().getResource("/mainApp/customer/customer.fxml");
         fxmlLoader.setLocation(url);
         ScrollPane customerView = fxmlLoader.load(url.openStream());
         CustomerController customerController = fxmlLoader.getController();
@@ -369,4 +367,14 @@ public class AppController implements Initializable {
 
         mainBorderpane.setCenter(customerView);
     }
+
+    public void updateFilePath(String chosenFile) {
+        headerComponentController.updateFilePath(chosenFile);
+    }
+
+    public void updateCurrentYaz() {
+        headerComponentController.updateCurrentYaz();
+    }
+
+
 }

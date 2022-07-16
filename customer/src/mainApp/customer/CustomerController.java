@@ -4,7 +4,10 @@ import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
 import DTO.loan.LoanInformationDTO;
+import client.util.Constants;
+import client.util.http.HttpClientUtil;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,11 +17,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import mainApp.AppController;
 import mainApp.admin.*;
@@ -30,7 +35,10 @@ import mainApp.customer.scrambleExceptions.MaxOpenLoansException;
 import mainApp.customer.scrambleExceptions.MinTotalYazException;
 import mainApp.customer.scrambleExceptions.MoneyToInvestException;
 import mainApp.customer.scrambleExceptions.NotEnoughMoneyException;
+import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -272,8 +280,74 @@ public class CustomerController implements Initializable {
     private Button loadFileButton;
 
     @FXML
-    void loadFileButtonActionListener(ActionEvent event) {
+    void loadFileButtonActionListener(ActionEvent event) throws Exception {
+        Node node = (Node) event.getSource();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("XML","*.xml")
+        );
+        fileChooser.setTitle("Load File");
+        File chosenFile = fileChooser.showOpenDialog(node.getScene().getWindow());
 
+        if (chosenFile != null) {
+            loadFile(chosenFile.getPath());
+        }
+    }
+
+    private void loadFile(String chosenFile) throws Exception {
+        String finalUrl = HttpUrl
+                .parse(Constants.CUSTOMER_LOAD_FILE)
+                .newBuilder()
+                .build()
+                .toString();
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("file1",chosenFile,
+                        RequestBody.create(MediaType.parse("application/octet-stream"),
+                                new File(chosenFile)))
+                .build();
+
+
+        HttpClientUtil.runAsyncPost(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->{
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Load File Error");
+                            alert.setHeaderText("Could not open your file");
+                            alert.setContentText(e.getMessage());
+                            alert.showAndWait();
+                        }
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            Platform.runLater(() -> {
+                                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                                        alert.setTitle("Load File Error");
+                                        alert.setHeaderText("Could not open your file");
+                                        alert.setContentText(responseBody);
+
+                                        alert.showAndWait();
+                                    }
+                            ));
+                } else {
+                    Platform.runLater(() -> {
+                        mainController.updateFilePath(chosenFile);
+                    });
+                }
+                response.close();
+            }
+        }, body);
+
+        //mainController.updateHeaderLabels(engine.getCurrentTimeUnit().getCurrentTimeUnit(), chosenFile.getPath());
+
+
+        //insertAdminView();
     }
 
     @FXML

@@ -9,7 +9,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import java.util.List;
 
 public class PaymentsController {
-    @FXML private AdminController mainController;
+   // @FXML private AdminController mainController;
 
     @FXML
     private TableView<PaymentsDTO> paymentsTableView;
@@ -32,9 +32,9 @@ public class PaymentsController {
     @FXML
     private TableColumn<PaymentsDTO, Boolean> paidCol;
 
-    public void setMainController(AdminController adminController) {
+   /* public void setMainController(AdminController adminController) {
         this.mainController = adminController;
-    }
+    }*/
 
     public void showPaymentsTable(List<PaymentsDTO> paymentsList, String loanStatus) {
         paymentNumberCol.setCellValueFactory(new PropertyValueFactory<PaymentsDTO, Integer>("paymentNumber"));

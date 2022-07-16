@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<TableView fx:id="loanTableView" prefHeight="400.0" prefWidth="1230.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.admin.LoanInfoController">
+   <columns>
+      <TableColumn fx:id="numberCol" prefWidth="66.00003051757812" text="Number" />
+      <TableColumn fx:id="IDCol" editable="false" prefWidth="133.0" text="ID" />
+      <TableColumn fx:id="OwnerCol" editable="false" prefWidth="134.0" text="Owner" />
+      <TableColumn fx:id="categoryCol" prefWidth="169.0" text="Category" />
+      <TableColumn fx:id="statusCol" prefWidth="106.0" text="Status" />
+      <TableColumn fx:id="fundCol" prefWidth="98.0" text="Fund" />
+      <TableColumn fx:id="totalYazCol" prefWidth="130.0" text="Total Yaz" />
+      <TableColumn fx:id="InterestCol" prefWidth="95.0" text="Interest" />
+      <TableColumn fx:id="sumCol" prefWidth="91.0" text="Sum" />
+      <TableColumn fx:id="yazBetweenPaymentCol" prefWidth="226.0" text="Yaz Between Payment" />
+   </columns>
+</TableView>

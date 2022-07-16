@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class LendersController implements Initializable {
-    @FXML
-    private AdminController mainController;
+    //@FXML
+    //private AdminController mainController;
     @FXML
     private TableView<PartInLoanDTO> lendersTableView;
 
@@ -32,9 +32,9 @@ public class LendersController implements Initializable {
 
     }
 
-    public void setMainController(AdminController mainController) {
+   /* public void setMainController(AdminController mainController) {
         this.mainController = mainController;
-    }
+    }*/
 
     public void showLendersTable(List<PartInLoanDTO> lendersList) {
         lenderNumberCol.setCellValueFactory(new PropertyValueFactory<PartInLoanDTO, Integer>("lenderNumber"));

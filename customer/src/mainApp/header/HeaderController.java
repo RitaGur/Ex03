@@ -1,15 +1,24 @@
 package mainApp.header;
 import DTO.client.ClientInformationDTO;
+import client.util.Constants;
+import client.util.http.HttpClientUtil;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import mainApp.AppController;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -124,6 +133,57 @@ public class HeaderController implements Initializable {
 
     public void updateUsernameLabel(String userName) {
         userNameLabel.setText("Hello " + userName);
+    }
 
+    public void updateFilePath(String chosenFile) {
+        filePathLabel.setText("  File Path: " + chosenFile);
+    }
+
+    public void updateCurrentYaz() {
+        String finalUrl = HttpUrl
+                .parse(Constants.ADMIN_CURRENT_YAZ)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        {
+                            Alert alert = new Alert(Alert.AlertType.ERROR);
+                            alert.setTitle("Current Yaz Error");
+                            alert.setHeaderText("Could not load current yaz");
+                            alert.setContentText(e.getMessage());
+
+                            alert.showAndWait();
+                        }
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Current Yaz Error");
+                        alert.setHeaderText("Could not load current yaz");
+                        alert.setContentText(responseBody);
+
+                        alert.showAndWait();
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            currentYazLabel.setText("Current Yaz: " + response.body().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
     }
 }

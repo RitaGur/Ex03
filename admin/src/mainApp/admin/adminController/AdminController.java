@@ -1,15 +1,21 @@
-package mainApp.admin;
+package mainApp.admin.adminController;
 
 import DTO.client.ClientInformationDTO;
-import DTO.client.PaymentsNotificationsDTO;
+import DTO.lists.CustomersListDTO;
+import DTO.lists.LoanListDTO;
 import DTO.loan.LoanInformationDTO;
 import DTO.loan.PaymentsDTO;
-//import bankingSystem.BankingSystem;
+import client.util.api.HttpStatusUpdate;
+import client.util.http.HttpClientUtil;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,19 +29,31 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.transform.Rotate;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import mainApp.AppController;
+import mainApp.AdminAppController;
+import mainApp.admin.CustomerRefresher;
+import mainApp.admin.LendersController;
+import mainApp.admin.LoanInfoController;
+import mainApp.admin.PaymentsController;
 import mainApp.admin.loan.pending.PendingInfoController;
 import mainApp.customer.CustomerController;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static client.util.Constants.*;
+import static client.util.popup.AlertPopUp.alertPopUp;
 
 public class AdminController implements Initializable {
     @FXML private TableView lendersComponent;
@@ -48,9 +66,14 @@ public class AdminController implements Initializable {
     private List<ClientInformationDTO> customersList;
 
     //private BankingSystem engine;
-    private File chosenFile;
-    private AppController mainController;
+    private AdminAppController mainController;
     private ScrollPane adminView;
+
+   /* private Timer timer;
+    private TimerTask listRefresher;
+    private final BooleanProperty autoUpdate;
+    private final IntegerProperty totalCustomers;
+    private HttpStatusUpdate httpStatusUpdate;*/
 
     @FXML
     private ScrollPane adminScrollPane;
@@ -110,9 +133,6 @@ public class AdminController implements Initializable {
     private Button increaseYazButton;
 
     @FXML
-    private Button loadFileButton;
-
-    @FXML
     private ScrollPane topInfoScrollPane;
 
     @FXML
@@ -144,6 +164,11 @@ public class AdminController implements Initializable {
 
     @FXML
     private AnchorPane animationAnchorPane;
+
+ /*   public AdminController(BooleanProperty autoUpdate, IntegerProperty totalCustomers) {
+        this.autoUpdate = autoUpdate;
+        this.totalCustomers = totalCustomers;
+    }*/
 
     @FXML
     void clickMeOnActionListener(ActionEvent event) {
@@ -186,8 +211,11 @@ public class AdminController implements Initializable {
 
     @FXML
     void increaseYazButtonActionListener(ActionEvent event) throws Exception {
-        /*mainController.increaseYaz();
+        //todo: to yaz servlet
+        mainController.increaseYaz();
 
+/*
+        //todo: notification area
         // load Notification Area again
         List<ClientInformationDTO> customersList = engine.showClientsInformation();
         for (ClientInformationDTO customer : customersList) {
@@ -195,40 +223,9 @@ public class AdminController implements Initializable {
         }*/
     }
 
-    @FXML
-    void loadFileButtonActionListener(ActionEvent event) throws Exception {
-        Node node = (Node) event.getSource();
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("XML","*.xml")
-        );
-        fileChooser.setTitle("Load File");
-        chosenFile = fileChooser.showOpenDialog(node.getScene().getWindow());
-
-        if (chosenFile != null) {
-            loadFile(chosenFile);
-        }
-
-        setAdminScrollPanesVisibility(true);
-    }
-
     private void setAdminScrollPanesVisibility(boolean visibility) {
         customersInformationScrollPane.setVisible(visibility);
-        //bottomInfoScrollPane.setVisible(visibility);
         loansScrollPane.setVisible(visibility);
-    }
-
-    private void loadFile(File chosenFile) throws Exception {
-       /* mainController.makeButtonAbleBack();
-        engine = new BankingSystem();
-        engine.readFromFile(chosenFile);
-
-        mainController.updateHeaderLabels(engine.getCurrentTimeUnit().getCurrentTimeUnit(), chosenFile.getPath());
-        insertAdminView();
-
-        // customers Loading
-        addCustomersToComboBox();
-        loadCustomerView();*/
     }
 
     private void loadCustomerView() throws IOException {
@@ -240,17 +237,8 @@ public class AdminController implements Initializable {
         CustomerController customerController = fxmlLoader.getController();
         mainController.setCustomerController(customerController);
 
-        //mainController.setCustomerViewParameter(customerView);
         mainController.setCustomerComponent(customerView);
         mainController.setCustomerStyleSheet();
-
-        //TODO: styleCSS
-        //customerView.getStylesheets().add(getClass().getResource("customerCSS2.css").toExternalForm());
-        //customerView.getStylesheets().add(getClass().getResource("customerCSS.css").toExternalForm());
-    }
-
-    private void addCustomersToComboBox() {
-        //mainController.addCustomersToComboBox(engine.showClientsInformation());
     }
 
     @Override
@@ -266,7 +254,7 @@ public class AdminController implements Initializable {
         topInfoScrollPane.setVisible(false);
     }
 
-    public void setMainController(AppController mainController) {
+    public void setMainController(AdminAppController mainController) {
         this.mainController = mainController;
     }
 
@@ -274,18 +262,31 @@ public class AdminController implements Initializable {
         increaseYazButton.setDisable(false);
     }
 
-    public void insertAdminView() throws IOException {
-        // update loans table
+    private void loadLoanTableFromFXML() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
         fxmlLoader.setLocation(url);
         TableView loansTable = fxmlLoader.load(url.openStream());
         LoanInfoController loanInfoController = fxmlLoader.getController();
         mainController.setLoanInfoController(loanInfoController);
-
         loansScrollPane.setContent(loansTable);
+    }
+
+    public void insertAdminView() throws IOException {
+        //todo func insertAdmin
+
+        // update loans table
+        loadLoanTableFromFXML();
+
+        //TODO: get loans list
         //mainController.showLoanInfo(engine.showLoansInformation(), true, true, topInfoScrollPane);
 
+       setCustomerTableColumns();
+
+        //customersInfoTableView.setItems(FXCollections.observableArrayList(engine.showClientsInformation()));
+    }
+
+    private void setCustomerTableColumns() {
         customersInfoTableView.refresh();
         // customers information table:
         CINumberCol.setCellValueFactory(new PropertyValueFactory<ClientInformationDTO, Integer>("clientNumber"));
@@ -301,8 +302,6 @@ public class AdminController implements Initializable {
         CIFinishedLenderCol.setCellValueFactory(new PropertyValueFactory<ClientInformationDTO, Integer>("finishedLender"));
         CIRiskBorrower.setCellValueFactory(new PropertyValueFactory<ClientInformationDTO, Integer>("riskBorrower"));
         CIRiskLender.setCellValueFactory(new PropertyValueFactory<ClientInformationDTO, Integer>("riskLender"));
-
-       // customersInfoTableView.setItems(FXCollections.observableArrayList(engine.showClientsInformation()));
     }
 
     public void setAdminView(ScrollPane adminComponent) {
@@ -400,14 +399,6 @@ public class AdminController implements Initializable {
         return engine.getCurrentTimeUnit().getCurrentTimeUnit();
     }
 
-    public void increaseYaz() throws Exception {
-        engine.promoteTimeline();
-
-        for (ClientInformationDTO clientDTO : engine.showClientsInformation()) {
-            mainController.setAllTables(clientDTO.getClientName());
-        }
-    }
-
     public boolean isNewPaymentNotificationExist(String customerName, String selectedLoanID) throws Exception {
         return engine.isNewPaymentNotificationExist(customerName, selectedLoanID);
     }
@@ -437,4 +428,178 @@ public class AdminController implements Initializable {
     public void setCustomerStyleSheet(String value) {
 
     }*/
+   private void updateCustomersList(List<String> usersNames) {
+       Platform.runLater(() -> {
+           try {
+               mainController.setAllTables();
+           } catch (Exception e) {
+               e.printStackTrace();
+           }
+          /* ObservableList<String> items = usersListView.getItems();
+           items.clear();
+           items.addAll(usersNames);
+           totalCustomers.set(usersNames.size());*/
+       });
+   }
+
+/*    public void startListRefresher() {
+        listRefresher = new CustomerRefresher(
+                httpStatusUpdate::updateHttpLine,
+                this::updateCustomersList,
+                autoUpdate);
+        timer = new Timer();
+        timer.schedule(listRefresher, REFRESH_RATE, REFRESH_RATE);
+    }*/
+
+    public void fillLoanTablesInformation() throws IOException {
+        String finalUrl = HttpUrl
+                .parse(ADMIN_SHOW_LOANS)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                       alertPopUp("Loans information error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Loans information error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            loadLoanTableFromFXML();
+                            rawBody = response.body().string();
+                            LoanListDTO loanListDTO = GSON_INSTANCE.fromJson(rawBody, LoanListDTO.class);
+                            setAdminScrollPanesVisibility(true);
+                            mainController.showLoanInfo(loanListDTO.getLoanList(), true, true, topInfoScrollPane);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+
+
+       //loadLoanTableFromFXML();
+
+
+
+        /*//TODO: get loans list
+        mainController.showLoanInfo(engine.showLoansInformation(), true, true, topInfoScrollPane);
+
+        setCustomerTableColumns();
+
+        customersInfoTableView.setItems(FXCollections.observableArrayList(engine.showClientsInformation()));*/
+    }
+
+    public void fillCustomerTableInformation() {
+        String finalUrl = HttpUrl
+                .parse(ADMIN_SHOW_CUSTOMERS)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Customers information error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Customers information error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            //loadLoanTableFromFXML();
+                            rawBody = response.body().string();
+                            CustomersListDTO customersListDTO = GSON_INSTANCE.fromJson(rawBody, CustomersListDTO.class);
+                            setCustomerTableColumns();
+                            customersInfoTableView.setItems(FXCollections.observableArrayList(customersListDTO.getCustomerList()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void makeIncreaseYazButtonAble() {
+        increaseYazButton.setDisable(false);
+    }
+
+    public void loadLoansTable() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
+        fxmlLoader.setLocation(url);
+        TableView loansTable = fxmlLoader.load(url.openStream());
+        LoanInfoController loanInfoController = fxmlLoader.getController();
+
+        mainController.setLoanInfoController(loanInfoController);
+        loansScrollPane.setContent(loansTable);
+        loansScrollPane.setVisible(true); //todo: delete?
+    }
+
+    public void increaseYaz() throws Exception {
+        String finalUrl = HttpUrl
+                .parse(ADMIN_INCREASE_YAZ)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Increase Yaz error", "Could not increase yaz", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Increase Yaz error", "Could not increase yaz", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            mainController.updateCurrentYazByNumber(response.body().string());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+
+        //todo: setAllTables with pull
+        //set all table - will work with pull
+        /*for (ClientInformationDTO clientDTO : engine.showClientsInformation()) {
+            mainController.setAllTables(clientDTO.getClientName());
+        }*/
+    }
 }

@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="okHttp">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/OneDrive - The Academic College of Tel-Aviv Jaffa - MTA/JAVA/okHttp/annotations-13.0.jar!/" />
+      <root url="jar://$USER_HOME$/OneDrive - The Academic College of Tel-Aviv Jaffa - MTA/JAVA/okHttp/kotlin-stdlib-1.4.10.jar!/" />
+      <root url="jar://$USER_HOME$/OneDrive - The Academic College of Tel-Aviv Jaffa - MTA/JAVA/okHttp/okhttp-4.9.1.jar!/" />
+      <root url="jar://$USER_HOME$/OneDrive - The Academic College of Tel-Aviv Jaffa - MTA/JAVA/okHttp/okio-2.8.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

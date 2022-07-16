@@ -15,6 +15,7 @@ import static constants.Constants.INT_PARAMETER_ERROR;
 public class ServletUtils {
 	public final static Gson GSON_INSTANCE = new Gson();
 	private static final String BANK_ATTRIBUTE_NAME = "BankingSystem";
+	private static final String ADMIN_ATTRIBUTE_NAME = "admin";
 	private static final String CUSTOMER_LIST_ATTRIBUTE_NAME = "CustomerList";
 	private static final String INLAYS_ATTRIBUTE_NAME = "inlaysList";
 
@@ -57,5 +58,15 @@ public class ServletUtils {
 			}
 		}
 		return (ArrayList<InvestmentLoanInformationDTO>)servletContext.getAttribute(INLAYS_ATTRIBUTE_NAME);
+	}
+
+	public static boolean isAdminLoggedIn(ServletContext servletContext) {
+		synchronized (bankManagerLock) {
+			if (servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME) == null) {
+				servletContext.setAttribute(ADMIN_ATTRIBUTE_NAME, true);
+				return false;
+			}
+			return (boolean) servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME);
+		}
 	}
 }

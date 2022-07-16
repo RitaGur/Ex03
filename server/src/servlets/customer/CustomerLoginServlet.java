@@ -22,7 +22,7 @@ public class CustomerLoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/plain;charset=UTF-8");
-        PrintWriter out=response.getWriter();
+        PrintWriter out = response.getWriter();
         String customerFromSession = SessionUtils.getCustomer(request);
 
         List<ClientInformationDTO> customersList = ServletUtils.getCustomerList(getServletContext());

@@ -7,7 +7,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import mainApp.admin.AdminController;
 import mainApp.header.HeaderController;
 import mainApp.login.LoginController;
 
@@ -16,17 +15,18 @@ import java.net.URL;
 public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
+        //todo: change to customer app
         primaryStage.setTitle("Banking System");
 
         // load admin component and controller from fxml
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("admin/admin.fxml");
+        //FXMLLoader fxmlLoader = new FXMLLoader();
+     /*   URL url = getClass().getResource("admin/admin.fxml");
         fxmlLoader.setLocation(url);
         ScrollPane adminComponent = fxmlLoader.load(url.openStream());
-        AdminController adminController = fxmlLoader.getController();
+        AdminController adminController = fxmlLoader.getController();*/
 
-        fxmlLoader = new FXMLLoader();
-        url = getClass().getResource("login/login.fxml");
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        URL url = getClass().getResource("login/login.fxml");
         fxmlLoader.setLocation(url);
         ScrollPane loginComponent = fxmlLoader.load(url.openStream());
         LoginController loginController = fxmlLoader.getController();
@@ -53,12 +53,12 @@ public class MainApp extends Application {
         root.setCenter(loginComponent);
 
         // connect between controllers
-        appController.setAdminController(adminController);
+        //appController.setAdminController(adminController);
         appController.setLoginController(loginController);
         appController.setHeaderController(headerController);
 
         //appController.setLoginComponent(loginComponent);
-        appController.setAdminComponent(adminComponent);
+        //appController.setAdminComponent(adminComponent);
         appController.setHeaderComponent(headerComponent);
 
         Scene scene = new Scene(root, 1300, 900);
