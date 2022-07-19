@@ -237,7 +237,6 @@ public class BankingSystem implements LogicInterface {
         loanDTO.setPendingMoney(loan.getPendingMoney());
         loanDTO.setMissingMoneyToActive((loanDTO.getFundAmount() + loanDTO.getPendingMoney()));
         loanDTO.setNextPaymentTimeUnit(calculateNextPaymentOfLoan(loan));
-       // loanDTO.setNextPaymentTimeUnit(loan.getBeginningTimeUnit() + loan.getTimeUnitsBetweenPayment() - 1);
         loanDTO.setSumAmountToPayEveryTimeUnit((int)Math.round(loan.sumAmountToPayEveryTimeUnit()));
         loanDTO.setPaymentsListInDTO(paymentsListInDTO(loan.getPaymentInfoList()));
         loanDTO.setLastPaymentTimeunit(loan.getLastPaidTimeUnit());
@@ -341,6 +340,7 @@ public class BankingSystem implements LogicInterface {
         paymentsNotificationsDTO.setLoanID(paymentNotification.getLoanID());
         paymentsNotificationsDTO.setPaymentYaz(paymentNotification.getPaymentYaz());
         paymentsNotificationsDTO.setSum(paymentNotification.getSum());
+        paymentsNotificationsDTO.setNewNotification(paymentNotification.getNewNotification());
 
         return paymentsNotificationsDTO;
     }
@@ -631,5 +631,29 @@ public class BankingSystem implements LogicInterface {
         BankAccount customer = findBankAccountByName(customerName);
 
         return customer.isNewPaymentNotificationExist(selectedLoanID);
+    }
+
+    public int getCustomerBalanceByName(String customerName) throws Exception {
+        BankAccount customer = findBankAccountByName(customerName);
+
+        return (int)customer.getAccountBalance();
+    }
+
+    public List<RecentTransactionDTO> getCustomerRecentTransactionByName(String customerFromSession) throws Exception {
+        BankAccount customer = findBankAccountByName(customerFromSession);
+
+        return recentTransactionListDTO(customer.getLastTransactions());
+    }
+
+    public List<LoanInformationDTO> getCustomerLenderLoans(String customerFromSession) throws Exception {
+        BankAccount customer = findBankAccountByName(customerFromSession);
+
+        return clientLoanListDTO(customer.getClientAsLenderSet());
+    }
+
+    public List<LoanInformationDTO> getCustomerLoanerLoans(String customerFromSession) throws Exception {
+        BankAccount customer = findBankAccountByName(customerFromSession);
+
+        return clientLoanListDTO(customer.getClientAsBorrowerSet());
     }
 }

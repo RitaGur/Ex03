@@ -1,7 +1,9 @@
 package mainApp.admin;
+import DTO.client.ClientInformationDTO;
 import DTO.loan.LoanInformationDTO;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,6 +26,7 @@ import java.util.ResourceBundle;
 public class LoanInfoController implements Initializable {
     private AdminAppController mainController;
     private ScrollPane infoScrollPane;
+    private ObservableList<LoanInformationDTO> adminLoanList;
 
     @FXML
     private TableView<LoanInformationDTO> loanTableView;
@@ -58,7 +61,7 @@ public class LoanInfoController implements Initializable {
     @FXML
     private TableColumn<LoanInformationDTO, Integer> yazBetweenPaymentCol;
 
-    public void setTableColumns(List<LoanInformationDTO> listToShow, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane) {
+    public void setTableColumns(List<LoanInformationDTO> listToShow, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane, String toObservableList) {
         this.infoScrollPane = infoScrollPane;
         infoScrollPane.setVisible(false);
         infoScrollPane.setContent(null);
@@ -77,26 +80,33 @@ public class LoanInfoController implements Initializable {
         OwnerCol.setVisible(isOwnerVisible);
 
         loanTableView.setItems(FXCollections.observableArrayList(listToShow));
+        adminLoanList = FXCollections.observableArrayList(listToShow);
     }
 
+    public void setAdminLoanList(ObservableList<LoanInformationDTO> adminLoanList) {
+        this.adminLoanList = adminLoanList;
+    }
+
+    public ObservableList<LoanInformationDTO> getAdminLoanList() {
+        return adminLoanList;
+    }
     public void setMainController(AdminAppController adminAppController) {
         this.mainController = adminAppController;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        /*loanTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        loanTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && (oldValue == null || !(newValue.getLoanNameID().equals(oldValue.getLoanNameID())))) {
                 try {
                     LoanInformationDTO currentLoan = loanTableView.getSelectionModel().selectedItemProperty().get();
                     insertByStatus(currentLoan, infoScrollPane);
-                    mainController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
                     mainController.setScrollPaneDisability(currentLoan.getLoanStatus());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        });*/
+        });
     }
 
     public void insertByStatus(LoanInformationDTO currentLoan, ScrollPane infoScrollPane) throws IOException {
@@ -183,5 +193,9 @@ public class LoanInfoController implements Initializable {
                 }
             }
         });
+    }
+
+    public TableView<LoanInformationDTO> getLoanTableView() {
+        return loanTableView;
     }
 }

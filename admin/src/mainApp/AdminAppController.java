@@ -199,8 +199,8 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         loanInfoController.setMainController(this);
     }
 
-    public void showLoanInfo(List<LoanInformationDTO> loanOptions, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane) {
-        loanInfoComponentController.setTableColumns(loanOptions, isOwnerVisible, isNumberLoanVisible, infoScrollPane);
+    public void showLoanInfo(List<LoanInformationDTO> loanOptions, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane, String kindOfTableView) {
+        loanInfoComponentController.setTableColumns(loanOptions, isOwnerVisible, isNumberLoanVisible, infoScrollPane, kindOfTableView);
     }
 
   /*  public List<LoanInformationDTO> getLoansList() {
@@ -251,17 +251,15 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         adminComponentController.closeLoan(selectedLoan);
     }
 
-    public void setPayPaymentAndCloseLoanDisableByPaymentNotification(LoanInformationDTO currentLoan) {
-            customerComponentController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
-    }
-
     public boolean isNewPaymentNotificationExist(String customerName, String loanNameID) throws Exception {
         return adminComponentController.isNewPaymentNotificationExist(customerName, loanNameID);
     }
 
+    */
+
     public void setScrollPaneDisability(String loanStatus) {
         adminComponentController.setScrollPaneDisability(loanStatus);
-    }*/
+    }
 
     public void setAllStylesheets(String value) {
         if (adminComponentController != null) {
@@ -360,7 +358,7 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
     public void afterLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName); // update user label
         loadAdminViewAfterLoginSucceeded(); // admin fxml loading
-        adminComponentController.loadLoansTable(); //loans fxml loading
+        adminComponentController.loadLoanTableFromFXML(); //loans fxml loading
         adminComponentController.fillLoanTablesInformation();
         adminComponentController.fillCustomerTableInformation();
         adminComponentController.makeIncreaseYazButtonAble();
@@ -382,7 +380,6 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
 
     public void setActive() {
         adminComponentController.startListRefresher();
-        //chatAreaComponentController.startListRefresher();
     }
 
     @Override

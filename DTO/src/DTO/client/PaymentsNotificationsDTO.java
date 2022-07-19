@@ -5,17 +5,11 @@ public class PaymentsNotificationsDTO {
     private String loanID;
     private int paymentYaz;
     private int sum;
+    private Boolean newNotification;
 
     public PaymentsNotificationsDTO() {
 
     }
-
-   /* public PaymentsNotificationsDTO(PaymentNotification paymentNotification, int paymentNotificationNumber) {
-        this.paymentNotificationNumber = paymentNotificationNumber;
-        this.loanID = paymentNotification.getLoanID();
-        this.paymentYaz = paymentNotification.getPaymentYaz();
-        this.sum = paymentNotification.getSum();
-    }*/
 
     public int getPaymentNotificationNumber() {
         return paymentNotificationNumber;
@@ -47,5 +41,13 @@ public class PaymentsNotificationsDTO {
 
     public void setSum(int sum) {
         this.sum = sum;
+    }
+
+    public Boolean getNewNotification() {
+        return newNotification;
+    }
+
+    public void setNewNotification(Boolean newNotification) {
+        this.newNotification = newNotification;
     }
 }

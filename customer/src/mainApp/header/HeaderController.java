@@ -186,4 +186,8 @@ public class HeaderController implements Initializable {
             }
         });
     }
+
+    public void updateCurrentYazByNumber(String currentYaz) {
+        currentYazLabel.setText("Current Yaz: " + String.valueOf(currentYaz));
+    }
 }

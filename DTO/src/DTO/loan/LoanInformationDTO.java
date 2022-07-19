@@ -38,7 +38,7 @@ public class LoanInformationDTO {
 
     }
 
-   /* public LoanInformationDTO(Loan loan, int loanNumberI) {
+  /*  public LoanInformationDTO(Loan loan, int loanNumberI) {
         loanNumber = loanNumberI;
         loanNameID = loan.getLoanNameID();
         borrowerName = loan.getLoanOwner().getClientName();

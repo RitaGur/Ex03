@@ -1,8 +1,6 @@
 package DTO.lists;
 
 import DTO.client.ClientInformationDTO;
-import DTO.loan.LoanInformationDTO;
-
 import java.util.List;
 
 public class CustomersListDTO {

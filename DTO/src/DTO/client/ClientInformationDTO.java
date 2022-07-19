@@ -1,6 +1,8 @@
 package DTO.client;
 
 import DTO.loan.LoanInformationDTO;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientInformationDTO {

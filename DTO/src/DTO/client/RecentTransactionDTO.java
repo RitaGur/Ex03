@@ -1,12 +1,12 @@
 package DTO.client;
 
 public class RecentTransactionDTO {
-    private final int transActionNumber;
-    private final int amountOfTransaction;
-    private final int balanceBeforeTransaction;
-    private final int balanceAfterTransaction;
-    private final int transactionTimeUnit;
-    private final char kindOfTransaction;
+    private int transActionNumber;
+    private int amountOfTransaction;
+    private int balanceBeforeTransaction;
+    private int balanceAfterTransaction;
+    private int transactionTimeUnit;
+    private char kindOfTransaction;
 
     public RecentTransactionDTO(double f_AmountOfTransaction, double i_BalanceBeforeTransaction, double i_BalanceAfterTransaction, int i_TransactionTimeUnit, char i_KindOfTransaction, int transactionNumber) {
         this.transActionNumber = transactionNumber;
@@ -39,5 +39,29 @@ public class RecentTransactionDTO {
 
     public int getTransActionNumber() {
         return transActionNumber;
+    }
+
+    public void setTransActionNumber(int transActionNumber) {
+        this.transActionNumber = transActionNumber;
+    }
+
+    public void setAmountOfTransaction(int amountOfTransaction) {
+        this.amountOfTransaction = amountOfTransaction;
+    }
+
+    public void setBalanceBeforeTransaction(int balanceBeforeTransaction) {
+        this.balanceBeforeTransaction = balanceBeforeTransaction;
+    }
+
+    public void setBalanceAfterTransaction(int balanceAfterTransaction) {
+        this.balanceAfterTransaction = balanceAfterTransaction;
+    }
+
+    public void setTransactionTimeUnit(int transactionTimeUnit) {
+        this.transactionTimeUnit = transactionTimeUnit;
+    }
+
+    public void setKindOfTransaction(char kindOfTransaction) {
+        this.kindOfTransaction = kindOfTransaction;
     }
 }

@@ -2,6 +2,7 @@ package mainApp.admin;
 import DTO.loan.LoanInformationDTO;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -24,6 +25,9 @@ import java.util.ResourceBundle;
 public class LoanInfoController implements Initializable {
     private AppController mainController;
     private ScrollPane infoScrollPane;
+    private ObservableList<LoanInformationDTO> customerLenderList;
+    private ObservableList<LoanInformationDTO> customerLoanerList;
+    private ObservableList<LoanInformationDTO> customerPaymentLoanerLoansList;
 
     @FXML
     private TableView<LoanInformationDTO> loanTableView;
@@ -58,7 +62,7 @@ public class LoanInfoController implements Initializable {
     @FXML
     private TableColumn<LoanInformationDTO, Integer> yazBetweenPaymentCol;
 
-    public void setTableColumns(List<LoanInformationDTO> listToShow, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane) {
+    public void setTableColumns(List<LoanInformationDTO> listToShow, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane, String toObservableList) {
         this.infoScrollPane = infoScrollPane;
         infoScrollPane.setVisible(false);
         infoScrollPane.setContent(null);
@@ -77,6 +81,47 @@ public class LoanInfoController implements Initializable {
         OwnerCol.setVisible(isOwnerVisible);
 
         loanTableView.setItems(FXCollections.observableArrayList(listToShow));
+        chooseWhichObservableList(toObservableList, listToShow);
+    }
+
+    private void chooseWhichObservableList(String toObservableList, List<LoanInformationDTO> listToShow) {
+        switch (toObservableList) {
+            case "Customer Lender Loans":
+                customerLenderList = FXCollections.observableList(listToShow);
+                break;
+            case "Customer Loaner Loans":
+                customerLoanerList = FXCollections.observableList(listToShow);
+                break;
+            case "Customer Payment Loaner Loans":
+                customerPaymentLoanerLoansList = FXCollections.observableList(listToShow);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void setCustomerLenderList(ObservableList<LoanInformationDTO> customerLenderList) {
+        this.customerLenderList = customerLenderList;
+    }
+
+    public void setCustomerLoanerList(ObservableList<LoanInformationDTO> customerLoanerList) {
+        this.customerLoanerList = customerLoanerList;
+    }
+
+    public void setCustomerPaymentLoanerLoansList(ObservableList<LoanInformationDTO> customerPaymentLoanerLoansList) {
+        this.customerPaymentLoanerLoansList = customerPaymentLoanerLoansList;
+    }
+
+    public ObservableList<LoanInformationDTO> getCustomerLenderList() {
+        return customerLenderList;
+    }
+
+    public ObservableList<LoanInformationDTO> getCustomerLoanerList() {
+        return customerLoanerList;
+    }
+
+    public ObservableList<LoanInformationDTO> getCustomerPaymentLoanerLoansList() {
+        return customerPaymentLoanerLoansList;
     }
 
     public void setMainController(AppController appController) {
@@ -85,18 +130,17 @@ public class LoanInfoController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        /*loanTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        loanTableView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && (oldValue == null || !(newValue.getLoanNameID().equals(oldValue.getLoanNameID())))) {
                 try {
                     LoanInformationDTO currentLoan = loanTableView.getSelectionModel().selectedItemProperty().get();
                     insertByStatus(currentLoan, infoScrollPane);
                     mainController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
-                    mainController.setScrollPaneDisability(currentLoan.getLoanStatus());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        });*/
+        });
     }
 
     public void insertByStatus(LoanInformationDTO currentLoan, ScrollPane infoScrollPane) throws IOException {

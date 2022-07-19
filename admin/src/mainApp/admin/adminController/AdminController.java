@@ -5,6 +5,7 @@ import DTO.lists.CustomersListDTO;
 import DTO.lists.LoanListDTO;
 import DTO.loan.LoanInformationDTO;
 import DTO.loan.PaymentsDTO;
+import DTO.refresher.ForAdminRefresherDTO;
 import client.util.api.HttpStatusUpdate;
 import client.util.http.HttpClientUtil;
 import javafx.animation.FadeTransition;
@@ -12,11 +13,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,7 +63,6 @@ public class AdminController implements Initializable {
 
     private List<ClientInformationDTO> customersList;
 
-    //private BankingSystem engine;
     private AdminAppController mainController;
     private ScrollPane adminView;
 
@@ -260,7 +257,7 @@ public class AdminController implements Initializable {
         increaseYazButton.setDisable(false);
     }
 
-    private void loadLoanTableFromFXML() throws IOException {
+    public void loadLoanTableFromFXML() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
         fxmlLoader.setLocation(url);
@@ -268,6 +265,8 @@ public class AdminController implements Initializable {
         LoanInfoController loanInfoController = fxmlLoader.getController();
         mainController.setLoanInfoController(loanInfoController);
         loansScrollPane.setContent(loansTable);
+        loansScrollPane.setVisible(true);
+        adminLoansTableView = loansTable;
     }
 
     public void insertAdminView() throws IOException {
@@ -397,15 +396,8 @@ public class AdminController implements Initializable {
         return engine.getCurrentTimeUnit().getCurrentTimeUnit();
     }
 
-    public boolean isNewPaymentNotificationExist(String customerName, String selectedLoanID) throws Exception {
-        return engine.isNewPaymentNotificationExist(customerName, selectedLoanID);
-    }
 
-    public void setScrollPaneDisability(String loanStatus) {
-        if (!(loanStatus.equals("NEW"))) {
-            topInfoScrollPane.setVisible(true);
-        }
-    }
+
 
     public void setAdminStyleSheet(String value) {
         switch (value) {
@@ -426,20 +418,82 @@ public class AdminController implements Initializable {
     public void setCustomerStyleSheet(String value) {
 
     }*/
-   private void updateCustomersList(List<ClientInformationDTO> customersList) {
-       Platform.runLater(() -> {
-           try {
-               //todo: setCustomers tables
-               //setCustomerTableColumns();
-               customersInfoTableView.setItems(FXCollections.observableList(customersList));
-           } catch (Exception e) {
-               e.printStackTrace();
-           }
-       });
+
+/*
+    public boolean isNewPaymentNotificationExist(String customerName, String selectedLoanID) throws Exception {
+        return engine.isNewPaymentNotificationExist(customerName, selectedLoanID);
+    }*/
+
+    public void setScrollPaneDisability(String loanStatus) {
+        if (!(loanStatus.equals("NEW"))) {
+            topInfoScrollPane.setVisible(true);
+        }
+    }
+
+    private void checkForChangesInLoans(ObservableList<LoanInformationDTO> oldLoansList, List<LoanInformationDTO> newLoanList) {
+        int i = 0;
+        for (LoanInformationDTO oldLoanDTO : oldLoansList) {
+            LoanInformationDTO currentNewLoan = newLoanList.get(i++);
+            if (oldLoanDTO.getLoanNameID().equals(currentNewLoan.getLoanNameID())) {
+                oldLoanDTO.setStatus(currentNewLoan.getLoanStatus());
+                oldLoanDTO.setFundAmount(currentNewLoan.getFundAmount());
+                oldLoanDTO.setLoanSumOfTimeUnit(currentNewLoan.getLoanSumOfTimeUnit());
+                oldLoanDTO.setLoanInterest((int)currentNewLoan.getLoanInterest());
+                oldLoanDTO.setSumAmount(currentNewLoan.getSumAmount());
+                oldLoanDTO.setTimeUnitsBetweenPayments(currentNewLoan.getTimeUnitsBetweenPayments());
+            }
+        }
+        while (newLoanList.size() > i) {
+            oldLoansList.add(newLoanList.get(i++));
+        }
    }
 
+    private void checkForChangesInCustomers(ObservableList<ClientInformationDTO> oldCustomersList, List<ClientInformationDTO> newCustomersList) {
+        int i = 0;
+        for (ClientInformationDTO oldClientDTO : oldCustomersList) {
+            ClientInformationDTO currentNewCustomer = newCustomersList.get(i++);
+            if (oldClientDTO.getClientName().equals(currentNewCustomer.getClientName())) {
+                oldClientDTO.setRiskLender(currentNewCustomer.getRiskLender());
+                oldClientDTO.setNewLender(currentNewCustomer.getNewLender());
+                oldClientDTO.setFinishedLender(currentNewCustomer.getFinishedLender());
+                oldClientDTO.setActiveLender(currentNewCustomer.getActiveLender());
+                oldClientDTO.setPendingLender(currentNewCustomer.getPendingLender());
+                oldClientDTO.setNewBorrower(currentNewCustomer.getNewBorrower());
+                oldClientDTO.setFinishedBorrower(currentNewCustomer.getFinishedBorrower());
+                oldClientDTO.setRiskBorrower(currentNewCustomer.getRiskBorrower());
+                oldClientDTO.setPendingBorrower(currentNewCustomer.getPendingBorrower());
+                oldClientDTO.setActiveBorrower(currentNewCustomer.getActiveBorrower());
+                oldClientDTO.setClientBalance((int)currentNewCustomer.getClientBalance());
+            }
+        }
+        while (newCustomersList.size() > i) {
+            oldCustomersList.add(newCustomersList.get(i++));
+        }
+    }
+
+    private void updateCustomersList(ForAdminRefresherDTO adminRefresherDTO) {
+        Platform.runLater(() -> {
+            try {
+                // Loans update
+                ObservableList<ClientInformationDTO> customersFromTableView = customersInfoTableView.getItems();
+                checkForChangesInCustomers(customersFromTableView, adminRefresherDTO.getAdminCustomerList());
+                customersInfoTableView.refresh();
+
+                // Customers update
+                ObservableList<LoanInformationDTO> loansFromTableView = adminLoansTableView.getItems();
+                checkForChangesInLoans(loansFromTableView, adminRefresherDTO.getAdminLoanList());
+                adminLoansTableView.refresh();
+
+                // Current Yaz Update
+                mainController.updateCurrentYazByNumber(String.valueOf(adminRefresherDTO.getCurrentYaz()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     public void startListRefresher() {
-        listRefresher = new CustomerRefresher(
+        listRefresher = new AdminRefresher(
                 this::updateCustomersList
                );
         timer = new Timer();
@@ -477,7 +531,7 @@ public class AdminController implements Initializable {
                             rawBody = response.body().string();
                             LoanListDTO loanListDTO = GSON_INSTANCE.fromJson(rawBody, LoanListDTO.class);
                             setAdminScrollPanesVisibility(true);
-                            mainController.showLoanInfo(loanListDTO.getLoanList(), true, true, topInfoScrollPane);
+                            mainController.showLoanInfo(loanListDTO.getLoanList(), true, true, topInfoScrollPane, "Admin Loans");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -542,19 +596,6 @@ public class AdminController implements Initializable {
 
     public void makeIncreaseYazButtonAble() {
         increaseYazButton.setDisable(false);
-    }
-
-    public void loadLoansTable() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
-        fxmlLoader.setLocation(url);
-        TableView loansTable = fxmlLoader.load(url.openStream());
-        LoanInfoController loanInfoController = fxmlLoader.getController();
-
-        mainController.setLoanInfoController(loanInfoController);
-        loansScrollPane.setContent(loansTable);
-        loansScrollPane.setVisible(true); //todo: delete?
-        adminLoansTableView = loansTable;
     }
 
     public void increaseYaz() throws Exception {

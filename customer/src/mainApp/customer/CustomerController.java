@@ -3,14 +3,19 @@ package mainApp.customer;
 import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
+import DTO.lists.CategoriesList;
 import DTO.lists.CustomersListDTO;
 import DTO.lists.LoanListDTO;
+import DTO.lists.PaymentNotificationsListDTO;
 import DTO.loan.LoanInformationDTO;
+import DTO.loan.scramble.InvestmentLoanInformationDTO;
+import DTO.refresher.ForCustomerRefresherDTO;
 import client.util.Constants;
 import client.util.http.HttpClientUtil;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,14 +30,16 @@ import javafx.stage.FileChooser;
 import mainApp.AppController;
 import mainApp.admin.*;
 import mainApp.customer.scrambleExceptions.MaxOpenLoansException;
+import mainApp.customer.scrambleExceptions.MinTotalYazException;
+import mainApp.customer.scrambleExceptions.MoneyToInvestException;
+import mainApp.customer.scrambleExceptions.NotEnoughMoneyException;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static client.util.Constants.*;
 import static client.util.popup.AlertPopUp.alertPopUp;
@@ -40,10 +47,11 @@ import static client.util.popup.AlertPopUp.alertPopUp;
 public class CustomerController implements Initializable {
     private AppController mainController;
     private String customerName;
-    private List<LoanInformationDTO> chosenLoans;
-    private int moneyToInvest, minTotalYaz, maxOpenLoans;
+    private ObservableList<LoanInformationDTO> chosenLoans;
+    private int moneyToInvest, minTotalYaz, maxOpenLoans, maxOwnershipPercentage;
     private Parent customerComponent;
     private ClientInformationDTO customer;
+    private int customerBalance;
 
     private Task<Boolean> loanOptionsTask;
     List<String> selectedCategories;
@@ -53,6 +61,14 @@ public class CustomerController implements Initializable {
     List<LoanInformationDTO> loanOptions;
     private SimpleIntegerProperty scrambleInterestSliderValue;
     private SimpleIntegerProperty scrambleOwnershipPercentageSliderValue;
+
+    private Timer timer;
+    private TimerTask listRefresher;
+    private TableView informationLoanerLoansTableView;
+    private TableView informationLenderLoansTableView;
+
+    @FXML
+    private TableView paymentLoanerLoansTableView;
 
     @FXML
     private Label scrambleErrorLabel;
@@ -109,7 +125,7 @@ public class CustomerController implements Initializable {
     private Label accountTransactionsLabel;
 
     @FXML
-    private TableView<LoanInformationDTO> loanerLoansTableView;
+    private TableView loanerLoansTableView;
 
     @FXML
     private TableColumn<LoanInformationDTO, String> loanerLoanIDCol;
@@ -133,7 +149,7 @@ public class CustomerController implements Initializable {
     private TableColumn<LoanInformationDTO, String> loanerStatusCol;
 
     @FXML
-    private TableView<LoanInformationDTO> lenderLoansTableView;
+    private TableView lenderLoansTableView;
 
     @FXML
     private TableColumn<LoanInformationDTO, String> lenderLoanIDCol;
@@ -332,7 +348,8 @@ public class CustomerController implements Initializable {
                 } else {
                     Platform.runLater(() -> {
                         mainController.updateFilePath(chosenFile);
-                        fillCustomerLoansTables(customerName);
+                        //todo: delete?
+                        //fillCustomerLoansTables(customerName);
                     });
                 }
                 response.close();
@@ -413,6 +430,114 @@ public class CustomerController implements Initializable {
         mainController.setAllTables(customerName);*/
     }
 
+    private void updateCustomersList(ForCustomerRefresherDTO customerRefresherDTO) {
+        Platform.runLater(() -> {
+            try {
+                // Information Loaner Loans update:
+                ObservableList<LoanInformationDTO> loanerLoansFromTableView = loanerLoansTableView.getItems();
+                checkForChangesLoans(loanerLoansFromTableView, customerRefresherDTO.getCustomerLonerLoansList());
+                loanerLoansTableView.refresh();
+
+                // Information Lender Loans update:
+                ObservableList<LoanInformationDTO> lenderLoansFromTableView = lenderLoansTableView.getItems();
+                checkForChangesLoans(lenderLoansFromTableView, customerRefresherDTO.getCustomerLenderLoansList());
+                lenderLoansTableView.refresh();
+
+                // Recent Transactions List:
+                ObservableList<RecentTransactionDTO> recentTransactionsFromTableView = accountTransactionsTableView.getItems();
+                checkForChangesInRecentTransactions(recentTransactionsFromTableView, customerRefresherDTO.getCustomerRecentTransactionsList());
+                accountTransactionsTableView.refresh();
+
+                // Customer Balance:
+                currentBalanceLabel.setText("Current Balance: " + customerRefresherDTO.getCustomerBalance());
+                scrambleCurrentBalanceLabel.setText("(Current Balance: " + customerRefresherDTO.getCustomerBalance() + ")");
+                customerBalance = customerRefresherDTO.getCustomerBalance();
+
+                // Customer Payment Loaner Loans List:
+                ObservableList<LoanInformationDTO> customerPaymentLoanerLoansListFromTableView = paymentLoanerLoansTableView.getItems();
+                checkForChangesLoans(customerPaymentLoanerLoansListFromTableView, customerRefresherDTO.getCustomerPaymentLoanerLoansList());
+                paymentLoanerLoansTableView.refresh();
+
+                // Payment Notifications:
+                ObservableList<PaymentsNotificationsDTO> paymentsNotificationsFromTableView = notificationAreaTable.getItems();
+                checkForChangesInNotificationArea(paymentsNotificationsFromTableView, customerRefresherDTO.getCustomerPaymentNotificationsList());
+                notificationAreaTable.refresh();
+
+                // Current Yaz:
+                mainController.updateCurrentYazByNumber(String.valueOf(customerRefresherDTO.getCurrentYaz()));
+
+                // Categories List:
+                fillCategoriesOnScrambleTab(customerRefresherDTO.getLoanCategoryList());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private void checkForChangesInNotificationArea(ObservableList<PaymentsNotificationsDTO> oldPaymentsNotificationsList, List<PaymentsNotificationsDTO> newPaymentsNotificationsList) {
+        int i = 0;
+
+        for (PaymentsNotificationsDTO oldPaymentsNotification : oldPaymentsNotificationsList) {
+            PaymentsNotificationsDTO currentPaymentsNotification = newPaymentsNotificationsList.get(i++);
+            if (oldPaymentsNotification.getPaymentNotificationNumber() == currentPaymentsNotification.getPaymentNotificationNumber()) {
+                oldPaymentsNotification.setPaymentYaz(currentPaymentsNotification.getPaymentYaz());
+                oldPaymentsNotification.setSum(currentPaymentsNotification.getSum());
+            }
+        }
+
+        while (newPaymentsNotificationsList.size() > i) {
+            oldPaymentsNotificationsList.add(newPaymentsNotificationsList.get(i++));
+        }
+
+    }
+
+    private void checkForChangesInRecentTransactions(ObservableList<RecentTransactionDTO> oldRecentTransactionList, List<RecentTransactionDTO> newRecentTransactionList) {
+        int i = 0;
+
+        for (RecentTransactionDTO oldRecentTransactionDTO : oldRecentTransactionList) {
+            RecentTransactionDTO currentRecentTransaction = newRecentTransactionList.get(i++);
+            if (oldRecentTransactionDTO.getTransActionNumber() == currentRecentTransaction.getTransActionNumber()) {
+                oldRecentTransactionDTO.setAmountOfTransaction((int)currentRecentTransaction.getAmountOfTransaction());
+                oldRecentTransactionDTO.setKindOfTransaction(currentRecentTransaction.getKindOfTransaction());
+                oldRecentTransactionDTO.setBalanceAfterTransaction((int)currentRecentTransaction.getBalanceAfterTransaction());
+                oldRecentTransactionDTO.setTransactionTimeUnit(currentRecentTransaction.getTransactionTimeUnit());
+                oldRecentTransactionDTO.setBalanceBeforeTransaction((int)currentRecentTransaction.getBalanceBeforeTransaction());
+            }
+        }
+
+        while (newRecentTransactionList.size() > i) {
+            oldRecentTransactionList.add(newRecentTransactionList.get(i++));
+        }
+    }
+
+    private void checkForChangesLoans(ObservableList<LoanInformationDTO> oldLoansList, List<LoanInformationDTO> newLoanList) {
+        int i = 0;
+
+        for (LoanInformationDTO oldLoanDTO : oldLoansList) {
+            LoanInformationDTO currentNewLoan = newLoanList.get(i++);
+            if (oldLoanDTO.getLoanNameID().equals(currentNewLoan.getLoanNameID())) {
+                oldLoanDTO.setStatus(currentNewLoan.getLoanStatus());
+                oldLoanDTO.setFundAmount(currentNewLoan.getFundAmount());
+                oldLoanDTO.setLoanSumOfTimeUnit(currentNewLoan.getLoanSumOfTimeUnit());
+                oldLoanDTO.setLoanInterest((int)currentNewLoan.getLoanInterest());
+                oldLoanDTO.setSumAmount(currentNewLoan.getSumAmount());
+                oldLoanDTO.setTimeUnitsBetweenPayments(currentNewLoan.getTimeUnitsBetweenPayments());
+            }
+        }
+
+        while (newLoanList.size() > i) {
+            oldLoansList.add(newLoanList.get(i++));
+        }
+    }
+
+    public void startListRefresher() {
+        listRefresher = new CustomerRefresher(
+                this::updateCustomersList
+        );
+        timer = new Timer();
+        timer.schedule(listRefresher, REFRESH_RATE, REFRESH_RATE);
+    }
+
     private void showInvalidInputAlertDialog(NumberFormatException ex) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Pay Payment Error");
@@ -475,7 +600,6 @@ public class CustomerController implements Initializable {
                         );
                     } else {
                         Platform.runLater(() -> {
-                            //todo: set all tables
                             fillAccountTransactionTableAndUpdateBalanceLabel();
                         });
                     }
@@ -528,20 +652,52 @@ public class CustomerController implements Initializable {
 
     @FXML
     void chooseLoansOnActionListener(ActionEvent event) throws Exception {
-       /* scrambleProgressMessage.setVisible(false);
+        //todo: delete progress details
+        scrambleProgressMessage.setVisible(false);
         scrambleProgressBar.setVisible(false);
 
-        int maxOwnershipPercentage = scrambleOwnershipPercentageSlider.getValue() == 0 ? 0 : (int) scrambleOwnershipPercentageSlider.getValue();
+        LoanListDTO loanListDTO = new LoanListDTO();
+        loanListDTO.setLoanList(chosenLoans);
 
-        mainController.loansDistribution(chosenLoans, maxOwnershipPercentage, moneyToInvest, customerName);
-        mainController.setAllTables(customerName);
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_INVEST_IN_CHOSEN_LOANS)
+                .newBuilder()
+                .build()
+                .toString();
 
-        scrambleSuccessMessageLabel.setText("Your investment money was distributed successfully!");
-        clearAllScrambleFields();*/
+        HttpClientUtil.runAsyncSelectedLoans(finalUrl, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("There is not Customer by this name","Something went wrong: ", e.getMessage())//ToDo
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Error","Something went wrong: ", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            scrambleSuccessMessageLabel.setText("Your investment money was distributed successfully!");
+                            clearAllScrambleFields();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        },loanListDTO);
     }
 
     private void clearAllScrambleFields() {
-       /* scrambleProgressBar.setVisible(false);
+        scrambleProgressBar.setVisible(false);
         scrambleProgressMessage.setVisible(false);
         scrambleMoneyAmountTextField.clear();
         scrambleInterestSlider.setValue(0);
@@ -550,12 +706,12 @@ public class CustomerController implements Initializable {
         scrambleMaxOpenLoansTextField.clear();
         scrambleOwnershipPercentageSlider.setValue(0);
         scrambleOwnershipPercentageRangeLabel.setText("");
-        scrambleSetVisibility(false);*/
+        scrambleSetVisibility(false);
     }
 
     @FXML
     void submitOnActionListener(ActionEvent event) throws Exception {
-        /*resetLabels();
+        resetLabels();
 
         try {
             // calculate loans by parameters
@@ -564,14 +720,12 @@ public class CustomerController implements Initializable {
             selectedCategories = scrambleCategoriesListView.getSelectionModel().getSelectedItems();
             minInterest = (int) scrambleInterestSlider.getValue();
             checkMaxOpenLoans(scrambleMaxOpenLoansTextField.getText());
+            maxOwnershipPercentage = scrambleOwnershipPercentageSlider.getValue() == 0 ? 0 : (int) scrambleOwnershipPercentageSlider.getValue();
 
             scrambleProgressBar.setVisible(true);
             scrambleProgressMessage.setVisible(true);
 
             startInvest();
-
-
-
         }
         catch (MoneyToInvestException moneyToInvestException) {
             moneyToInvestCatch(moneyToInvestException.getMoneyToInvestMessage());
@@ -584,7 +738,63 @@ public class CustomerController implements Initializable {
         }
         catch (NotEnoughMoneyException notEnoughMoneyException) {
             accountBalanceErrorCatch(notEnoughMoneyException.getNotEnoughMoneyMessage());
-        }*/
+        }
+    }
+
+    private void startInvest() {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_GET_LOANS_OPTIONS_TO_INVEST)
+                .newBuilder()
+                .build()
+                .toString();
+        InvestmentLoanInformationDTO investmentLoanInformationDTO = getInvestmentParams();
+        String investmentParamsInJson = GSON_INSTANCE.toJson(investmentLoanInformationDTO);
+
+        HttpClientUtil.runAsyncJson(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Scramble error", "Could not load loan options to invest", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Scramble error", "Could not load loan options to invest", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            LoanListDTO loanListDTO = GSON_INSTANCE.fromJson(rawBody, LoanListDTO.class);
+                            loadLoanAndShowInformation(loanListDTO.getLoanList(), statusInfoScrollPane);
+                            //statusInfoScrollPane.setVisible(false);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        }, investmentParamsInJson);
+    }
+
+    private InvestmentLoanInformationDTO getInvestmentParams() {
+        InvestmentLoanInformationDTO investmentLoanInformationDTO = new InvestmentLoanInformationDTO();
+
+        investmentLoanInformationDTO.setInterest(minInterest);
+        investmentLoanInformationDTO.setMaxOpenLoans(maxOpenLoans);
+        investmentLoanInformationDTO.setAmountOfMoneyToInvest(moneyToInvest);
+        investmentLoanInformationDTO.setMinimumTotalTimeunits(minTotalYaz);
+        investmentLoanInformationDTO.setChosenCategories(selectedCategories);
+        investmentLoanInformationDTO.setCustomerOfInvestmentName(customerName);
+        investmentLoanInformationDTO.setMaxOwnershipPercentage(maxOwnershipPercentage);
+
+        return investmentLoanInformationDTO;
     }
 
     private void accountBalanceErrorCatch(String notEnoughMoneyMessage) {
@@ -648,7 +858,7 @@ public class CustomerController implements Initializable {
 
     }
 
-   /* private void checkMoneyToInvest(String moneyToInvestTF) throws Exception {
+    private void checkMoneyToInvest(String moneyToInvestTF) throws Exception {
         if(moneyToInvestTF.equals("")) {
             throw new MoneyToInvestException("Required Field");
         }
@@ -660,8 +870,7 @@ public class CustomerController implements Initializable {
                     throw new MoneyToInvestException("Invalid Input, Please enter an integer bigger than 0");
                 }
 
-                ClientInformationDTO customer = mainController.getCustomerByName(customerName);
-                if (moneyToInvest > customer.getClientBalance()) {
+                if (moneyToInvest > customerBalance) {
                     throw new NotEnoughMoneyException("There is not enough money in the account");
                 }
             }
@@ -702,7 +911,7 @@ public class CustomerController implements Initializable {
         LoanInfoController loanInfoController = fxmlLoader.getController();
         mainController.setLoanInfoController(loanInfoController);
 
-        mainController.showLoanInfo(loanOptions, false, false, statusInfoScrollPane);
+        mainController.showLoanInfo(loanOptions, false, false, statusInfoScrollPane, "");
         loansOptionsScrollPane.setContent(loanOptionsTable);
 
         chosenLoans = loanOptionsTable.getSelectionModel().getSelectedItems();
@@ -710,6 +919,13 @@ public class CustomerController implements Initializable {
         scrambleSetVisibility(true);
     }
 
+    private void scrambleSetVisibility(boolean visibility) {
+        scrambleLoansOptionsLabel.setVisible(visibility);
+        loansOptionsScrollPane.setVisible(visibility);
+        statusInfoScrollPane.setVisible(visibility);
+        scrambleChooseLoansToInvestButton.setVisible(visibility);
+    }
+/*
     private void sleepForAWhile(int sleepTime) {
         if (sleepTime != 0) {
             try {
@@ -754,102 +970,7 @@ public class CustomerController implements Initializable {
         });
     }
 
-    public void setPayPaymentAndCloseLoanDisableByPaymentNotification(LoanInformationDTO currentLoan) {
-        try {
-            if (!(currentLoan.getLoanStatus().equals("NEW")) && mainController.isNewPaymentNotificationExist(customerName, currentLoan.getLoanNameID())) {
-                payPaymentButton.setDisable(false);
-                paymentCloseLoanButton.setDisable(false);
-            } else {
-                payPaymentButton.setDisable(true);
-                paymentCloseLoanButton.setDisable(false);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    private void scrambleSetVisibility(boolean visibility) {
-        scrambleLoansOptionsLabel.setVisible(visibility);
-        loansOptionsScrollPane.setVisible(visibility);
-        statusInfoScrollPane.setVisible(visibility);
-        scrambleChooseLoansToInvestButton.setVisible(visibility);
-    }
-
-    private void insertByStatus(LoanInformationDTO currentLoan, ScrollPane infoScrollPane) throws IOException {
-        infoScrollPane.setVisible(false);
-        switch (currentLoan.getLoanStatus().toString()) {
-            case "PENDING": {
-                FXMLLoader fxmlLoader = new FXMLLoader();
-                URL url = getClass().getResource("/mainApp/admin/loan/pending/pendingStatusInfo.fxml");
-                fxmlLoader.setLocation(url);
-                GridPane pendingInfo = fxmlLoader.load(url.openStream());
-                PendingInfoController pendingInfoController = fxmlLoader.getController();
-                mainController.setPendingInfoController(pendingInfoController);
-
-                //TODO:CSS
-                //pendingInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/PendingCSS2.css").toExternalForm());
-                //pendingInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/PendingCSS.css").toExternalForm());
-
-
-                mainController.showPendingInfo(currentLoan);
-                infoScrollPane.setVisible(true);
-                infoScrollPane.setContent(pendingInfo);
-                break;
-            }
-            case "ACTIVE": {
-                FXMLLoader fxmlLoader = new FXMLLoader();
-                URL url = getClass().getResource("/mainApp/admin/loan/active/activeStatusInfo.fxml");
-                fxmlLoader.setLocation(url);
-                GridPane activeInfo = fxmlLoader.load(url.openStream());
-                ActiveInfoController activeInfoController = fxmlLoader.getController();
-                mainController.setActiveInfoController(activeInfoController);
-
-                //TODO:CSS
-                //activeInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/ActiveCSS2.css").toExternalForm());
-                //activeInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/ActiveCSS.css").toExternalForm());
-
-
-                mainController.showActiveInfo(currentLoan);
-                infoScrollPane.setVisible(true);
-                infoScrollPane.setContent(activeInfo);
-                break;
-            }
-            case "RISK": {
-                FXMLLoader fxmlLoader = new FXMLLoader();
-                URL url = getClass().getResource("/mainApp/admin/loan/risk/riskStatusInfo.fxml");
-                fxmlLoader.setLocation(url);
-                GridPane riskInfo = fxmlLoader.load(url.openStream());
-                RiskInfoController riskInfoController = fxmlLoader.getController();
-                mainController.setRiskInfoController(riskInfoController);
-
-                //TODO:CSS
-                //riskInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/RiskCSS2.css").toExternalForm());
-                //riskInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/RiskCSS.css").toExternalForm());
-
-                mainController.showRiskInfo(currentLoan);
-                infoScrollPane.setVisible(true);
-                infoScrollPane.setContent(riskInfo);
-                break;
-            }
-            case "FINISHED": {
-                FXMLLoader fxmlLoader = new FXMLLoader();
-                URL url = getClass().getResource("/mainApp/admin/loan/finished/finishedStatusInfo.fxml");
-                fxmlLoader.setLocation(url);
-                GridPane finishedInfo = fxmlLoader.load(url.openStream());
-                FinishedInfoController finishedInfoController = fxmlLoader.getController();
-                mainController.setFinishedInfoController(finishedInfoController);
-
-                //TODO:CSS
-                //finishedInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/FinishedCSS2.css").toExternalForm());
-                //finishedInfo.getStylesheets().add(getClass().getResource("/mainApp/admin/FinishedCSS.css").toExternalForm());
-
-                mainController.showFinishedInfo(currentLoan);
-                infoScrollPane.setVisible(true);
-                infoScrollPane.setContent(finishedInfo);
-                break;
-            }
-        }
-    }
 
     public void setCustomerComponent(ScrollPane customerView) {
         this.customerComponent = customerView;
@@ -871,44 +992,66 @@ public class CustomerController implements Initializable {
         }
     }
 
-    public void startInvest() {
-        Task<Boolean> taskLoan = new Task<Boolean>() {
+    */
+
+    public void setPayPaymentAndCloseLoanDisableByPaymentNotification(LoanInformationDTO currentLoan) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_PAYMENT_NOTIFICATIONS)
+                .newBuilder()
+                .addQueryParameter("username", customerName)
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
             @Override
-            protected Boolean call() throws Exception {
-                loanOptions = mainController.getLoanOptions(customerName, moneyToInvest, selectedCategories, minInterest, minTotalYaz, maxOpenLoans);
-
-                updateMessage("working...");
-                updateProgress(0,100);
-
-                for (int i = 0; i < 100; i++) {
-                    Thread.sleep(10);
-                    updateProgress(i, 100);
-                }
-
-                updateProgress(100,100);
-                updateMessage("done!");
-                return true;
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Payment Notifications error", "Could not load information", e.getMessage())
+                );
             }
-        };
-        scrambleProgressBar.progressProperty().bind(taskLoan.progressProperty());
-        scrambleProgressMessage.textProperty().bind(taskLoan.messageProperty());
 
-        // Task listener
-        taskLoan.valueProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                if(newValue)
-                {
-                    loadLoanAndShowInformation(loanOptions, statusInfoScrollPane);
-                    statusInfoScrollPane.setVisible(false);
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Payment Notifications error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            PaymentNotificationsListDTO paymentNotificationsListDTO = GSON_INSTANCE.fromJson(rawBody, PaymentNotificationsListDTO.class);
+                            if (!(currentLoan.getLoanStatus().equals("NEW")) && isNewPaymentNotificationExist(paymentNotificationsListDTO.getPaymentsNotificationsDTOList(), customerName, currentLoan.getLoanNameID())) {
+                                payPaymentButton.setDisable(false);
+                                paymentCloseLoanButton.setDisable(false);
+                            } else {
+                                payPaymentButton.setDisable(true);
+                                paymentCloseLoanButton.setDisable(false);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
             }
         });
+    }
 
-        new Thread(taskLoan, "Loan investing thread").start();
-    }*/
+    private boolean isNewPaymentNotificationExist(List<PaymentsNotificationsDTO> paymentsNotificationList, String customerName, String loanNameID) {
+        for (PaymentsNotificationsDTO paymentNotification : paymentsNotificationList) {
+            if (paymentNotification.getLoanID().equals(loanNameID) && paymentNotification.getNewNotification()) {
+                return true;
+            }
+        }
 
-    public void fillCustomerLoansTables(String customerName) {
+        return false;
+    }
+
+
+    private void fillCustomerLoansTables(String customerName) {
         String finalUrl = HttpUrl
                 .parse(ADMIN_SHOW_CUSTOMERS)
                 .newBuilder()
@@ -941,12 +1084,13 @@ public class CustomerController implements Initializable {
                             //update customerDTO
                             customer = relevantCustomer;
                             if (relevantCustomer != null) {
-                                //todo: to pull
-                                loadCustomerTablesFromFXML(lenderLoansScrollPane);
-                                mainController.showLoanInfo(relevantCustomer.getClientAsLenderLoanList(), false, false, bottomInfoScrollPane);
-                                loadCustomerTablesFromFXML(loanerLoansScrollPane);
-                                mainController.showLoanInfo(relevantCustomer.getClientAsBorrowerLoanList(), false, false, topInfoScrollPane);
-                                fillAccountTransactionTableAndUpdateBalanceLabel();
+                                loadCustomerTablesFromFXML(lenderLoansScrollPane, "Lender Loans");
+                                mainController.showLoanInfo(relevantCustomer.getClientAsLenderLoanList(), false, false, bottomInfoScrollPane, "Customer Lender Loans");
+                                loadCustomerTablesFromFXML(loanerLoansScrollPane, "Information Loaner Loans");
+                                mainController.showLoanInfo(relevantCustomer.getClientAsBorrowerLoanList(), false, false, topInfoScrollPane, "Customer Loaner Loans");
+                                //loadCustomerTablesFromFXML(paymentLoanerLoansScrollPane, "Payment Loaner Loans");
+                                //fillPaymentLoanerLoansTable();
+                                //fillAccountTransactionTableAndUpdateBalanceLabel(); //todo: delete?
                             } else {
                                 throw new Exception("customer not found");
                             }
@@ -971,7 +1115,7 @@ public class CustomerController implements Initializable {
         return null;
     }
 
-    private void loadCustomerTablesFromFXML(ScrollPane scrollPaneToLoadTo) throws IOException {
+    private void loadCustomerTablesFromFXML(ScrollPane scrollPaneToLoadTo, String relevantTableView) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
         fxmlLoader.setLocation(url);
@@ -980,6 +1124,21 @@ public class CustomerController implements Initializable {
         mainController.setLoanInfoController(loanInfoController);
 
         scrollPaneToLoadTo.setContent(loansTable);
+        setTableView(relevantTableView, loansTable);
+    }
+
+    private void setTableView(String relevantTableView, TableView loansTable) {
+        switch (relevantTableView) {
+            case "Information Loaner Loans":
+                loanerLoansTableView = loansTable;
+                break;
+            case "Lender Loans":
+                lenderLoansTableView = loansTable;
+                break;
+            case "Payment Loaner Loans":
+                paymentLoanerLoansTableView = loansTable;
+                break;
+        }
     }
 
     public void makeLoanTablesVisible() {
@@ -1049,46 +1208,14 @@ public class CustomerController implements Initializable {
         accountTransactionsTableView.setItems(FXCollections.observableArrayList(accountTransactions));
     }
 
-    public void loadCustomerInformation(String customerName, List<String> categoriesList, List<PaymentsNotificationsDTO> paymentsNotificationsDTOList) throws Exception {
-        clearAllScrambleFields();
 
-        if (customer != null) {
-            // information tab
-
-            loadCustomerTablesFromFXML(lenderLoansScrollPane);
-            mainController.showLoanInfo(customer.getClientAsLenderLoanList(), false, false, bottomInfoScrollPane);
-            loadCustomerTablesFromFXML(loanerLoansScrollPane);
-            mainController.showLoanInfo(customer.getClientAsBorrowerLoanList(), false, false, topInfoScrollPane);
-            fillAccountTransactionTableAndUpdateBalanceLabel();
-
-            currentBalanceLabel.setText("Current Balance: " + (int) customer.getClientBalance());
-
-            // scramble tab
-            fillCategoriesOnScrambleTab(categoriesList);
-            scrambleCurrentBalanceLabel.setText("(Current Balance: " + (int) customer.getClientBalance() + ")");
-
-            // payment tab
-            // TODO: a method for loan loading
-            FXMLLoader fxmlLoader = new FXMLLoader();
-            URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
-            fxmlLoader.setLocation(url);
-            customerOpenLoansToPayTable = fxmlLoader.load(url.openStream());
-            LoanInfoController loanInfoController = fxmlLoader.getController();
-            mainController.setLoanInfoController(loanInfoController);
-
-            fillOpenLoansToPay();
-            setNotificationAreaTable(paymentsNotificationsDTOList);
-
-            topInfoScrollPane.setVisible(false);
+    //todo: add to updates after pull ?
+    /*topInfoScrollPane.setVisible(false);
             bottomInfoScrollPane.setVisible(false);
             payPaymentButton.setDisable(true);
-            paymentCloseLoanButton.setDisable(true);
-        } else {
-            throw new Exception("client was not found");
-        }
-    }
+            paymentCloseLoanButton.setDisable(true);*/
 
-    private void fillOpenLoansToPay() {
+    private void fillPaymentLoanerLoansTable() {
         String finalUrl = HttpUrl
                 .parse(CUSTOMER_OPEN_LOANS_TO_PAY)
                 .newBuilder()
@@ -1118,9 +1245,9 @@ public class CustomerController implements Initializable {
                             rawBody = response.body().string();
                             LoanListDTO loanListDTO = GSON_INSTANCE.fromJson(rawBody, LoanListDTO.class);
                             List<LoanInformationDTO> customerOpenLoansToPayList = loanListDTO.getLoanList();
-                            mainController.showLoanInfo(customerOpenLoansToPayList, false, false, paymentInfoScrollPane);
-                            paymentLoanerLoansScrollPane.setContent(customerOpenLoansToPayTable);
-
+                            loadCustomerTablesFromFXML(paymentLoanerLoansScrollPane, "Payment Loaner Loans");
+                            mainController.showLoanInfo(customerOpenLoansToPayList, false, false, paymentInfoScrollPane, "Customer Payment Loaner Loans");
+                            //paymentLoanerLoansScrollPane.setContent(customerOpenLoansToPayTable); //todo: get back
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -1132,7 +1259,9 @@ public class CustomerController implements Initializable {
 
     private void fillCategoriesOnScrambleTab(List<String> categoriesList) {
         for (String category : categoriesList) {
-            scrambleCategoriesListView.getItems().add(category);
+            if (!(scrambleCategoriesListView.getItems().contains(category))) { //todo: check
+                scrambleCategoriesListView.getItems().add(category);
+            }
         }
 
         scrambleCategoriesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -1180,6 +1309,95 @@ public class CustomerController implements Initializable {
                             if (relevantCustomer != null) {
                                 customer = relevantCustomer;
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    public void afterCustomerLoginLoading(String userName) {
+        makeLoanTablesVisible();
+        setCustomerNameInCustomerController(userName);
+        setCustomerDTOInCustomerController(userName);
+        fillCustomerLoansTables(userName);
+        fillPaymentLoanerLoansTable();
+        loadAndSetNotificationAreaTable(userName);
+        loadAndFillCategoriesOnScrambleTab();
+    }
+
+    private void loadAndFillCategoriesOnScrambleTab() {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_CATEGORIES_LIST)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Categories error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Categories error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            CategoriesList categoriesList = GSON_INSTANCE.fromJson(rawBody, CategoriesList.class);
+                            fillCategoriesOnScrambleTab(categoriesList.getCategories());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void loadAndSetNotificationAreaTable(String userName) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_PAYMENT_NOTIFICATIONS)
+                .newBuilder()
+                .addQueryParameter("username", userName)
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Payment Notifications error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Payment Notifications error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            PaymentNotificationsListDTO paymentNotificationsListDTO = GSON_INSTANCE.fromJson(rawBody, PaymentNotificationsListDTO.class);
+                            setNotificationAreaTable(paymentNotificationsListDTO.getPaymentsNotificationsDTOList());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

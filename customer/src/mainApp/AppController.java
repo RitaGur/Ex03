@@ -26,8 +26,6 @@ import java.util.ResourceBundle;
 public class AppController implements Initializable {
     @FXML private GridPane headerComponent;
     @FXML private HeaderController headerComponentController;
-   /* @FXML private GridPane adminComponent;
-    @FXML private AdminController adminComponentController;*/
     @FXML private GridPane pendingInfoComponent;
     @FXML private PendingInfoController pendingInfoComponentController;
     @FXML private GridPane activeInfoComponent;
@@ -149,9 +147,12 @@ public class AppController implements Initializable {
         headerComponentController.addCustomersToComboBox(clientsInformationList);
     }*/
 
-   /* public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
-        adminComponentController.showLendersTable(currentLoan);
-    }*/
+   /**/
+
+    public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
+        customerComponentController.showLendersTable(currentLoan);
+    }
+    //todo: move admin funcs to customer controller
 
     public void setLendersTable(TableView lenders, String loanStatus) {
         if (loanStatus.equals("PENDING")) {
@@ -205,13 +206,9 @@ public class AppController implements Initializable {
         loanInfoController.setMainController(this);
     }
 
-    public void showLoanInfo(List<LoanInformationDTO> loanOptions, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane) {
-        loanInfoComponentController.setTableColumns(loanOptions, isOwnerVisible, isNumberLoanVisible, infoScrollPane);
+    public void showLoanInfo(List<LoanInformationDTO> loanOptions, Boolean isOwnerVisible, Boolean isNumberLoanVisible, ScrollPane infoScrollPane, String toObservableList) {
+        loanInfoComponentController.setTableColumns(loanOptions, isOwnerVisible, isNumberLoanVisible, infoScrollPane, toObservableList);
     }
-
-  /*  public List<LoanInformationDTO> getLoansList() {
-        return adminComponentController.getLoansList();
-    }*/
 
     public void insertByStatus(LoanInformationDTO currentLoan, ScrollPane infoScrollPane) throws IOException {
         loanInfoComponentController.insertByStatus(currentLoan, infoScrollPane);
@@ -221,27 +218,15 @@ public class AppController implements Initializable {
         headerComponentController.setCustomerViewParameter(customerView);
     }
 
+    public void setPayPaymentAndCloseLoanDisableByPaymentNotification(LoanInformationDTO currentLoan) {
+        customerComponentController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
+    }
+
     /*public List<LoanInformationDTO> getLoanOptions(String customerName, int moneyAmount, List<String> selectedCategories, int minInterest, int minTotalYaz, int maxOpenLoans) throws Exception {
         return adminComponentController.getLoanOptions(customerName, moneyAmount, selectedCategories, minInterest, minTotalYaz, maxOpenLoans);
     }*/
 
-    /*public void loansDistribution(List<LoanInformationDTO> chosenLoans, int maxOwnershipPercentage, int moneyToInvest, String customerName) throws Exception {
-        adminComponentController.loansDistribution(chosenLoans, maxOwnershipPercentage, moneyToInvest, customerName);
-    }*/
-
-    /*public void setAllTables(String customerName) throws Exception {
-        adminComponentController.insertAdminView();
-        loadCustomerInformation(customerName, adminComponentController.getCategoriesList(), adminComponentController.getPaymentNotificationList(customerName));
-    }
-
-    public void withdrawMoney(String customerName, int moneyToWithdraw) throws Exception {
-        adminComponentController.withdrawMoney(customerName, moneyToWithdraw);
-    }
-
-    public void addMoney(String customerName, int moneyToWithdraw) throws Exception {
-        adminComponentController.addMoney(customerName, moneyToWithdraw);
-    }
-
+    /*
     public void addPaymentToActiveLoan(LoanInformationDTO selectedLoan) throws Exception {
         adminComponentController.addPaymentToActiveLoan(selectedLoan);
     }
@@ -256,21 +241,12 @@ public class AppController implements Initializable {
 
 
 
-    public void setPayPaymentAndCloseLoanDisableByPaymentNotification(LoanInformationDTO currentLoan) {
-            customerComponentController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
-    }
 
-    public boolean isNewPaymentNotificationExist(String customerName, String loanNameID) throws Exception {
+
+    */
+
+ /*   public boolean isNewPaymentNotificationExist(String customerName, String loanNameID) throws Exception {
         return adminComponentController.isNewPaymentNotificationExist(customerName, loanNameID);
-    }
-
-    public void increaseYaz() throws Exception {
-        adminComponentController.increaseYaz();
-        headerComponentController.promoteIncreaseYazLabel(adminComponentController.getCurrentYaz());
-    }
-
-    public void setScrollPaneDisability(String loanStatus) {
-        adminComponentController.setScrollPaneDisability(loanStatus);
     }*/
 
     public void setAllStylesheets(String value) {
@@ -345,15 +321,14 @@ public class AppController implements Initializable {
         headerComponentController.updateUsernameLabel(userName);
         updateCurrentYaz();
         loadCustomerViewAfterLoginSucceeded();
-        customerComponentController.makeLoanTablesVisible();
-        customerComponentController.setCustomerNameInCustomerController(userName);
-        customerComponentController.setCustomerDTOInCustomerController(userName);
+        customerComponentController.afterCustomerLoginLoading(userName);
+        //refresher call
+        setActive();
     }
 
     private void loadCustomerViewAfterLoginSucceeded() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
         URL url = getClass().getResource("customer/customer.fxml");
-        //URL url = getClass().getResource("/mainApp/customer/customer.fxml");
         fxmlLoader.setLocation(url);
         ScrollPane customerView = fxmlLoader.load(url.openStream());
         CustomerController customerController = fxmlLoader.getController();
@@ -372,5 +347,13 @@ public class AppController implements Initializable {
 
     public void updateCurrentYaz() {
         headerComponentController.updateCurrentYaz();
+    }
+
+    public void updateCurrentYazByNumber(String currentYaz) {
+        headerComponentController.updateCurrentYazByNumber(currentYaz);
+    }
+
+    public void setActive() {
+        customerComponentController.startListRefresher();
     }
 }

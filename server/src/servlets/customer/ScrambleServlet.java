@@ -1,5 +1,6 @@
 package servlets.customer;
 
+import DTO.lists.LoanListDTO;
 import DTO.loan.LoanInformationDTO;
 import DTO.loan.scramble.InvestmentLoanInformationDTO;
 import bankingSystem.BankingSystem;
@@ -30,35 +31,6 @@ import static utils.ServletUtils.GSON_INSTANCE;
 @WebServlet(name = "ScrambleServlet",urlPatterns = "/customer/scramble")
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 1024 * 1024 * 5, maxRequestSize = 1024 * 1024 * 5 * 5)
 public class ScrambleServlet extends HttpServlet {
-    @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
-        List<InvestmentLoanInformationDTO> investmentsListInfoDTO = ServletUtils.getInvestmentsListInfo(getServletContext());
-        String customerFromSession = SessionUtils.getCustomer(request);
-        PrintWriter out = response.getWriter();
-        response.setContentType("application/json");
-        BufferedReader rd = request.getReader();
-        String line = null;
-        StringBuilder rawBody = new StringBuilder();
-        while ((line = rd.readLine()) != null) {
-            rawBody.append(line);
-        }
-        synchronized (this) {
-            InvestmentLoanInformationDTO investmentLoanInfoDTO = GSON_INSTANCE.fromJson(rawBody.toString(), InvestmentLoanInformationDTO.class);
-            List<LoanInformationDTO> potentialLoans = null;
-            try {
-                potentialLoans = bankingSystem.optionsForLoans(investmentLoanInfoDTO.getCustomerOfInvestmentName(), investmentLoanInfoDTO.getChosenCategories(), investmentLoanInfoDTO.getAmountOfMoneyToInvest(), investmentLoanInfoDTO.getInterest(),
-                        investmentLoanInfoDTO.getMinimumTotalTimeunits(), investmentLoanInfoDTO.getMaxOpenLoans());
-                investmentsListInfoDTO.add(investmentLoanInfoDTO);
-            } catch (Exception e) {
-                out.println(e.getMessage());
-            }
-            String json = GSON_INSTANCE.toJson(potentialLoans);
-            out.println(json);
-            out.flush();
-        }
-    }
-
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());

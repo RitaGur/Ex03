@@ -37,7 +37,6 @@ public class PaymentServlet extends HttpServlet {
                 customerAmount = new BufferedReader(new InputStreamReader(part.getInputStream())).readLine();
         }
         try {
-            //todo: take care of the amount in client
             bankingSystem.addPayment(bankingSystem.getLoanDTOByLoanID(partValue, -1), Integer.parseInt(customerAmount));
             out.println("The payment paid!");
         } catch (NumberFormatException exception) {
