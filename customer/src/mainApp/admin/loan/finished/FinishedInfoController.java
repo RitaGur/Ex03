@@ -32,10 +32,10 @@ public class FinishedInfoController {
     @FXML
     private Button finishedPaymentButton;
 
-  /*  @FXML
+    @FXML
     void LendersClicked(ActionEvent event) throws IOException {
         mainController.showLendersTable(currentLoan);
-    }*/
+    }
 
     @FXML
     void paymentsClicked(ActionEvent event) throws IOException {

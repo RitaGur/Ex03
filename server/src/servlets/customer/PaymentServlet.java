@@ -41,8 +41,10 @@ public class PaymentServlet extends HttpServlet {
             out.println("The payment paid!");
         } catch (NumberFormatException exception) {
             out.println("Incorrect input,please note that you entered an integer number!!\n");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         } catch (Exception e) {
             e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 }

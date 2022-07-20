@@ -206,7 +206,6 @@ public class BankingSystem implements LogicInterface {
 
         for (Loan i_Loan : m_LoanList) {
             loanListToReturn.add(buildLoanDTO(i_Loan, counter++));
-            //loanListToReturn.add(new LoanInformationDTO(i_Loan, counter++));
         }
 
         return loanListToReturn;

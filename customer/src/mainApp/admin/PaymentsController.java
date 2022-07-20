@@ -5,11 +5,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import mainApp.customer.CustomerController;
 
 import java.util.List;
 
 public class PaymentsController {
-   // @FXML private AdminController mainController;
+    @FXML private CustomerController mainController;
 
     @FXML
     private TableView<PaymentsDTO> paymentsTableView;
@@ -32,9 +33,9 @@ public class PaymentsController {
     @FXML
     private TableColumn<PaymentsDTO, Boolean> paidCol;
 
-   /* public void setMainController(AdminController adminController) {
-        this.mainController = adminController;
-    }*/
+    public void setMainController(CustomerController customerController) {
+        this.mainController = customerController;
+    }
 
     public void showPaymentsTable(List<PaymentsDTO> paymentsList, String loanStatus) {
         paymentNumberCol.setCellValueFactory(new PropertyValueFactory<PaymentsDTO, Integer>("paymentNumber"));

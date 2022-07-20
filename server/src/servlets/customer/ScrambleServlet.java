@@ -41,10 +41,12 @@ public class ScrambleServlet extends HttpServlet {
         Collection<Part> Parts = request.getParts();
         List<LoanInformationDTO> listOfChosenLoansDTO = new ArrayList<>();
         int counter = 1;
+
         for (Part part:Parts){
             String partValue = new BufferedReader(new InputStreamReader(part.getInputStream())).readLine();
-            listOfChosenLoansDTO.add(bankingSystem.getLoanDTOByLoanID(partValue, counter++)); //TODO: make sure it's not null
+            listOfChosenLoansDTO.add(bankingSystem.getLoanDTOByLoanID(partValue, counter++));
         }
+
         synchronized (this) {
             try {
                 InvestmentLoanInformationDTO investmentLoanInformationDTO = investmentsListInfoDTO.get(0);

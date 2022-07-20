@@ -3,11 +3,9 @@ package mainApp.customer;
 import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
-import DTO.lists.CategoriesList;
-import DTO.lists.CustomersListDTO;
-import DTO.lists.LoanListDTO;
-import DTO.lists.PaymentNotificationsListDTO;
+import DTO.lists.*;
 import DTO.loan.LoanInformationDTO;
+import DTO.loan.PaymentsDTO;
 import DTO.loan.scramble.InvestmentLoanInformationDTO;
 import DTO.refresher.ForCustomerRefresherDTO;
 import client.util.Constants;
@@ -57,15 +55,17 @@ public class CustomerController implements Initializable {
     List<String> selectedCategories;
     int minInterest;
 
-    private TableView customerOpenLoansToPayTable;
     List<LoanInformationDTO> loanOptions;
     private SimpleIntegerProperty scrambleInterestSliderValue;
     private SimpleIntegerProperty scrambleOwnershipPercentageSliderValue;
 
     private Timer timer;
     private TimerTask listRefresher;
-    private TableView informationLoanerLoansTableView;
-    private TableView informationLenderLoansTableView;
+
+    @FXML private TableView lendersComponent;
+    @FXML private LendersController lendersComponentController;
+    @FXML private TableView paymentsComponent;
+    @FXML private PaymentsController paymentsComponentController;
 
     @FXML
     private TableView paymentLoanerLoansTableView;
@@ -348,8 +348,6 @@ public class CustomerController implements Initializable {
                 } else {
                     Platform.runLater(() -> {
                         mainController.updateFilePath(chosenFile);
-                        //todo: delete?
-                        //fillCustomerLoansTables(customerName);
                     });
                 }
                 response.close();
@@ -385,7 +383,7 @@ public class CustomerController implements Initializable {
 
     @FXML
     void closeLoanOnActionListener(ActionEvent event) throws Exception {
-       /* LoanInformationDTO selectedLoan = (LoanInformationDTO) customerOpenLoansToPayTable.getSelectionModel().getSelectedItem();
+       /* LoanInformationDTO selectedLoan = (LoanInformationDTO) paymentLoanerLoansTableView.getSelectionModel().getSelectedItem();
         try {
             mainController.closeLoan(selectedLoan);
             mainController.setAllTables(customerName);
@@ -401,33 +399,79 @@ public class CustomerController implements Initializable {
 
     @FXML
     void payPaymentOnActionListener(ActionEvent event) throws Exception {
-       /* // if selected loan is in risk
-        ClientInformationDTO customer = mainController.getCustomerByName(customerName);
-        LoanInformationDTO selectedLoan = (LoanInformationDTO) customerOpenLoansToPayTable.getSelectionModel().getSelectedItem();
+        LoanInformationDTO selectedLoanToPay = (LoanInformationDTO) paymentLoanerLoansTableView.getSelectionModel().getSelectedItem();
+        int amountToPay = 0;
 
-        if (selectedLoan.getLoanStatus().equals("RISK")) {
-            TextInputDialog paymentDialog = new TextInputDialog();
-            paymentDialog.setTitle("Loan In Risk");
-            paymentDialog.setContentText("Please enter the amount of money you would like to pay:");
-            paymentDialog.setHeaderText("Current Balance: " + (int) customer.getClientBalance() + "\nDebt Amount: " + selectedLoan.getDebt());
-            paymentDialog.getDialogPane().setStyle(""); // #TODO
-            paymentDialog.showAndWait();
+        if (selectedLoanToPay.getLoanStatus().equals("RISK")) { // if selected loan is in risk
+            amountToPay = getAmountToPayFromClient(selectedLoanToPay);
+        }  // else - the server is taking care of that
 
-            if (paymentDialog.getResult() != null) {
-                try {
-                    checkAmountOfPaymentToPayRiskLoan(paymentDialog.getResult(), selectedLoan.getDebt());
-                    mainController.addPaymentToRiskLoan(selectedLoan, Integer.parseInt(paymentDialog.getResult()));
-                } catch (NumberFormatException ex) {
-                    showInvalidInputAlertDialog(ex);
-                } catch (Exception ex) {
-                    showPaymentErrorDialog(ex);
+        LoanInfoAndPaymentAmountDTO loanInfoAndPaymentAmountDTO = new LoanInfoAndPaymentAmountDTO();
+        loanInfoAndPaymentAmountDTO.setAmountToPay(amountToPay);
+        loanInfoAndPaymentAmountDTO.setLoanToPay(selectedLoanToPay);
+
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_LOAN_PAYMENT)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncPayLoanPayment(finalUrl, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Loan Payment error","Something went wrong: ", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Loan Payment error","Something went wrong: ", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        setCustomerTableViewVisibilityAndUnselected();
+                        alertPopUp("Payment","Payment validation", "Payment added successfully!"); //todo: delete
+                    });
                 }
             }
-        } else {
-            mainController.addPaymentToActiveLoan(selectedLoan);
+        }, loanInfoAndPaymentAmountDTO);
+    }
+
+    private void setCustomerTableViewVisibilityAndUnselected() {
+        topInfoScrollPane.setVisible(false);
+        bottomInfoScrollPane.setVisible(false);
+        paymentInfoScrollPane.setVisible(false);
+        lenderLoansTableView.getSelectionModel().clearSelection();
+        loanerLoansTableView.getSelectionModel().clearSelection();
+        paymentLoanerLoansTableView.getSelectionModel().clearSelection();
+    }
+
+    private int getAmountToPayFromClient(LoanInformationDTO selectedLoanToPay) {
+        int amountToPay = 0;
+
+        TextInputDialog paymentDialog = new TextInputDialog();
+        paymentDialog.setTitle("Loan In Risk");
+        paymentDialog.setContentText("Please enter the amount of money you would like to pay:");
+        paymentDialog.setHeaderText("Current Balance: " + customerBalance + "\nDebt Amount: " + selectedLoanToPay.getDebt());
+        paymentDialog.getDialogPane().setStyle("");
+        paymentDialog.showAndWait();
+
+        if (paymentDialog.getResult() != null) {
+            try {
+                checkAmountOfPaymentToPayRiskLoan(paymentDialog.getResult(), selectedLoanToPay.getDebt());
+                amountToPay = Integer.parseInt(paymentDialog.getResult());
+            } catch (NumberFormatException ex) {
+                showInvalidInputAlertDialog(ex);
+            } catch (Exception ex) {
+                showPaymentErrorDialog(ex);
+            }
         }
 
-        mainController.setAllTables(customerName);*/
+        return amountToPay;
     }
 
     private void updateCustomersList(ForCustomerRefresherDTO customerRefresherDTO) {
@@ -464,6 +508,10 @@ public class CustomerController implements Initializable {
                 notificationAreaTable.refresh();
 
                 // Current Yaz:
+                if (customerRefresherDTO.getCurrentYaz() > mainController.getSavedCurrentYaz()) {
+                    setCustomerTableViewVisibilityAndUnselected();
+                    mainController.setSavedCurrentYaz(customerRefresherDTO.getCurrentYaz());
+                }
                 mainController.updateCurrentYazByNumber(String.valueOf(customerRefresherDTO.getCurrentYaz()));
 
                 // Categories List:
@@ -522,6 +570,21 @@ public class CustomerController implements Initializable {
                 oldLoanDTO.setLoanInterest((int)currentNewLoan.getLoanInterest());
                 oldLoanDTO.setSumAmount(currentNewLoan.getSumAmount());
                 oldLoanDTO.setTimeUnitsBetweenPayments(currentNewLoan.getTimeUnitsBetweenPayments());
+
+                oldLoanDTO.setLenderSetAndAmounts(currentNewLoan.getLenderSetAndAmounts());
+                oldLoanDTO.setPaymentsListInDTO(currentNewLoan.getPaymentsList());
+
+                oldLoanDTO.setPendingMoney(currentNewLoan.getPendingMoney());
+                oldLoanDTO.setMissingMoneyToActive(currentNewLoan.getMissingMoneyToActive());
+                oldLoanDTO.setBeginningTimeUnit(currentNewLoan.getBeginningTimeUnit());
+                oldLoanDTO.setNextPaymentTimeUnit(currentNewLoan.getNextPaymentTimeUnit());
+                oldLoanDTO.setPaidFund(currentNewLoan.getPaidFund());
+                oldLoanDTO.setPaidInterest(currentNewLoan.getPaidInterest());
+                oldLoanDTO.setFundLeftToPay(currentNewLoan.getFundLeftToPay());
+                oldLoanDTO.setInterestLeftToPay(currentNewLoan.getInterestLeftToPay());
+                oldLoanDTO.setNumberOfUnpaidPayments(currentNewLoan.getNumberOfUnpaidPayments());
+                oldLoanDTO.setSumAmountToPayEveryTimeUnit(currentNewLoan.getSumAmountToPayEveryTimeUnit());
+                oldLoanDTO.setEndingTimeUnit(currentNewLoan.getEndingTimeUnit());
             }
         }
 
@@ -529,6 +592,36 @@ public class CustomerController implements Initializable {
             oldLoansList.add(newLoanList.get(i++));
         }
     }
+
+/*    private void checkForChangesInPaymentsOfLoan(List<PaymentsDTO> oldPaymentsList, List<PaymentsDTO> newPaymentsList) {
+        int i = 0;
+
+        for (PaymentsDTO oldPaymentDTO : oldPaymentsList) {
+            PaymentsDTO currentPaymentDTO = newPaymentsList.get(i++);
+            if (oldPaymentDTO.g().equals(currentPaymentDTO.getLenderName())) {
+                oldPaymentDTO.setAmountOfLoan(currentPaymentDTO.getAmountOfLoan());
+            }
+        }
+
+        while (newLenderSetAndAmountsList.size() > i) {
+            oldLenderSetAndAmountsList.add(newLenderSetAndAmountsList.get(i++));
+        }
+    }
+
+    private void checkForChangesInLendersOfLoan(List<PartInLoanDTO> oldLenderSetAndAmountsList, List<PartInLoanDTO> newLenderSetAndAmountsList) {
+        int i = 0;
+
+        for (PartInLoanDTO oldPartInLoanDTO : oldLenderSetAndAmountsList) {
+            PartInLoanDTO currentPartInLoanDTO = newLenderSetAndAmountsList.get(i++);
+            if (oldPartInLoanDTO.getLenderName().equals(currentPartInLoanDTO.getLenderName())) {
+                oldPartInLoanDTO.setAmountOfLoan(currentPartInLoanDTO.getAmountOfLoan());
+            }
+        }
+
+        while (newLenderSetAndAmountsList.size() > i) {
+            oldLenderSetAndAmountsList.add(newLenderSetAndAmountsList.get(i++));
+        }
+    }*/
 
     public void startListRefresher() {
         listRefresher = new CustomerRefresher(
@@ -669,7 +762,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("There is not Customer by this name","Something went wrong: ", e.getMessage())//ToDo
+                        alertPopUp("There is not Customer by this name","Something went wrong: ", e.getMessage())
                 );
             }
 
@@ -693,7 +786,7 @@ public class CustomerController implements Initializable {
                     });
                 }
             }
-        },loanListDTO);
+        }, loanListDTO);
     }
 
     private void clearAllScrambleFields() {
@@ -1088,9 +1181,6 @@ public class CustomerController implements Initializable {
                                 mainController.showLoanInfo(relevantCustomer.getClientAsLenderLoanList(), false, false, bottomInfoScrollPane, "Customer Lender Loans");
                                 loadCustomerTablesFromFXML(loanerLoansScrollPane, "Information Loaner Loans");
                                 mainController.showLoanInfo(relevantCustomer.getClientAsBorrowerLoanList(), false, false, topInfoScrollPane, "Customer Loaner Loans");
-                                //loadCustomerTablesFromFXML(paymentLoanerLoansScrollPane, "Payment Loaner Loans");
-                                //fillPaymentLoanerLoansTable();
-                                //fillAccountTransactionTableAndUpdateBalanceLabel(); //todo: delete?
                             } else {
                                 throw new Exception("customer not found");
                             }
@@ -1208,13 +1298,6 @@ public class CustomerController implements Initializable {
         accountTransactionsTableView.setItems(FXCollections.observableArrayList(accountTransactions));
     }
 
-
-    //todo: add to updates after pull ?
-    /*topInfoScrollPane.setVisible(false);
-            bottomInfoScrollPane.setVisible(false);
-            payPaymentButton.setDisable(true);
-            paymentCloseLoanButton.setDisable(true);*/
-
     private void fillPaymentLoanerLoansTable() {
         String finalUrl = HttpUrl
                 .parse(CUSTOMER_OPEN_LOANS_TO_PAY)
@@ -1247,7 +1330,6 @@ public class CustomerController implements Initializable {
                             List<LoanInformationDTO> customerOpenLoansToPayList = loanListDTO.getLoanList();
                             loadCustomerTablesFromFXML(paymentLoanerLoansScrollPane, "Payment Loaner Loans");
                             mainController.showLoanInfo(customerOpenLoansToPayList, false, false, paymentInfoScrollPane, "Customer Payment Loaner Loans");
-                            //paymentLoanerLoansScrollPane.setContent(customerOpenLoansToPayTable); //todo: get back
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -1259,7 +1341,7 @@ public class CustomerController implements Initializable {
 
     private void fillCategoriesOnScrambleTab(List<String> categoriesList) {
         for (String category : categoriesList) {
-            if (!(scrambleCategoriesListView.getItems().contains(category))) { //todo: check
+            if (!(scrambleCategoriesListView.getItems().contains(category))) { //todo: check new list
                 scrambleCategoriesListView.getItems().add(category);
             }
         }
@@ -1325,7 +1407,14 @@ public class CustomerController implements Initializable {
         fillCustomerLoansTables(userName);
         fillPaymentLoanerLoansTable();
         loadAndSetNotificationAreaTable(userName);
+        fillAccountTransactionTableAndUpdateBalanceLabel();
         loadAndFillCategoriesOnScrambleTab();
+        disablePayPaymentAndCloseLoan();
+    }
+
+    private void disablePayPaymentAndCloseLoan() {
+        payPaymentButton.setDisable(true);
+        paymentCloseLoanButton.setDisable(true);
     }
 
     private void loadAndFillCategoriesOnScrambleTab() {
@@ -1405,5 +1494,40 @@ public class CustomerController implements Initializable {
                 }
             }
         });
+    }
+
+    public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        URL url = getClass().getResource("/mainApp/admin/lendersTable.fxml");
+        fxmlLoader.setLocation(url);
+        TableView lenders = fxmlLoader.load(url.openStream());
+        LendersController lendersController = fxmlLoader.getController();
+        this.setLendersController(lendersController);
+
+        mainController.setLendersTable(lenders, currentLoan.getLoanStatus());
+        lendersComponentController.showLendersTable(currentLoan.getLenderSetAndAmounts());
+    }
+
+    public void setLendersController(LendersController lendersController) {
+        this.lendersComponentController = lendersController;
+        lendersController.setMainController(this);
+    }
+
+    public void showPaymentsTable(LoanInformationDTO currentLoan) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        URL url = getClass().getResource("/mainApp/admin/paymentsTable.fxml");
+        fxmlLoader.setLocation(url);
+        TableView paymentsTable = fxmlLoader.load(url.openStream());
+        PaymentsController paymentsController = fxmlLoader.getController();
+        this.setPaymentsController(paymentsController);
+
+        mainController.setPaymentsTable(paymentsTable, currentLoan.getLoanStatus());
+        List<PaymentsDTO> listOfPayments = currentLoan.getPaymentsList();
+        paymentsComponentController.showPaymentsTable(listOfPayments, currentLoan.getLoanStatus());
+    }
+
+    private void setPaymentsController(PaymentsController paymentsController) {
+        this.paymentsComponentController = paymentsController;
+        paymentsController.setMainController(this);
     }
 }

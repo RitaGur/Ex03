@@ -48,10 +48,10 @@ public class RiskInfoController {
     @FXML
     private Label riskSumOfUnpaidLabel;
 
-    /*@FXML
+    @FXML
     void LendersClicked(ActionEvent event) throws IOException {
         mainController.showLendersTable(currentLoan);
-    }*/
+    }
 
     @FXML
     void paymentsClicked(ActionEvent event) throws IOException {

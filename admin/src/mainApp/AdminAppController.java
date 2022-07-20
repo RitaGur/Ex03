@@ -347,13 +347,14 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
 
         setAdminController(adminController);
         setAdminComponent(adminView);
-        setAdminStyleSheet(); //TODO: func
+        setAdminStyleSheet(); //TODO: style sheet func
         mainBorderpane.setCenter(adminView);
     }
 
-    public void setAllTables() throws Exception {
+    // todo: delete?
+ /*   public void setAllTables() throws Exception {
         adminComponentController.insertAdminView();
-    }
+    }*/
 
     public void afterLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName); // update user label
@@ -385,5 +386,13 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
     @Override
     public void updateHttpLine(String line) {
 
+    }
+
+    public int getSavedCurrentYaz() {
+        return headerComponentController.getSavedYaz();
+    }
+
+    public void setSavedCurrentYaz(int newCurrentYaz) {
+        headerComponentController.setSavedYaz(newCurrentYaz);
     }
 }

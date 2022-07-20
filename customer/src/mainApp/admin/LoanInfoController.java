@@ -168,7 +168,6 @@ public class LoanInfoController implements Initializable {
                         break;
                     }
                     case "ACTIVE": {
-                        infoScrollPane.setVisible(true);
                         FXMLLoader fxmlLoader = new FXMLLoader();
                         URL url = getClass().getResource("/mainApp/admin/loan/active/activeStatusInfo.fxml");
                         fxmlLoader.setLocation(url);
@@ -179,6 +178,7 @@ public class LoanInfoController implements Initializable {
                             mainController.setActiveInfoComponent(activeInfo);
                             mainController.setActiveInfoStyleSheet();
                             mainController.showActiveInfo(currentLoan);
+                            infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(activeInfo);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -186,7 +186,6 @@ public class LoanInfoController implements Initializable {
                         break;
                     }
                     case "RISK": {
-                        infoScrollPane.setVisible(true);
                         FXMLLoader fxmlLoader = new FXMLLoader();
                         URL url = getClass().getResource("/mainApp/admin/loan/risk/riskStatusInfo.fxml");
                         fxmlLoader.setLocation(url);
@@ -197,6 +196,7 @@ public class LoanInfoController implements Initializable {
                             mainController.setRiskInfoComponent(riskInfo);
                             mainController.setRiskInfoStyleSheet();
                             mainController.showRiskInfo(currentLoan);
+                            infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(riskInfo);
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -204,7 +204,6 @@ public class LoanInfoController implements Initializable {
                         break;
                     }
                     case "FINISHED": {
-                        infoScrollPane.setVisible(true);
                         FXMLLoader fxmlLoader = new FXMLLoader();
                         URL url = getClass().getResource("/mainApp/admin/loan/finished/finishedStatusInfo.fxml");
                         fxmlLoader.setLocation(url);
@@ -215,6 +214,7 @@ public class LoanInfoController implements Initializable {
                             mainController.setFinishedInfoComponent(finishedInfo);
                             mainController.setFinishedInfoStyleSheet();
                             mainController.showFinishedInfo(currentLoan);
+                            infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(finishedInfo);
                         } catch (IOException e) {
                             e.printStackTrace();

@@ -30,6 +30,7 @@ public class HeaderController implements Initializable {
     private Parent adminView;
     private GridPane header;
     private ScrollPane customerView;
+    private int currentYaz;
 
     @FXML
     private GridPane headerComponent;
@@ -186,5 +187,13 @@ public class HeaderController implements Initializable {
 
     public void updateCurrentYazByNumber(String currentYaz) {
         currentYazLabel.setText("Current Yaz: " + String.valueOf(currentYaz));
+    }
+
+    public int getSavedYaz() {
+        return currentYaz;
+    }
+
+    public void setSavedYaz(int newYaz) {
+        currentYaz = newYaz;
     }
 }

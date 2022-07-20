@@ -647,7 +647,6 @@ public class CustomerController implements Initializable {
             scrambleCurrentBalanceLabel.setText("(Current Balance: " + (int) customer.getClientBalance() + ")");
 
             // payment tab
-            // TODO: a method for loan loading
             FXMLLoader fxmlLoader = new FXMLLoader();
             URL url = getClass().getResource("/mainApp/admin/loanInfo.fxml");
             fxmlLoader.setLocation(url);

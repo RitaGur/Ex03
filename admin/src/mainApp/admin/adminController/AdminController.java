@@ -209,13 +209,6 @@ public class AdminController implements Initializable {
     @FXML
     void increaseYazButtonActionListener(ActionEvent event) throws Exception {
         mainController.increaseYaz();
-/*
-        //todo: notification area
-        // load Notification Area again
-        List<ClientInformationDTO> customersList = engine.showClientsInformation();
-        for (ClientInformationDTO customer : customersList) {
-            mainController.loadCustomerInformation(customer.getClientName(), engine.getLoanCategoryList(), engine.getPaymentsNotificationInDTO(customer.getClientName()));
-        }*/
     }
 
     private void setAdminScrollPanesVisibility(boolean visibility) {
@@ -269,7 +262,8 @@ public class AdminController implements Initializable {
         adminLoansTableView = loansTable;
     }
 
-    public void insertAdminView() throws IOException {
+    //todo: delete?
+    /*public void insertAdminView() throws IOException {
         //todo func insertAdmin
 
         // update loans table
@@ -281,7 +275,7 @@ public class AdminController implements Initializable {
        setCustomerTableColumns();
 
         //customersInfoTableView.setItems(FXCollections.observableArrayList(engine.showClientsInformation()));
-    }
+    }*/
 
     private void setCustomerTableColumns() {
         customersInfoTableView.refresh();
@@ -311,7 +305,7 @@ public class AdminController implements Initializable {
 
     public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("lendersTable.fxml");
+        URL url = getClass().getResource("/mainApp/admin/lendersTable.fxml");
         fxmlLoader.setLocation(url);
         TableView lenders = fxmlLoader.load(url.openStream());
         LendersController lendersController = fxmlLoader.getController();
@@ -328,7 +322,7 @@ public class AdminController implements Initializable {
 
     public void showPaymentsTable(LoanInformationDTO currentLoan) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("paymentsTable.fxml");
+        URL url = getClass().getResource("/mainApp/admin/paymentsTable.fxml");
         fxmlLoader.setLocation(url);
         TableView paymentsTable = fxmlLoader.load(url.openStream());
         PaymentsController paymentsController = fxmlLoader.getController();
@@ -344,60 +338,11 @@ public class AdminController implements Initializable {
         paymentsController.setMainController(this);
     }
 
-   /* public ClientInformationDTO getCustomerByName(String customerName) {
-        return engine.getClientInformationByName(customerName);
-    }
-
-    public List<String> getCategoriesList() {
-        return engine.getLoanCategoryList();
-    }
-
-    public List<LoanInformationDTO> getLoansList() {
-        return engine.showLoansInformation();
-    }
-
-    public List<LoanInformationDTO> getLoanOptions(String customerName, int moneyAmount, List<String> selectedCategories, int minInterest, int minTotalYaz, int maxOpenLoans) throws Exception {
-        return engine.optionsForLoans(customerName, selectedCategories, moneyAmount, minInterest, minTotalYaz, maxOpenLoans);
-    }
-
-    public void loansDistribution(List<LoanInformationDTO> chosenLoans, int maxOwnershipPercentage, int moneyToInvest, String customerName) throws Exception {
-        engine.loansDistribution(chosenLoans, moneyToInvest, customerName, maxOwnershipPercentage);
-    }
-
-    public void withdrawMoney(String customerName, int moneyToWithdraw) throws Exception {
-        engine.withdrawMoneyFromAccount(customerName, moneyToWithdraw);
-    }
-
-    public void addMoney(String customerName, int moneyToAdd) throws Exception {
-        engine.addMoneyToAccount(customerName, moneyToAdd);
-    }
-
-    public List<LoanInformationDTO> getCustomerOpenLoansToPay(String customerName) throws Exception {
-        return engine.getCustomerOpenLoansToPay(customerName);
-    }
-
-    public List<PaymentsNotificationsDTO> getPaymentNotificationList(String customer) throws Exception {
-        return engine.getPaymentsNotificationInDTO(customer);
-    }
-
-    public void addPaymentToActiveLoan(LoanInformationDTO selectedLoan) throws Exception {
-        engine.addPaymentToActiveLoan(selectedLoan);
-    }
-
-    public void addPaymentToRiskLoan(LoanInformationDTO selectedLoan, int amountToPay) throws Exception {
-        engine.addPaymentToRiskLoan(selectedLoan, amountToPay);
-    }
+   /*
 
     public void closeLoan(LoanInformationDTO selectedLoan) throws Exception {
         engine.closeLoan(selectedLoan);
     }
-
-    public int getCurrentYaz() {
-        return engine.getCurrentTimeUnit().getCurrentTimeUnit();
-    }
-
-
-
 
     public void setAdminStyleSheet(String value) {
         switch (value) {
@@ -419,11 +364,6 @@ public class AdminController implements Initializable {
 
     }*/
 
-/*
-    public boolean isNewPaymentNotificationExist(String customerName, String selectedLoanID) throws Exception {
-        return engine.isNewPaymentNotificationExist(customerName, selectedLoanID);
-    }*/
-
     public void setScrollPaneDisability(String loanStatus) {
         if (!(loanStatus.equals("NEW"))) {
             topInfoScrollPane.setVisible(true);
@@ -441,6 +381,21 @@ public class AdminController implements Initializable {
                 oldLoanDTO.setLoanInterest((int)currentNewLoan.getLoanInterest());
                 oldLoanDTO.setSumAmount(currentNewLoan.getSumAmount());
                 oldLoanDTO.setTimeUnitsBetweenPayments(currentNewLoan.getTimeUnitsBetweenPayments());
+
+                oldLoanDTO.setLenderSetAndAmounts(currentNewLoan.getLenderSetAndAmounts());
+                oldLoanDTO.setPaymentsListInDTO(currentNewLoan.getPaymentsList());
+
+                oldLoanDTO.setPendingMoney(currentNewLoan.getPendingMoney());
+                oldLoanDTO.setMissingMoneyToActive(currentNewLoan.getMissingMoneyToActive());
+                oldLoanDTO.setBeginningTimeUnit(currentNewLoan.getBeginningTimeUnit());
+                oldLoanDTO.setNextPaymentTimeUnit(currentNewLoan.getNextPaymentTimeUnit());
+                oldLoanDTO.setPaidFund(currentNewLoan.getPaidFund());
+                oldLoanDTO.setPaidInterest(currentNewLoan.getPaidInterest());
+                oldLoanDTO.setFundLeftToPay(currentNewLoan.getFundLeftToPay());
+                oldLoanDTO.setInterestLeftToPay(currentNewLoan.getInterestLeftToPay());
+                oldLoanDTO.setNumberOfUnpaidPayments(currentNewLoan.getNumberOfUnpaidPayments());
+                oldLoanDTO.setSumAmountToPayEveryTimeUnit(currentNewLoan.getSumAmountToPayEveryTimeUnit());
+                oldLoanDTO.setEndingTimeUnit(currentNewLoan.getEndingTimeUnit());
             }
         }
         while (newLoanList.size() > i) {
@@ -486,10 +441,19 @@ public class AdminController implements Initializable {
 
                 // Current Yaz Update
                 mainController.updateCurrentYazByNumber(String.valueOf(adminRefresherDTO.getCurrentYaz()));
+                if (adminRefresherDTO.getCurrentYaz() > mainController.getSavedCurrentYaz()) {
+                    setCustomerTableViewVisibilityAndUnselected();
+                    mainController.setSavedCurrentYaz(adminRefresherDTO.getCurrentYaz());
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void setCustomerTableViewVisibilityAndUnselected() {
+        topInfoScrollPane.setVisible(false);
+        adminLoansTableView.getSelectionModel().clearSelection();
     }
 
     public void startListRefresher() {
@@ -539,18 +503,6 @@ public class AdminController implements Initializable {
                 }
             }
         });
-
-
-       //loadLoanTableFromFXML();
-
-
-
-        /*//TODO: get loans list
-        mainController.showLoanInfo(engine.showLoansInformation(), true, true, topInfoScrollPane);
-
-        setCustomerTableColumns();
-
-        customersInfoTableView.setItems(FXCollections.observableArrayList(engine.showClientsInformation()));*/
     }
 
     public void fillCustomerTableInformation() {
@@ -632,11 +584,5 @@ public class AdminController implements Initializable {
                 }
             }
         });
-
-        //todo: setAllTables with pull
-        //set all table - will work with pull
-        /*for (ClientInformationDTO clientDTO : engine.showClientsInformation()) {
-            mainController.setAllTables(clientDTO.getClientName());
-        }*/
     }
 }

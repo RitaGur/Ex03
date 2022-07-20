@@ -30,6 +30,7 @@ public class HeaderController implements Initializable {
     private Parent adminView;
     private GridPane header;
     private ScrollPane customerView;
+    private int currentYaz;
 
     @FXML
     private GridPane headerComponent;
@@ -51,17 +52,6 @@ public class HeaderController implements Initializable {
         mainController.setAllStylesheets(skinComboBox.getValue());
     }
 
-/*    @FXML
-    void comboBoxClicked(ActionEvent event) throws Exception {
-        if (!(adminComboBox.getValue().toString().equals("Admin"))) {
-            mainController.putCustomerView(adminComboBox.getValue(), customerView);
-        }
-        else {
-            adminView = loadScene("/mainApp/admin/admin.fxml");
-            mainController.insertAdminView(adminView);
-        }
-    }*/
-
     private Parent loadScene(String sc) throws IOException {
         return FXMLLoader.load(getClass().getResource(sc));
     }
@@ -70,28 +60,14 @@ public class HeaderController implements Initializable {
         this.mainController = mainController;
     }
 
-    //public void makeComboBoxAble() {
-        //adminComboBox.setDisable(false);
-   // }
-
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //adminComboBox.getItems().addAll("Admin");
-        //adminComboBox.getSelectionModel().select("Admin");
         addSkinsCSS();
     }
 
     public void updateLabels(int currentTimeUnit, String filePath) {
         currentYazLabel.setText("Current Yaz: " + currentTimeUnit);
         filePathLabel.setText("  File Path: " + filePath);
-    }
-
-
-    public void addCustomersToComboBox(List<ClientInformationDTO> clientsInformationList) {
-        for (ClientInformationDTO clientDTO : clientsInformationList) {
-            //adminComboBox.getItems().add(clientDTO.getClientName().toString());
-        }
     }
 
     public void promoteIncreaseYazLabel(int currentYaz) {
@@ -177,7 +153,9 @@ public class HeaderController implements Initializable {
                 } else {
                     Platform.runLater(() -> {
                         try {
-                            currentYazLabel.setText("Current Yaz: " + response.body().string());
+                            String s = response.body().string();
+                            currentYaz = Integer.parseInt(s.trim());
+                            currentYazLabel.setText("Current Yaz: " + currentYaz);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -189,5 +167,13 @@ public class HeaderController implements Initializable {
 
     public void updateCurrentYazByNumber(String currentYaz) {
         currentYazLabel.setText("Current Yaz: " + String.valueOf(currentYaz));
+    }
+
+    public int getCurrentYaz() {
+        return currentYaz;
+    }
+
+    public void setCurrentYaz(int newCurrentYaz) {
+        currentYaz = newCurrentYaz;
     }
 }

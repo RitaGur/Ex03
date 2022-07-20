@@ -55,7 +55,6 @@ public class CustomerLoginServlet extends HttpServlet {
                         request.getSession(true).setAttribute(USERNAME, usernameFromParameter);
 
                         //redirect the request to the chat room - in order to actually change the URL
-                        //TODO: delete!
                         out.println("Welcome " + usernameFromParameter+" to the bank app!");
                         response.setStatus(HttpServletResponse.SC_OK);
                     }
@@ -63,7 +62,6 @@ public class CustomerLoginServlet extends HttpServlet {
             }
         } else {
             //user is already logged in
-            //TODO: delete!
             out.println("The user name is already in use!");
             response.setStatus(HttpServletResponse.SC_OK);
         }

@@ -7,14 +7,15 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import mainApp.customer.CustomerController;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class LendersController implements Initializable {
-    //@FXML
-    //private AdminController mainController;
+    @FXML
+    private CustomerController mainController;
     @FXML
     private TableView<PartInLoanDTO> lendersTableView;
 
@@ -32,9 +33,9 @@ public class LendersController implements Initializable {
 
     }
 
-   /* public void setMainController(AdminController mainController) {
+    public void setMainController(CustomerController mainController) {
         this.mainController = mainController;
-    }*/
+    }
 
     public void showLendersTable(List<PartInLoanDTO> lendersList) {
         lenderNumberCol.setCellValueFactory(new PropertyValueFactory<PartInLoanDTO, Integer>("lenderNumber"));

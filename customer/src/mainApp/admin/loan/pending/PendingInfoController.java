@@ -10,6 +10,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 import mainApp.AppController;
+import mainApp.customer.CustomerController;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +19,7 @@ import java.util.ResourceBundle;
 public class PendingInfoController implements Initializable {
     private AppController mainController;
     private LoanInformationDTO currentLoan;
-    //private AdminController adminController;
+    private CustomerController customerController;
     private GridPane pendingInfoComponent;
 
     @FXML
@@ -33,10 +34,10 @@ public class PendingInfoController implements Initializable {
     @FXML
     private ScrollPane lendersScrollPane;
 
-  /*  @FXML
+    @FXML
     void LendersClicked(ActionEvent event) throws IOException {
         mainController.showLendersTable(currentLoan);
-    }*/
+    }
 
     public void setMainController(AppController appController) {
         this.mainController = appController;

@@ -174,7 +174,7 @@ public class AppController implements Initializable {
     }
 
     public void showPaymentsTable(LoanInformationDTO currentLoan) throws IOException {
-        //adminComponentController.showPaymentsTable(currentLoan);
+        customerComponentController.showPaymentsTable(currentLoan);
     }
 
     public void setPaymentsTable(TableView payments, String loanStatus) {
@@ -355,5 +355,13 @@ public class AppController implements Initializable {
 
     public void setActive() {
         customerComponentController.startListRefresher();
+    }
+
+    public int getSavedCurrentYaz() {
+        return headerComponentController.getCurrentYaz();
+    }
+
+    public void setSavedCurrentYaz(int newCurrentYaz) {
+        headerComponentController.setCurrentYaz(newCurrentYaz);
     }
 }

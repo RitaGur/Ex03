@@ -10,6 +10,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 import mainApp.AppController;
+import mainApp.customer.CustomerController;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,7 +19,7 @@ import java.util.ResourceBundle;
 public class ActiveInfoController implements Initializable{
     private AppController mainController;
     private LoanInformationDTO currentLoan;
-    //private AdminController adminController;
+    private CustomerController customerController;
     private GridPane activeInfoComponent;
 
     @FXML
@@ -48,10 +49,10 @@ public class ActiveInfoController implements Initializable{
     @FXML
     private Button paymentsButton;
 
-   /* @FXML
+    @FXML
     void LendersClicked(ActionEvent event) throws IOException {
         mainController.showLendersTable(currentLoan);
-    }*/
+    }
 
     @FXML
     void paymentsClicked(ActionEvent event) throws IOException {

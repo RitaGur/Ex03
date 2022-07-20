@@ -24,7 +24,9 @@ public class ForCustomerRefresherServlet extends HttpServlet {
         BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
         String customerFromSession = SessionUtils.getCustomer(request);
         ForCustomerRefresherDTO forCustomerRefresherDTO = new ForCustomerRefresherDTO();
-        setCustomerRefresherParams(forCustomerRefresherDTO, bankingSystem, customerFromSession);
+        synchronized (this) {
+            setCustomerRefresherParams(forCustomerRefresherDTO, bankingSystem, customerFromSession);
+        }
         String json = GSON_INSTANCE.toJson(forCustomerRefresherDTO);
         out.println(json);
         out.flush();
