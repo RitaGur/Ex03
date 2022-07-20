@@ -222,37 +222,7 @@ public class AppController implements Initializable {
         customerComponentController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
     }
 
-    /*public List<LoanInformationDTO> getLoanOptions(String customerName, int moneyAmount, List<String> selectedCategories, int minInterest, int minTotalYaz, int maxOpenLoans) throws Exception {
-        return adminComponentController.getLoanOptions(customerName, moneyAmount, selectedCategories, minInterest, minTotalYaz, maxOpenLoans);
-    }*/
-
-    /*
-    public void addPaymentToActiveLoan(LoanInformationDTO selectedLoan) throws Exception {
-        adminComponentController.addPaymentToActiveLoan(selectedLoan);
-    }
-
-    public void addPaymentToRiskLoan(LoanInformationDTO selectedLoan, int amountToPay) throws Exception {
-        adminComponentController.addPaymentToRiskLoan(selectedLoan, amountToPay);
-    }
-
-    public void closeLoan(LoanInformationDTO selectedLoan) throws Exception {
-        adminComponentController.closeLoan(selectedLoan);
-    }
-
-
-
-
-
-    */
-
- /*   public boolean isNewPaymentNotificationExist(String customerName, String loanNameID) throws Exception {
-        return adminComponentController.isNewPaymentNotificationExist(customerName, loanNameID);
-    }*/
-
     public void setAllStylesheets(String value) {
-      /*  if (adminComponentController != null) {
-           // adminComponentController.setAdminStyleSheet(value);
-        }*/
         if (headerComponentController != null) {
             headerComponentController.setHeaderStyleSheet(value);
         }

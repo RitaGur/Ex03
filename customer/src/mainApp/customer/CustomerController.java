@@ -290,6 +290,104 @@ public class CustomerController implements Initializable {
     private Button loadFileButton;
 
     @FXML
+    private Slider newLoanInterestSlider;
+
+    @FXML
+    private TextField newLoanIDTextField;
+
+    @FXML
+    private TextField newLoanAmountTextField;
+
+    @FXML
+    private TextField newLoanTotalYazTimeTextField;
+
+    @FXML
+    private TextField newLoanYazBetweenPaymentTextField;
+
+    @FXML
+    private Label newLoanInterestRangeLabel;
+
+    @FXML
+    private Button addNewLoanButton;
+
+    @FXML
+    private Label newLoanSuccessLabel;
+
+    @FXML
+    private TextField newLoanCategoryTextField;
+
+    @FXML
+    void addNewLoanClicked(ActionEvent event) {
+        String loanID = newLoanIDTextField.getText();
+        int loanAmount, totalYazTime, yazBetweenPayment, loanInterest;
+        loanAmount = Integer.parseInt(newLoanAmountTextField.getText());
+        totalYazTime = Integer.parseInt(newLoanTotalYazTimeTextField.getText());
+        yazBetweenPayment = Integer.parseInt(newLoanYazBetweenPaymentTextField.getText());
+        loanInterest = (int) newLoanInterestSlider.getValue();
+        String selectedCategory = newLoanCategoryTextField.getText();
+
+        LoanInformationDTO loanToAdd = new LoanInformationDTO();
+        loanToAdd.setLoanNameID(loanID);
+        loanToAdd.setLoanStartSum(loanAmount);
+        loanToAdd.setLoanSumOfTimeUnit(totalYazTime);
+        loanToAdd.setTimeUnitsBetweenPayments(yazBetweenPayment);
+        loanToAdd.setLoanInterest(loanInterest);
+        loanToAdd.setLoanCategory(selectedCategory);
+        loanToAdd.setBorrowerName(customerName);
+
+        addNewLoanToCustomer(loanToAdd);
+    }
+
+    private void addNewLoanToCustomer(LoanInformationDTO loanToAdd) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_ADD_NEW_LOAN)
+                .newBuilder()
+                .build()
+                .toString();
+
+        String loanToAddInJson = GSON_INSTANCE.toJson(loanToAdd);
+
+        HttpClientUtil.runAsyncJson(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Add New Loan error", "Could not add new loan", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Add New Loan error", "Could not add new loan", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            clearAllAddNewLoanFields();
+                            newLoanSuccessLabel.setText("Loan was added successfully!");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        }, loanToAddInJson);
+    }
+
+    private void clearAllAddNewLoanFields() {
+        newLoanInterestRangeLabel.setText("");
+        newLoanInterestSlider.setValue(0);
+        newLoanAmountTextField.clear();
+        newLoanIDTextField.clear();
+        newLoanCategoryTextField.clear();
+        newLoanTotalYazTimeTextField.clear();
+        newLoanYazBetweenPaymentTextField.clear();
+    }
+
+    @FXML
     void loadFileButtonActionListener(ActionEvent event) throws Exception {
         Node node = (Node) event.getSource();
         FileChooser fileChooser = new FileChooser();
@@ -664,7 +762,7 @@ public class CustomerController implements Initializable {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Charge Money");
         dialog.setContentText("Please enter the amount of money you would like to add");
-        dialog.setHeaderText("Current Balance: " + (int) customer.getClientBalance());
+        dialog.setHeaderText("Current Balance: " + customerBalance);
         dialog.showAndWait();
 
         if (dialog.getResult() != null) {
@@ -866,7 +964,7 @@ public class CustomerController implements Initializable {
                             rawBody = response.body().string();
                             LoanListDTO loanListDTO = GSON_INSTANCE.fromJson(rawBody, LoanListDTO.class);
                             loadLoanAndShowInformation(loanListDTO.getLoanList(), statusInfoScrollPane);
-                            //statusInfoScrollPane.setVisible(false);
+                            statusInfoScrollPane.setVisible(false);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -948,7 +1046,26 @@ public class CustomerController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        scrambleSetVisibility(false);
 
+        paymentTab.setOnSelectionChanged(event -> {
+            payPaymentButton.setDisable(true);
+            paymentCloseLoanButton.setDisable(true);
+        });
+
+        newLoanInterestSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            newLoanInterestRangeLabel.setText(String.valueOf(newValue.intValue()));
+        });
+
+        scrambleInterestSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            scrambleInterestRangeLabel.setText(String.valueOf(newValue.intValue()));
+        });
+
+        scrambleOwnershipPercentageSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            scrambleOwnershipPercentageRangeLabel.setText(String.valueOf(newValue.intValue()));
+        });
+
+        scrambleLoansOptionsLabel.setVisible(false);
     }
 
     private void checkMoneyToInvest(String moneyToInvestTF) throws Exception {

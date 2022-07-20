@@ -17,7 +17,6 @@ import mainApp.admin.loan.active.ActiveInfoController;
 import mainApp.admin.loan.finished.FinishedInfoController;
 import mainApp.admin.loan.pending.PendingInfoController;
 import mainApp.admin.loan.risk.RiskInfoController;
-import mainApp.customer.CustomerController;
 import mainApp.header.HeaderController;
 import mainApp.login.LoginController;
 
@@ -39,8 +38,6 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
     @FXML private RiskInfoController riskInfoComponentController;
     @FXML private GridPane finishedInfoComponent;
     @FXML private FinishedInfoController finishedInfoComponentController;
-    @FXML private ScrollPane customerComponent;
-    @FXML private CustomerController customerComponentController;
     @FXML private TableView<LoanInformationDTO> loanInfoComponent;
     @FXML private LoanInfoController loanInfoComponentController;
 
@@ -69,9 +66,9 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         if (finishedInfoComponentController != null) {
             finishedInfoComponentController.setMainController(this);
         }
-        if (customerComponentController != null) {
+       /* if (customerComponentController != null) {
            // customerComponentController.setMainController(this);
-        }
+        }*/
         if (loanInfoComponentController != null) {
             loanInfoComponentController.setMainController(this);
         }
@@ -112,10 +109,10 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         finishedInfoController.setMainController(this);
     }
 
-    public void setCustomerController(CustomerController customerController) {
+  /*  public void setCustomerController(CustomerController customerController) {
         this.customerComponentController = customerController;
         customerController.setMainController(this);
-    }
+    }*/
 
     public void insertAdminView(Parent adminView) {
         mainBorderpane.setCenter(adminComponentController.getAdminView());
@@ -268,9 +265,9 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         if (headerComponentController != null) {
             headerComponentController.setHeaderStyleSheet(value);
         }
-        if (customerComponentController != null) {
+        /*if (customerComponentController != null) {
            // customerComponentController.setCustomerStyleSheet(value);
-        }
+        }*/
         if (pendingInfoComponentController != null) {
             pendingInfoComponentController.setPendingInfoStyleSheet(value);
         }

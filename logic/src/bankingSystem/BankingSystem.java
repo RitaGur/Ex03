@@ -64,14 +64,16 @@ public class BankingSystem implements LogicInterface {
     }
 
     public void addLoan(String i_LoanID, String i_BorrowerName, int i_LoanStartSum, int i_SumOfTimeUnit, int i_HowOftenToPay, double i_Interest, String i_LoanCategory) throws Exception {
+        checkLoanParams(i_SumOfTimeUnit, i_HowOftenToPay, i_LoanID);
+
         BankAccount borrowerAccount = findBankAccountByName(i_BorrowerName);
 
-        if (checkIfCategoryExists(i_LoanCategory)) {
-            Loan loanToAdd = new Loan(i_LoanID, borrowerAccount, i_LoanStartSum, i_SumOfTimeUnit, i_HowOftenToPay, i_Interest, i_LoanCategory);
-            m_LoanList.add(loanToAdd);
-            borrowerAccount.addAsLoanOwner(loanToAdd);
-        } else {
-            throw new Exception("Loan Category does not exist");
+        Loan loanToAdd = new Loan(i_LoanID, borrowerAccount, i_LoanStartSum, i_SumOfTimeUnit, i_HowOftenToPay, i_Interest, i_LoanCategory);
+        m_LoanList.add(loanToAdd);
+        borrowerAccount.addAsLoanOwner(loanToAdd);
+
+        if (!checkIfCategoryExists(i_LoanCategory)) {
+            m_LoanCategoryList.add(i_LoanCategory);
         }
     }
 
@@ -146,17 +148,21 @@ public class BankingSystem implements LogicInterface {
 
     private void fillLoanList(List<AbsLoan> absLoan, String customerName) throws Exception {
         for (AbsLoan i_Loan : absLoan) {
-            if (i_Loan.getAbsTotalYazTime() % i_Loan.getAbsPaysEveryYaz() != 0) {
-                throw new Exception("The division between totalYazNumber to paysEveryYaz is not an integer.");
-            }
-            if ( i_Loan.getAbsTotalYazTime() < i_Loan.getAbsPaysEveryYaz()) {
-               throw new Exception("paysEveryYaz is bigger than totalYazTime.");
-            }
-            if(checkIfLoanExist(m_LoanList, i_Loan.getId())) {
-                throw new Exception("The loan: " + i_Loan.getId() + " already exist.");
-            }
+            //checkLoanParams(i_Loan.getAbsTotalYazTime(), i_Loan.getAbsPaysEveryYaz(), i_Loan.getId());
             addLoan(i_Loan.getId(), customerName, i_Loan.getAbsCapital(), i_Loan.getAbsTotalYazTime(), i_Loan.getAbsPaysEveryYaz(),
                     i_Loan.getAbsIntristPerPayment(), i_Loan.getAbsCategory());
+        }
+    }
+
+    private void checkLoanParams(int loanTotalYazTime, int loanPaysEveryYaz, String loanID) throws Exception {
+        if (loanTotalYazTime % loanPaysEveryYaz != 0) {
+            throw new Exception("The division between totalYazNumber to paysEveryYaz is not an integer.");
+        }
+        if (loanTotalYazTime < loanPaysEveryYaz) {
+            throw new Exception("paysEveryYaz is bigger than totalYazTime.");
+        }
+        if(checkIfLoanExist(m_LoanList, loanID)) {
+            throw new Exception("The loan: " + loanID + " already exist.");
         }
     }
 
@@ -191,9 +197,9 @@ public class BankingSystem implements LogicInterface {
 
     private void fromListToSetCategories(List<String> i_ListToConvert) throws Exception {
         for (String i_CategoryInList : i_ListToConvert) {
-            if (!i_ListToConvert.contains(i_CategoryInList)) {
+            /*if (!i_ListToConvert.contains(i_CategoryInList)) {
                 throw new Exception("This category does not exist.");
-            }
+            }*/
             m_LoanCategoryList.add(i_CategoryInList);
         }
     }

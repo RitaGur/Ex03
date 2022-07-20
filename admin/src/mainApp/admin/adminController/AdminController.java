@@ -36,7 +36,6 @@ import mainApp.admin.LendersController;
 import mainApp.admin.LoanInfoController;
 import mainApp.admin.PaymentsController;
 import mainApp.admin.loan.pending.PendingInfoController;
-import mainApp.customer.CustomerController;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -214,19 +213,6 @@ public class AdminController implements Initializable {
     private void setAdminScrollPanesVisibility(boolean visibility) {
         customersInformationScrollPane.setVisible(visibility);
         loansScrollPane.setVisible(visibility);
-    }
-
-    private void loadCustomerView() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        URL url = getClass().getResource("/mainApp/customer/customer.fxml");
-        fxmlLoader.setLocation(url);
-        assert url != null;
-        ScrollPane customerView = fxmlLoader.load(url.openStream());
-        CustomerController customerController = fxmlLoader.getController();
-        mainController.setCustomerController(customerController);
-
-        mainController.setCustomerComponent(customerView);
-        mainController.setCustomerStyleSheet();
     }
 
     @Override

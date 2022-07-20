@@ -238,6 +238,59 @@
                         </GridPane>
                      </content>
                   </Tab>
+                  <Tab fx:id="newLoanTab" text="New Loan">
+                     <content>
+                        <GridPane hgap="10.0" vgap="10.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="NEVER" maxWidth="15.0" minWidth="15.0" prefWidth="15.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Please fill the fields below:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Label prefHeight="21.0" prefWidth="36.0" text="1." GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER" prefHeight="81.0" prefWidth="12.0" text="2." GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <Label text="Loan ID:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                              <Label alignment="CENTER" prefHeight="79.0" prefWidth="100.0" text="Loan Category:" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                              <Label text="3." GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <Label text="Loan Amount:" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                              <Label text="4." GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                              <Label text="Total Yaz Time:" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                              <Label text="5." GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                              <Label text="Yaz Between Payment:" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                              <Label text="6." GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                              <Label text="Loan Interest:" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                              <Slider fx:id="newLoanInterestSlider" blockIncrement="1.0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                              <TextField fx:id="newLoanIDTextField" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                              <TextField fx:id="newLoanAmountTextField" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                              <TextField fx:id="newLoanTotalYazTimeTextField" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                              <TextField fx:id="newLoanYazBetweenPaymentTextField" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                              <Label fx:id="newLoanInterestRangeLabel" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+                              <Button fx:id="addNewLoanButton" mnemonicParsing="false" onAction="#addNewLoanClicked" prefHeight="31.0" prefWidth="310.0" text="Add New Loan" GridPane.columnIndex="3" GridPane.rowIndex="9" />
+                              <Label fx:id="newLoanSuccessLabel" GridPane.columnIndex="4" GridPane.rowIndex="9" />
+                              <TextField fx:id="newLoanCategoryTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                     </content>
+                  </Tab>
               </tabs>
             </TabPane>
          </center>
