@@ -84,7 +84,9 @@ public class BankingSystem implements LogicInterface {
         // loans in risk
         for (Loan loan : m_LoanList) {
             if (loan.getLoanStatus().toString().equals("RISK") && loan.isItPaymentTime(m_CurrentTimeUnit.getCurrentTimeUnit())) {
-                loan.loanInRisk(m_CurrentTimeUnit.getCurrentTimeUnit());
+                if (!(loan.getDebt() == (int) loan.loanSumLeftToPay())) {
+                    loan.loanInRisk(m_CurrentTimeUnit.getCurrentTimeUnit());
+                }
             }
         }
 
@@ -197,9 +199,6 @@ public class BankingSystem implements LogicInterface {
 
     private void fromListToSetCategories(List<String> i_ListToConvert) throws Exception {
         for (String i_CategoryInList : i_ListToConvert) {
-            /*if (!i_ListToConvert.contains(i_CategoryInList)) {
-                throw new Exception("This category does not exist.");
-            }*/
             m_LoanCategoryList.add(i_CategoryInList);
         }
     }
@@ -240,7 +239,7 @@ public class BankingSystem implements LogicInterface {
         loanDTO.setFundLeftToPay((int)Math.round(loan.loanFundLeftToPay()));
         loanDTO.setInterestLeftToPay((int)Math.round(loan.loanInterestLeftToPay()));
         loanDTO.setPendingMoney(loan.getPendingMoney());
-        loanDTO.setMissingMoneyToActive((loanDTO.getFundAmount() + loanDTO.getPendingMoney()));
+        loanDTO.setMissingMoneyToActive((loanDTO.getFundAmount() - loanDTO.getPendingMoney()));
         loanDTO.setNextPaymentTimeUnit(calculateNextPaymentOfLoan(loan));
         loanDTO.setSumAmountToPayEveryTimeUnit((int)Math.round(loan.sumAmountToPayEveryTimeUnit()));
         loanDTO.setPaymentsListInDTO(paymentsListInDTO(loan.getPaymentInfoList()));
@@ -256,11 +255,12 @@ public class BankingSystem implements LogicInterface {
 
     private int calculateNextPaymentOfLoan(Loan loan) {
         int nextPaymentYaz = loan.getBeginningTimeUnit() + loan.getTimeUnitsBetweenPayment() - 1;
+        int endYaz = loan.getBeginningTimeUnit() + loan.getSumOfTimeUnit() - 1;
 
-        while (nextPaymentYaz < m_CurrentTimeUnit.getCurrentTimeUnit()) {
+        while (nextPaymentYaz < m_CurrentTimeUnit.getCurrentTimeUnit() && nextPaymentYaz < endYaz) {
             nextPaymentYaz += loan.getTimeUnitsBetweenPayment();
 
-            if (nextPaymentYaz >= m_CurrentTimeUnit.getCurrentTimeUnit()) {
+            if (nextPaymentYaz >= m_CurrentTimeUnit.getCurrentTimeUnit() || nextPaymentYaz == endYaz) {
                 return nextPaymentYaz;
             }
         }

@@ -283,9 +283,9 @@
                               <TextField fx:id="newLoanAmountTextField" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                               <TextField fx:id="newLoanTotalYazTimeTextField" GridPane.columnIndex="3" GridPane.rowIndex="5" />
                               <TextField fx:id="newLoanYazBetweenPaymentTextField" GridPane.columnIndex="3" GridPane.rowIndex="6" />
-                              <Label fx:id="newLoanInterestRangeLabel" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+                              <Label fx:id="newLoanInterestRangeLabel" GridPane.columnIndex="4" GridPane.rowIndex="7" />
                               <Button fx:id="addNewLoanButton" mnemonicParsing="false" onAction="#addNewLoanClicked" prefHeight="31.0" prefWidth="310.0" text="Add New Loan" GridPane.columnIndex="3" GridPane.rowIndex="9" />
-                              <Label fx:id="newLoanSuccessLabel" GridPane.columnIndex="4" GridPane.rowIndex="9" />
+                              <Label fx:id="newLoanSuccessLabel" GridPane.columnIndex="3" GridPane.rowIndex="8" />
                               <TextField fx:id="newLoanCategoryTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                            </children>
                         </GridPane>

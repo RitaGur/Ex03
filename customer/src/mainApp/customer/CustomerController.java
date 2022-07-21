@@ -5,6 +5,7 @@ import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
 import DTO.lists.*;
 import DTO.loan.LoanInformationDTO;
+import DTO.loan.PartInLoanDTO;
 import DTO.loan.PaymentsDTO;
 import DTO.loan.scramble.InvestmentLoanInformationDTO;
 import DTO.refresher.ForCustomerRefresherDTO;
@@ -501,7 +502,13 @@ public class CustomerController implements Initializable {
         int amountToPay = 0;
 
         if (selectedLoanToPay.getLoanStatus().equals("RISK")) { // if selected loan is in risk
-            amountToPay = getAmountToPayFromClient(selectedLoanToPay);
+            try {
+                amountToPay = getAmountToPayFromClient(selectedLoanToPay);
+            }
+            catch (Exception e) {
+                paymentLoanerLoansTableView.getSelectionModel().clearSelection();
+                return ; // the customer did not fill amount of money, get out of pay payment.
+            }
         }  // else - the server is taking care of that
 
         LoanInfoAndPaymentAmountDTO loanInfoAndPaymentAmountDTO = new LoanInfoAndPaymentAmountDTO();
@@ -532,7 +539,7 @@ public class CustomerController implements Initializable {
                 } else {
                     Platform.runLater(() -> {
                         setCustomerTableViewVisibilityAndUnselected();
-                        alertPopUp("Payment","Payment validation", "Payment added successfully!"); //todo: delete
+                        //alertPopUp("Payment","Payment validation", "Payment added successfully!"); //todo: delete
                     });
                 }
             }
@@ -548,7 +555,7 @@ public class CustomerController implements Initializable {
         paymentLoanerLoansTableView.getSelectionModel().clearSelection();
     }
 
-    private int getAmountToPayFromClient(LoanInformationDTO selectedLoanToPay) {
+    private int getAmountToPayFromClient(LoanInformationDTO selectedLoanToPay) throws Exception {
         int amountToPay = 0;
 
         TextInputDialog paymentDialog = new TextInputDialog();
@@ -564,9 +571,14 @@ public class CustomerController implements Initializable {
                 amountToPay = Integer.parseInt(paymentDialog.getResult());
             } catch (NumberFormatException ex) {
                 showInvalidInputAlertDialog(ex);
+                throw new Exception("");
             } catch (Exception ex) {
                 showPaymentErrorDialog(ex);
+                throw new Exception("");
             }
+        }
+        else {
+            throw new Exception("The customer did not fill the field.");
         }
 
         return amountToPay;
@@ -608,6 +620,8 @@ public class CustomerController implements Initializable {
                 // Current Yaz:
                 if (customerRefresherDTO.getCurrentYaz() > mainController.getSavedCurrentYaz()) {
                     setCustomerTableViewVisibilityAndUnselected();
+                    payPaymentButton.setDisable(true);
+                    paymentCloseLoanButton.setDisable(true);
                     mainController.setSavedCurrentYaz(customerRefresherDTO.getCurrentYaz());
                 }
                 mainController.updateCurrentYazByNumber(String.valueOf(customerRefresherDTO.getCurrentYaz()));
@@ -657,6 +671,11 @@ public class CustomerController implements Initializable {
     }
 
     private void checkForChangesLoans(ObservableList<LoanInformationDTO> oldLoansList, List<LoanInformationDTO> newLoanList) {
+        if (newLoanList.size() < oldLoansList.size()) {
+            oldLoansList.clear();
+            oldLoansList.addAll(newLoanList);
+        }
+
         int i = 0;
 
         for (LoanInformationDTO oldLoanDTO : oldLoansList) {
@@ -664,6 +683,7 @@ public class CustomerController implements Initializable {
             if (oldLoanDTO.getLoanNameID().equals(currentNewLoan.getLoanNameID())) {
                 oldLoanDTO.setStatus(currentNewLoan.getLoanStatus());
                 oldLoanDTO.setFundAmount(currentNewLoan.getFundAmount());
+                oldLoanDTO.setInterestAmount(currentNewLoan.getInterestAmount());
                 oldLoanDTO.setLoanSumOfTimeUnit(currentNewLoan.getLoanSumOfTimeUnit());
                 oldLoanDTO.setLoanInterest((int)currentNewLoan.getLoanInterest());
                 oldLoanDTO.setSumAmount(currentNewLoan.getSumAmount());
@@ -683,6 +703,11 @@ public class CustomerController implements Initializable {
                 oldLoanDTO.setNumberOfUnpaidPayments(currentNewLoan.getNumberOfUnpaidPayments());
                 oldLoanDTO.setSumAmountToPayEveryTimeUnit(currentNewLoan.getSumAmountToPayEveryTimeUnit());
                 oldLoanDTO.setEndingTimeUnit(currentNewLoan.getEndingTimeUnit());
+                oldLoanDTO.setDebt(currentNewLoan.getDebt());
+                oldLoanDTO.setLastPaymentTimeunit(currentNewLoan.getLastPaymentTimeunit());
+                oldLoanDTO.setAmountToPayNextPayment(currentNewLoan.getAmountToPayNextPayment());
+                oldLoanDTO.setFundToPayNextPayment(currentNewLoan.getFundToPayNextPayment());
+                oldLoanDTO.setInterestToPayNextPayment(currentNewLoan.getInterestToPayNextPayment());
             }
         }
 
@@ -755,6 +780,9 @@ public class CustomerController implements Initializable {
         } else if (paymentAmountByUser <= 0) {
             throw new Exception("Please enter a number bigger than 0.");
         }
+        else if (paymentAmountByUser > customerBalance) {
+            throw new Exception("There is not enough money in the account.");
+        }
     }
 
     @FXML
@@ -804,7 +832,7 @@ public class CustomerController implements Initializable {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Withdraw Money");
         dialog.setContentText("Please enter the amount of money you would like to withdraw");
-        dialog.setHeaderText("Current Balance: " + (int) customer.getClientBalance());
+        dialog.setHeaderText("Current Balance: " + customerBalance);
         dialog.showAndWait();
 
         if (dialog.getResult() != null) {

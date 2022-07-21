@@ -26,6 +26,7 @@ public class Loan {
     private final String f_LoanCategory;
     private List<PaymentInfo> m_PaymentInfoList;
     private int timeunitOfFirstUnPaidPayment;
+    private Boolean allNotificationsAreShown = false;
 
     public Loan(String i_LoanNameID, BankAccount i_LoanOwner, int i_LoanStartSum, int i_SumOfTimeUnit,
                 int i_HowOftenToPay, double i_Interest, String i_LoanCategory) {
@@ -240,7 +241,13 @@ public class Loan {
 
     public void checkIfPaymentNeededAndAddPaymentNotification(int i_CurrentTimeUnit) {
         if (isItPaymentTime(i_CurrentTimeUnit) && (m_LoanStatus == LoanStatus.ACTIVE || m_LoanStatus == LoanStatus.RISK)) {
-            f_LoanOwner.addPaymentNotification(f_LoanNameID, i_CurrentTimeUnit, (int) m_Payment.getSumToPayEveryTimeUnit());
+            if (!(m_Payment.getDebt() == m_Payment.getSumLeftToPay())) {
+                f_LoanOwner.addPaymentNotification(f_LoanNameID, i_CurrentTimeUnit, (int) m_Payment.getSumToPayEveryTimeUnit());
+            }
+            else if (m_Payment.getDebt() == m_Payment.getSumLeftToPay() && !allNotificationsAreShown) {
+                f_LoanOwner.addPaymentNotification(f_LoanNameID, i_CurrentTimeUnit, (int) m_Payment.getSumToPayEveryTimeUnit());
+                allNotificationsAreShown = true;
+            }
         }
     }
 
@@ -389,7 +396,9 @@ public class Loan {
                 updateNextPaymentsOfLendersNotAllDebtPaid(1);
                 addPaymentToPaymentInfoListInRisk(currentTimeUnit, true, 1);
                 m_Payment.takeDownFromDebt(paymentNotification.getSum());
-                timeunitOfFirstUnPaidPayment += f_TimeUnitsBetweenPayment;
+                if (timeunitOfFirstUnPaidPayment < m_BeginningTimeUnit + f_SumOfTimeUnit - 1) {
+                    timeunitOfFirstUnPaidPayment += f_TimeUnitsBetweenPayment;
+                }
             }
             else {
                 addNewPaymentNotificationSmallerAmount(paymentNotification.getSum() - currentAmountToPay, indexOfFirstNewNotification);
@@ -404,7 +413,11 @@ public class Loan {
         m_LastPaidTimeUnit = currentTimeUnit;
         takePaymentsFromBorrowerToLenders(currentTimeUnit, amountToPayOnLoan);
 
-        if (isItPaymentTime(currentTimeUnit) && f_LoanOwner.getAmountOfNewNotifications() == 1) {
+        if (m_Payment.getSumLeftToPay() < 1) {
+            m_LoanStatus = LoanStatus.FINISHED;
+            updateEndingTimeunit(currentTimeUnit);
+        }
+        else if (isItPaymentTime(currentTimeUnit) && f_LoanOwner.getAmountOfNewNotifications() == 1 && !allNotificationsAreShown) {
             loanIsActiveAgain();
         }
         else if (f_LoanOwner.getAmountOfNewNotifications() == 0) {
@@ -460,7 +473,9 @@ public class Loan {
 
     public void loanInRisk(int currentTimeUnit) {
         addUnPaidPaymentToInfoListLoanInRisk(currentTimeUnit);
-        m_Payment.updateNextPaymentRisk();
+        if (currentTimeUnit < (m_BeginningTimeUnit + f_SumOfTimeUnit - 1)) {
+            m_Payment.updateNextPaymentRisk();
+        }
         m_Payment.addToDebt((int) m_Payment.getSumToPayEveryTimeUnit());
         updateNextPaymentsOfLendersRisk();
     }

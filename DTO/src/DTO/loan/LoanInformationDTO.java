@@ -38,39 +38,6 @@ public class LoanInformationDTO {
 
     }
 
-  /*  public LoanInformationDTO(Loan loan, int loanNumberI) {
-        loanNumber = loanNumberI;
-        loanNameID = loan.getLoanNameID();
-        borrowerName = loan.getLoanOwner().getClientName();
-        loanCategory = loan.getLoanCategory();
-        loanStartSum = loan.getLoanStartSum();
-        loanSumOfTimeUnit = loan.getSumOfTimeUnit();
-        loanInterest = (int)(loan.getInterest() * 100);
-        timeUnitsBetweenPayments = loan.getTimeUnitsBetweenPayment();
-        loanStatus = loan.getLoanStatus().toString();
-        lenderSetAndAmounts = lenderSetAndAmountInDTO(loan.getLendersSet());
-        beginningTimeUnit = loan.getBeginningTimeUnit();
-        endingTimeUnit = beginningTimeUnit + loanSumOfTimeUnit - 1;
-        fundAmount = loan.getLoanStartSum();
-        interestAmount = (int) Math.round(loan.interestLoanToPayAmount());
-        sumAmount = fundAmount + interestAmount;
-        paidFund = (int)Math.round(loan.loanPaidFund());
-        paidInterest = (int)Math.round(loan.loanPaidInterest());
-        fundLeftToPay = (int)Math.round(loan.loanFundLeftToPay());
-        interestLeftToPay = (int)Math.round(loan.loanInterestLeftToPay());
-        pendingMoney = loan.getPendingMoney();
-        missingMoneyToActive = (int)(fundAmount - pendingMoney);
-        nextPaymentTimeUnit = loan.getLastPaidTimeUnit() + timeUnitsBetweenPayments;
-        sumAmountToPayEveryTimeUnit = (int)Math.round(loan.sumAmountToPayEveryTimeUnit());
-        paymentsListInDTO = paymentsListInDTO(loan.getPaymentInfoList());
-        lastPaymentTimeunit = loan.getLastPaidTimeUnit();
-        amountToPayNextPayment = (int)Math.round(loan.amountOfNextPayment());
-        fundToPayNextPayment = (int)Math.round(loan.fundOfNextPayment());
-        interestToPayNextPayment = (int)Math.round(loan.interestOfNextPayment());
-        numberOfUnpaidPayments = loan.howManyUnpaidPayments();
-        debt = loan.getDebt();
-    }*/
-
     public int getLastPaymentTimeunit() {
         return lastPaymentTimeunit;
     }
