@@ -2,6 +2,8 @@ package DTO.refresher;
 
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
+import DTO.lists.LoanForSaleListDTO;
+import DTO.loan.LoanForSaleDTO;
 import DTO.loan.LoanInformationDTO;
 
 import java.util.List;
@@ -15,6 +17,15 @@ public class ForCustomerRefresherDTO {
     private List<PaymentsNotificationsDTO> customerPaymentNotificationsList;
     private int currentYaz;
     private List<String> loanCategoryList;
+    private LoanForSaleListDTO loansForSaleList;
+
+    public LoanForSaleListDTO getLoansForSaleList() {
+        return loansForSaleList;
+    }
+
+    public void setLoansForSaleList(LoanForSaleListDTO loansForSaleList) {
+        this.loansForSaleList = loansForSaleList;
+    }
 
     public List<LoanInformationDTO> getCustomerLonerLoansList() {
         return customerLonerLoansList;

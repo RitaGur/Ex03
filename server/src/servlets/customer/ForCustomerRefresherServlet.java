@@ -44,5 +44,6 @@ public class ForCustomerRefresherServlet extends HttpServlet {
         customerRefresherDTO.setCustomerLonerLoansList(bankingSystem.getCustomerLoanerLoans(customerFromSession));
         customerRefresherDTO.setCustomerPaymentLoanerLoansList(bankingSystem.getCustomerOpenLoansToPay(customerFromSession));
         customerRefresherDTO.setLoanCategoryList(bankingSystem.getLoanCategoryList());
+        customerRefresherDTO.setLoansForSaleList(bankingSystem.getLoanForSaleForRefresher(customerFromSession));
     }
 }

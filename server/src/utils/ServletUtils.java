@@ -15,7 +15,9 @@ import static constants.Constants.INT_PARAMETER_ERROR;
 public class ServletUtils {
 	public final static Gson GSON_INSTANCE = new Gson();
 	private static final String BANK_ATTRIBUTE_NAME = "BankingSystem";
-	private static final String ADMIN_ATTRIBUTE_NAME = "admin";
+	private static final String ADMIN_ATTRIBUTE_IS_LOGGED_IN = "adminLogin";
+	private static final String ADMIN_ATTRIBUTE_NAME = "adminName";
+	private static final String ADMIN_ATTRIBUTE_NAME_IS_USED = "adminNameUsed";
 	private static final String CUSTOMER_LIST_ATTRIBUTE_NAME = "CustomerList";
 	private static final String INLAYS_ATTRIBUTE_NAME = "inlaysList";
 
@@ -40,6 +42,21 @@ public class ServletUtils {
 		return getBankingSystem(servletContext).showClientsInformation();
 	}
 
+	public static String getAdminName(ServletContext servletContext, String adminName) {
+		synchronized (bankManagerLock) {
+			if (servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME) == null) {
+				servletContext.setAttribute(ADMIN_ATTRIBUTE_NAME, adminName);
+				servletContext.setAttribute(ADMIN_ATTRIBUTE_NAME_IS_USED, true);
+				return adminName;
+			}
+			return (String) servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME);
+		}
+	}
+
+	public static Boolean isAdminNameUsed(ServletContext servletContext) {
+		return (boolean) servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME_IS_USED);
+	}
+
 	public static int getIntParameter(HttpServletRequest request, String name) {
 		String value = request.getParameter(name);
 		if (value != null) {
@@ -62,11 +79,11 @@ public class ServletUtils {
 
 	public static boolean isAdminLoggedIn(ServletContext servletContext) {
 		synchronized (bankManagerLock) {
-			if (servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME) == null) {
-				servletContext.setAttribute(ADMIN_ATTRIBUTE_NAME, true);
+			if (servletContext.getAttribute(ADMIN_ATTRIBUTE_IS_LOGGED_IN) == null) {
+				servletContext.setAttribute(ADMIN_ATTRIBUTE_IS_LOGGED_IN, true);
 				return false;
 			}
-			return (boolean) servletContext.getAttribute(ADMIN_ATTRIBUTE_NAME);
+			return (boolean) servletContext.getAttribute(ADMIN_ATTRIBUTE_IS_LOGGED_IN);
 		}
 	}
 }

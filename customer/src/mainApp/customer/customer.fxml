@@ -88,6 +88,7 @@
                               <Label text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                               <Label text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                               <Button fx:id="clickMe2Button" mnemonicParsing="false" onAction="#secondAnimationClickOnActionListener" text="Click me!" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                              <Button fx:id="sellLoanButton" mnemonicParsing="false" onAction="#sellLoanClicked" text="Sell Loan" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                            </children>
                         </GridPane>
                      </content>
@@ -287,6 +288,37 @@
                               <Button fx:id="addNewLoanButton" mnemonicParsing="false" onAction="#addNewLoanClicked" prefHeight="31.0" prefWidth="310.0" text="Add New Loan" GridPane.columnIndex="3" GridPane.rowIndex="9" />
                               <Label fx:id="newLoanSuccessLabel" GridPane.columnIndex="3" GridPane.rowIndex="8" />
                               <TextField fx:id="newLoanCategoryTextField" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                           </children>
+                        </GridPane>
+                     </content>
+                  </Tab>
+                  <Tab fx:id="sellBuyLoanTab" text="Sell/Buy Loan">
+                     <content>
+                        <GridPane>
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="322.0" minWidth="10.0" prefWidth="322.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="550.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="198.0" minWidth="10.0" prefWidth="180.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="305.0" minWidth="10.0" prefWidth="158.0" />
+                            <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                              <RowConstraints maxHeight="236.0" minHeight="10.0" prefHeight="203.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="239.0" minHeight="10.0" prefHeight="76.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="165.0" minHeight="10.0" prefHeight="87.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="165.0" minHeight="10.0" prefHeight="104.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="91.0" minHeight="10.0" prefHeight="91.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Loans for Sale:" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <ScrollPane fx:id="loanForSaleScrollPane" prefHeight="200.0" prefWidth="872.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="2" />
+                              <Label fx:id="loanPriceLabel" alignment="TOP_LEFT" prefHeight="163.0" prefWidth="153.0" text="Loan Price:" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                              <Button fx:id="buyLoanButton" alignment="CENTER" mnemonicParsing="false" onAction="#buyLoanClicked" prefHeight="73.0" prefWidth="180.0" text="Buy Loan" GridPane.columnIndex="4" GridPane.rowIndex="3" />
                            </children>
                         </GridPane>
                      </content>

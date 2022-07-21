@@ -4,8 +4,8 @@ import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
 import DTO.lists.*;
+import DTO.loan.LoanForSaleDTO;
 import DTO.loan.LoanInformationDTO;
-import DTO.loan.PartInLoanDTO;
 import DTO.loan.PaymentsDTO;
 import DTO.loan.scramble.InvestmentLoanInformationDTO;
 import DTO.refresher.ForCustomerRefresherDTO;
@@ -51,6 +51,7 @@ public class CustomerController implements Initializable {
     private Parent customerComponent;
     private ClientInformationDTO customer;
     private int customerBalance;
+    private LoanForSaleDTO loanToBuy;
 
     private Task<Boolean> loanOptionsTask;
     List<String> selectedCategories;
@@ -70,6 +71,9 @@ public class CustomerController implements Initializable {
 
     @FXML
     private TableView paymentLoanerLoansTableView;
+
+    @FXML
+    private TableView loansForSaleTableView;
 
     @FXML
     private Label scrambleErrorLabel;
@@ -318,6 +322,150 @@ public class CustomerController implements Initializable {
     private TextField newLoanCategoryTextField;
 
     @FXML
+    private Label loanPriceLabel;
+
+    @FXML
+    private Button buyLoanButton;
+
+    @FXML
+    private ScrollPane loanForSaleScrollPane;
+
+    @FXML
+    private Button sellLoanButton;
+
+    @FXML
+    void sellLoanClicked(ActionEvent event) {
+        LoanInformationDTO loanToSell = (LoanInformationDTO) lenderLoansTableView.getSelectionModel().getSelectedItem();
+
+        String finalUrl = HttpUrl
+                .parse(Constants.CUSTOMER_SELL_LOAN)
+                .newBuilder()
+                .addQueryParameter("loan", loanToSell.getLoanNameID())
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Sell Loan Error", "Could not put your loan to sale", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Sell Loan Error", "Could not put your loan to sale", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        lenderLoansTableView.getSelectionModel().clearSelection();
+                        sellLoanButton.setDisable(true);
+                    });
+                }
+            }
+        });
+    }
+
+    @FXML
+    void buyLoanClicked(ActionEvent event) {
+        findLoanToBuy((LoanInformationDTO)loansForSaleTableView.getSelectionModel().getSelectedItem());
+    }
+
+    private void findLoanToBuy(LoanInformationDTO selectedItem) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_LOAN_FOR_SALE)
+                .newBuilder()
+                .addQueryParameter("username", customerName)
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            LoanForSaleListDTO loanForSaleListDTO = GSON_INSTANCE.fromJson(rawBody, LoanForSaleListDTO.class);
+                            loanToBuy = checkInLoansListForLoanToBuy(loanForSaleListDTO.getLoanForSaleDTOList(), selectedItem);
+                            buyLoanCountinue(loanToBuy, selectedItem);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void buyLoanCountinue(LoanForSaleDTO loanToBuy, LoanInformationDTO selectedItem) {
+        if (loanToBuy != null) {
+            String finalUrl = HttpUrl
+                    .parse(CUSTOMER_BUY_LOAN)
+                    .newBuilder()
+                    .build()
+                    .toString();
+
+            String loanToBuyJson = GSON_INSTANCE.toJson(loanToBuy);
+
+            HttpClientUtil.runAsyncJson(finalUrl, new Callback() {
+
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    Platform.runLater(() ->
+                            alertPopUp("Buy loan error", "Could not buy loan", e.getMessage())
+                    );
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    if (response.code() != 200) {
+                        String responseBody = response.body().string();
+                        Platform.runLater(() ->
+                                alertPopUp("Buy loan error", "Could not buy loan", responseBody)
+                        );
+                    } else {
+                        Platform.runLater(() -> {
+                            buyLoanButton.setDisable(true);
+                        });
+                    }
+                }
+            }, loanToBuyJson);
+        }
+        else {
+            alertPopUp("Error", "Something went wrong", "");
+        }
+    }
+
+    private LoanForSaleDTO checkInLoansListForLoanToBuy(List<LoanForSaleDTO> loanForSaleDTOList, LoanInformationDTO selectedItem) {
+        for (LoanForSaleDTO loanForSale : loanForSaleDTOList) {
+            if (loanForSale.getLoanNumber() == selectedItem.getLoanNumber()) {
+                return loanForSale;
+            }
+        }
+
+        return null;
+    }
+
+    @FXML
     void addNewLoanClicked(ActionEvent event) {
         String loanID = newLoanIDTextField.getText();
         int loanAmount, totalYazTime, yazBetweenPayment, loanInterest;
@@ -482,18 +630,48 @@ public class CustomerController implements Initializable {
 
     @FXML
     void closeLoanOnActionListener(ActionEvent event) throws Exception {
-       /* LoanInformationDTO selectedLoan = (LoanInformationDTO) paymentLoanerLoansTableView.getSelectionModel().getSelectedItem();
-        try {
-            mainController.closeLoan(selectedLoan);
-            mainController.setAllTables(customerName);
-        } catch (Exception exception) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Close Loan Error");
-            alert.setHeaderText("Could not close loan");
-            alert.setContentText(exception.getMessage());
+        LoanInformationDTO selectedLoan = (LoanInformationDTO) paymentLoanerLoansTableView.getSelectionModel().getSelectedItem();
 
-            alert.showAndWait();
-        }*/
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_CLOSE_LOAN)
+                .newBuilder()
+                .build()
+                .toString();
+
+        String loanToCloseInJson = GSON_INSTANCE.toJson(selectedLoan);
+
+        HttpClientUtil.runAsyncJson(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Close Loan error", "Could not close loan", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Close Loan error", "Could not close loan", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            setCustomerTableViewVisibilityAndUnselected();
+                            payPaymentButton.setDisable(true);
+                            paymentCloseLoanButton.setDisable(true);
+                        } catch (Exception e) {
+                            setCustomerTableViewVisibilityAndUnselected();
+                            payPaymentButton.setDisable(true);
+                            paymentCloseLoanButton.setDisable(true);
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        }, loanToCloseInJson);
     }
 
     @FXML
@@ -539,7 +717,8 @@ public class CustomerController implements Initializable {
                 } else {
                     Platform.runLater(() -> {
                         setCustomerTableViewVisibilityAndUnselected();
-                        //alertPopUp("Payment","Payment validation", "Payment added successfully!"); //todo: delete
+                        payPaymentButton.setDisable(true);
+                        paymentCloseLoanButton.setDisable(true);
                     });
                 }
             }
@@ -623,15 +802,30 @@ public class CustomerController implements Initializable {
                     payPaymentButton.setDisable(true);
                     paymentCloseLoanButton.setDisable(true);
                     mainController.setSavedCurrentYaz(customerRefresherDTO.getCurrentYaz());
+                    checkForLoansForSalesRiskLoans(customerRefresherDTO.getCustomerLenderLoansList());
                 }
                 mainController.updateCurrentYazByNumber(String.valueOf(customerRefresherDTO.getCurrentYaz()));
 
                 // Categories List:
                 fillCategoriesOnScrambleTab(customerRefresherDTO.getLoanCategoryList());
+
+                // buy/sell loans
+                ObservableList<LoanInformationDTO> loansForSaleFromTableView = loansForSaleTableView.getItems();
+                checkForChangesLoans(loansForSaleFromTableView, customerRefresherDTO.getLoansForSaleList().getLoanForSaleListInformationDTO());
+                //fillLoanPriceLoansForSale(customerRefresherDTO.getLoansForSaleList().getLoanForSaleDTOList());
+                loansForSaleTableView.refresh();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void checkForLoansForSalesRiskLoans(List<LoanInformationDTO> customerLenderLoansList) {
+        for (LoanInformationDTO loan : customerLenderLoansList) { //todo: fix
+           if (loan.getLoanStatus().equals("RISK") && loansForSaleTableView.getItems().contains(loan)) {
+               alertPopUp("Attention!","Loans For Sale list has changed","The loan: " + loan.getLoanNameID() + "is in RISK now.");
+           }
+        }
     }
 
     private void checkForChangesInNotificationArea(ObservableList<PaymentsNotificationsDTO> oldPaymentsNotificationsList, List<PaymentsNotificationsDTO> newPaymentsNotificationsList) {
@@ -835,6 +1029,13 @@ public class CustomerController implements Initializable {
         dialog.setHeaderText("Current Balance: " + customerBalance);
         dialog.showAndWait();
 
+        try {
+            checkAmountToWithdraw(dialog.getResult());
+        } catch (Exception e) {
+            alertPopUp("Withdraw Error", "Could not withdraw the money", e.getMessage());
+            return ;
+        }
+
         if (dialog.getResult() != null) {
             String finalUrl = HttpUrl
                     .parse(Constants.CUSTOMER_WITHDRAW)
@@ -866,6 +1067,22 @@ public class CustomerController implements Initializable {
                     }
                 }
             });
+        }
+    }
+
+    private void checkAmountToWithdraw(String amountToWithdraw) throws Exception {
+        if(amountToWithdraw.equals("")) {
+            throw new MoneyToInvestException("Required Field");
+        } else {
+            int amountInInt = Integer.parseInt(amountToWithdraw);
+
+            if (amountInInt <= 0) {
+                throw new MoneyToInvestException("Invalid Input, Please enter an integer bigger than 0");
+            }
+
+            if (amountInInt > customerBalance) {
+                throw new Exception("There is not enough money in the account");
+            }
         }
     }
 
@@ -1075,6 +1292,7 @@ public class CustomerController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         scrambleSetVisibility(false);
+        sellLoanButton.setDisable(true);
 
         paymentTab.setOnSelectionChanged(event -> {
             payPaymentButton.setDisable(true);
@@ -1373,6 +1591,8 @@ public class CustomerController implements Initializable {
             case "Payment Loaner Loans":
                 paymentLoanerLoansTableView = loansTable;
                 break;
+            case "Loans for sale":
+                loansForSaleTableView = loansTable;
         }
     }
 
@@ -1486,7 +1706,7 @@ public class CustomerController implements Initializable {
 
     private void fillCategoriesOnScrambleTab(List<String> categoriesList) {
         for (String category : categoriesList) {
-            if (!(scrambleCategoriesListView.getItems().contains(category))) { //todo: check new list
+            if (!(scrambleCategoriesListView.getItems().contains(category))) {
                 scrambleCategoriesListView.getItems().add(category);
             }
         }
@@ -1553,9 +1773,56 @@ public class CustomerController implements Initializable {
         fillPaymentLoanerLoansTable();
         loadAndSetNotificationAreaTable(userName);
         fillAccountTransactionTableAndUpdateBalanceLabel();
+        fillLoansForSaleTable(userName);
         loadAndFillCategoriesOnScrambleTab();
         disablePayPaymentAndCloseLoan();
     }
+
+    private void fillLoansForSaleTable(String userName) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_LOAN_FOR_SALE)
+                .newBuilder()
+                .addQueryParameter("username", userName)
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            LoanForSaleListDTO loanForSaleListDTO = GSON_INSTANCE.fromJson(rawBody, LoanForSaleListDTO.class);
+                            List<LoanInformationDTO> loanForSaleForTableView = loanForSaleListDTO.getLoanForSaleListInformationDTO();
+                            loadCustomerTablesFromFXML(loanForSaleScrollPane, "Loans for sale");
+                            mainController.showLoanInfo(loanForSaleForTableView, false, false, paymentInfoScrollPane, "Customer Payment Loaner Loans");
+                            buyLoanButton.setDisable(true);
+                            // todo: take care of the amount label
+                            //todo: check payment scrollpane
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
 
     private void disablePayPaymentAndCloseLoan() {
         payPaymentButton.setDisable(true);
@@ -1674,5 +1941,66 @@ public class CustomerController implements Initializable {
     private void setPaymentsController(PaymentsController paymentsController) {
         this.paymentsComponentController = paymentsController;
         paymentsController.setMainController(this);
+    }
+
+    public void setSellLoanButtonAble(LoanInformationDTO selectedItem) {
+        if (lenderLoansTableView.getItems().contains(selectedItem)) {
+            sellLoanButton.setDisable(false);
+        }
+    }
+
+    public void fillLoanPriceLoansForSale(LoanInformationDTO selectedItem) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_LOAN_FOR_SALE)
+                .newBuilder()
+                .addQueryParameter("username", customerName)
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            LoanForSaleListDTO loanForSaleListDTO = GSON_INSTANCE.fromJson(rawBody, LoanForSaleListDTO.class);
+                            List<LoanForSaleDTO> loanForSaleToCheck = loanForSaleListDTO.getLoanForSaleDTOList();
+                            intoLoanPriceLabel(loanForSaleToCheck, selectedItem);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void intoLoanPriceLabel(List<LoanForSaleDTO> loanForSaleToCheck, LoanInformationDTO selectedItem) {
+        for (LoanForSaleDTO loan : loanForSaleToCheck) {
+            if (selectedItem.getLoanNumber() == loan.getLoanNumber()) {
+                loanPriceLabel.setText("Loan Price: " + loan.getLoanPrice());
+            }
+        }
+    }
+
+    public void setBuyLoanButtonAble(LoanInformationDTO selectedItem) {
+        if (loansForSaleTableView.getItems().contains(selectedItem) && !(selectedItem.getBorrowerName().equals(customerName))) {
+            buyLoanButton.setDisable(false);
+        }
     }
 }

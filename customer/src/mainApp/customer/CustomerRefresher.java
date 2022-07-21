@@ -1,6 +1,5 @@
 package mainApp.customer;
 
-import DTO.refresher.ForAdminRefresherDTO;
 import DTO.refresher.ForCustomerRefresherDTO;
 import client.util.Constants;
 import client.util.http.HttpClientUtil;

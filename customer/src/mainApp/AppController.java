@@ -152,7 +152,6 @@ public class AppController implements Initializable {
     public void showLendersTable(LoanInformationDTO currentLoan) throws IOException {
         customerComponentController.showLendersTable(currentLoan);
     }
-    //todo: move admin funcs to customer controller
 
     public void setLendersTable(TableView lenders, String loanStatus) {
         if (loanStatus.equals("PENDING")) {
@@ -333,5 +332,17 @@ public class AppController implements Initializable {
 
     public void setSavedCurrentYaz(int newCurrentYaz) {
         headerComponentController.setCurrentYaz(newCurrentYaz);
+    }
+
+    public void setSellLoanButtonAble(LoanInformationDTO selectedItem) {
+        customerComponentController.setSellLoanButtonAble(selectedItem);
+    }
+
+    public void fillLoanPriceLoanForSale(LoanInformationDTO selectedItem) {
+        customerComponentController.fillLoanPriceLoansForSale(selectedItem);
+    }
+
+    public void setBuyLoanButtonAble(LoanInformationDTO selectedItem) {
+        customerComponentController.setBuyLoanButtonAble(selectedItem);
     }
 }

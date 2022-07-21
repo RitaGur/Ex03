@@ -248,21 +248,6 @@ public class AdminController implements Initializable {
         adminLoansTableView = loansTable;
     }
 
-    //todo: delete?
-    /*public void insertAdminView() throws IOException {
-        //todo func insertAdmin
-
-        // update loans table
-        loadLoanTableFromFXML();
-
-        //TODO: get loans list
-        //mainController.showLoanInfo(engine.showLoansInformation(), true, true, topInfoScrollPane);
-
-       setCustomerTableColumns();
-
-        //customersInfoTableView.setItems(FXCollections.observableArrayList(engine.showClientsInformation()));
-    }*/
-
     private void setCustomerTableColumns() {
         customersInfoTableView.refresh();
         // customers information table:

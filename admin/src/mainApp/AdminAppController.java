@@ -348,11 +348,6 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         mainBorderpane.setCenter(adminView);
     }
 
-    // todo: delete?
- /*   public void setAllTables() throws Exception {
-        adminComponentController.insertAdminView();
-    }*/
-
     public void afterLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName); // update user label
         loadAdminViewAfterLoginSucceeded(); // admin fxml loading

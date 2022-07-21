@@ -63,7 +63,7 @@ public class CustomerLoginServlet extends HttpServlet {
         } else {
             //user is already logged in
             out.println("The user name is already in use!");
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 }

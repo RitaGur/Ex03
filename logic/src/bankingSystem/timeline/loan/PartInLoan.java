@@ -3,7 +3,7 @@ package bankingSystem.timeline.loan;
 import bankingSystem.timeline.bankAccount.BankAccount;
 
 public class PartInLoan {
-    private final BankAccount m_Lender;
+    private BankAccount m_Lender;
     private int m_AmountOfLoan;
     private double amountPercentageOfLoan;
     private final double m_AmountToReceiveEveryTimeUnit;
@@ -47,5 +47,9 @@ public class PartInLoan {
 
     public double getAmountPercentageOfLoan() {
         return amountPercentageOfLoan;
+    }
+
+    public void setLender(BankAccount m_Lender) {
+        this.m_Lender = m_Lender;
     }
 }

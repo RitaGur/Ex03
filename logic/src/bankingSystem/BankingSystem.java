@@ -3,6 +3,8 @@ package bankingSystem;
 import DTO.client.ClientInformationDTO;
 import DTO.client.PaymentsNotificationsDTO;
 import DTO.client.RecentTransactionDTO;
+import DTO.lists.LoanForSaleListDTO;
+import DTO.loan.LoanForSaleDTO;
 import DTO.loan.LoanInformationDTO;
 import DTO.loan.PartInLoanDTO;
 import DTO.loan.PaymentsDTO;
@@ -14,15 +16,10 @@ import bankingSystem.timeline.bankAccount.BankAccount;
 import bankingSystem.timeline.bankAccount.RecentTransaction;
 import bankingSystem.timeline.bankClient.BankClient;
 import bankingSystem.timeline.bankClient.PaymentNotification;
-import bankingSystem.timeline.loan.Loan;
-import bankingSystem.timeline.loan.LoanStatus;
-import bankingSystem.timeline.loan.PartInLoan;
-import bankingSystem.timeline.loan.PaymentInfo;
+import bankingSystem.timeline.loan.*;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,12 +31,14 @@ public class BankingSystem implements LogicInterface {
     private List<Loan> m_LoanList;
     private TimeUnit m_CurrentTimeUnit;
     private List<String> m_LoanCategoryList;
+    private List<LoanForSale> loansForSaleList;
 
     public BankingSystem() {
         m_BankAccountList = new ArrayList<>();
         m_LoanList = new ArrayList<>();
         m_CurrentTimeUnit = new TimeUnit();
         m_LoanCategoryList = new ArrayList<>();
+        loansForSaleList = new ArrayList<>();
     }
 
     @Override
@@ -660,5 +659,109 @@ public class BankingSystem implements LogicInterface {
         BankAccount customer = findBankAccountByName(customerFromSession);
 
         return clientLoanListDTO(customer.getClientAsBorrowerSet());
+    }
+
+    public void addToSellLoanList(String loanID, String lenderName) throws Exception {
+        Loan newLoanForSale = findLoanById(loanID);
+
+        if (!newLoanForSale.getLoanStatus().toString().equals("ACTIVE")) {
+            throw new Exception("The loan is not in ACTIVE status.");
+        }
+
+        BankClient loanSeller = findBankAccountByName(lenderName);
+        int loanPrice = newLoanForSale.amountOfPartInLoanOfLender(loanSeller);
+
+        LoanForSale newLoanForSaleToAddToList = new LoanForSale(newLoanForSale, loanSeller, loanPrice);
+        for (LoanForSale loan : loansForSaleList) {
+            if (loan.getLoanSeller().getClientName().equals(lenderName)) {
+                throw new Exception("The client has already put this loan to sale.");
+            }
+        }
+        loansForSaleList.add(newLoanForSaleToAddToList);
+    }
+
+    public List<LoanForSaleDTO> getLoansToSellInDTO() {
+        List<LoanForSaleDTO> loanListToReturn = new ArrayList<>();
+
+        for (LoanForSale loanForSale : loansForSaleList) {
+            LoanForSaleDTO loanToAddDTO = new LoanForSaleDTO();
+            loanToAddDTO.setLoanForSaleID(loanForSale.getLoanForSale().getLoanNameID());
+            loanToAddDTO.setLoanSellerName(loanForSale.getLoanSeller().getClientName());
+            loanToAddDTO.setLoanPrice(loanForSale.getLoanPrice());
+            loanListToReturn.add(loanToAddDTO);
+        }
+
+        return loanListToReturn;
+    }
+
+    public List<LoanForSaleDTO> getLoansToSellInDTOByCustomer(String customer) {
+        List<LoanForSaleDTO> loanListToReturn = new ArrayList<>();
+        int counter = 1;
+
+        for (LoanForSale loanForSale : loansForSaleList) {
+            if (loanForSale.getLoanForSale().getLoanStatus().toString().equals("ACTIVE")) {
+                if (!(loanForSale.getLoanForSale().getLoanOwner().getClientName().equals(customer))) {
+                    LoanForSaleDTO loanToAddDTO = new LoanForSaleDTO();
+                    loanToAddDTO.setLoanForSaleID(loanForSale.getLoanForSale().getLoanNameID());
+                    loanToAddDTO.setLoanSellerName(loanForSale.getLoanSeller().getClientName());
+                    loanToAddDTO.setLoanPrice(loanForSale.getLoanPrice());
+                    loanToAddDTO.setLoanNumber(counter++);
+
+                    loanListToReturn.add(loanToAddDTO);
+                }
+            }
+        }
+
+        return loanListToReturn;
+    }
+
+    public LoanForSaleListDTO getLoanForSaleForRefresher(String customer) {
+        LoanForSaleListDTO listDTOToReturn = new LoanForSaleListDTO();
+
+        List<LoanForSaleDTO> listLoanForSale = getLoansToSellInDTOByCustomer(customer);
+        listDTOToReturn.setLoanForSaleListInformationDTO(loanInformationForSale(listLoanForSale));
+        listDTOToReturn.setLoanForSaleDTOList(listLoanForSale);
+
+        return listDTOToReturn;
+    }
+
+    public List<LoanInformationDTO> loanInformationForSale(List<LoanForSaleDTO> loanForSaleDTOList) {
+        List<LoanInformationDTO> listToReturn = new ArrayList<>();
+
+        for (LoanForSaleDTO loan : loanForSaleDTOList) {
+            Loan loanToAdd = findLoanById(loan.getLoanForSaleID());
+            if (loanToAdd.getLoanStatus().toString().equals("ACTIVE")) {
+                LoanInformationDTO loanToAddDTO = buildLoanDTO(loanToAdd, loan.getLoanNumber());
+                listToReturn.add(loanToAddDTO);
+            }
+        }
+
+        return listToReturn;
+    }
+
+
+    public void buyLoan(String loanForSaleID, String sellerName, String newLenderName) throws Exception {
+        if (newLenderName.equals(sellerName)) {
+            throw new Exception("You can't buy a loan you put on sale");
+        }
+        Loan loanToSwitchLenders = findLoanById(loanForSaleID);
+        BankClient seller = findBankAccountByName(sellerName);
+        BankClient newLender = findBankAccountByName(newLenderName);
+        loanToSwitchLenders.switchLenders(seller, newLender);
+        transferMoneyOfLenders(seller, newLender, loanForSaleID);
+        loansForSaleList.removeIf(Loan ->(Loan.getLoanForSale().getLoanNameID().equals(loanForSaleID)));
+    }
+
+    private void transferMoneyOfLenders(BankClient seller, BankClient newLender, String loanForSaleID) throws Exception {
+        int amountToTransfer = 0;
+
+        for (LoanForSale loanforSale : loansForSaleList) {
+            if (loanforSale.getLoanForSale().getLoanNameID().equals(loanForSaleID)) {
+                amountToTransfer = loanforSale.getLoanPrice();
+            }
+        }
+
+        seller.addMoneyToAccount(amountToTransfer, m_CurrentTimeUnit.getCurrentTimeUnit());
+        newLender.withdrawMoneyFromAccount(amountToTransfer, m_CurrentTimeUnit.getCurrentTimeUnit());
     }
 }

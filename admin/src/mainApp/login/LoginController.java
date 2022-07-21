@@ -68,7 +68,7 @@ public class LoginController {
                         .build()
                         .toString();
 
-        updateHttpStatusLine("New request is launched for: " + finalUrl);
+        //updateHttpStatusLine("New request is launched for: " + finalUrl);
 
         HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
 
@@ -116,8 +116,4 @@ public class LoginController {
     public void setMainController(AdminAppController adminAppController) {
         this.adminAppController = adminAppController;
     }
-
-    /*public void setChatAppMainController(ChatAppMainController chatAppMainController) {
-        this.chatAppMainController = chatAppMainController;
-    }*/
 }

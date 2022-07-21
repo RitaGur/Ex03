@@ -23,23 +23,31 @@ public class AdminLoginServlet extends HttpServlet {
         response.setContentType("text/plain;charset=UTF-8");
         PrintWriter out = response.getWriter();
         String adminFromSession = SessionUtils.getCustomer(request);
+        List<ClientInformationDTO> customersList = ServletUtils.getCustomerList(getServletContext());
 
         if (adminFromSession == null) {
-            String usernameFromParameter = request.getParameter(USERNAME);
+            String adminNameFromParameter = request.getParameter(USERNAME);
 
-            if (usernameFromParameter == null || usernameFromParameter.isEmpty() || (!usernameFromParameter.equals("Admin") && !usernameFromParameter.equals("admin"))) {
+            if (adminNameFromParameter == null || adminNameFromParameter.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
             } else {
-                usernameFromParameter = usernameFromParameter.trim();
+                adminNameFromParameter = adminNameFromParameter.trim();
                 synchronized (this) {
+                    String finalAdminNameFromParameter = adminNameFromParameter;
+                    if (customersList.stream().anyMatch(c -> c.getClientName().equals(finalAdminNameFromParameter))) {
+                        String errorMessage = "Admin name " + adminNameFromParameter + " already exists. Please enter a different Admin name.";
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        out.println(errorMessage);
+                    }
+
                     if (ServletUtils.isAdminLoggedIn(getServletContext())) {
                         String errorMessage = "Admin is already logged-in!";
 
                         // stands for unauthorized as there is already such user with this name
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.getOutputStream().print(errorMessage);
+                        out.println(errorMessage);
                     } else {
-                        out.println("Welcome " + "Admin"+" to the bank app!");
+                        out.println("Welcome " + "Admin" + " to the bank app!");
                         response.setStatus(HttpServletResponse.SC_OK);
                     }
                 }
@@ -47,7 +55,7 @@ public class AdminLoginServlet extends HttpServlet {
         } else {
             //user is already logged in
             out.println("The Admin name is already in use!");
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 }

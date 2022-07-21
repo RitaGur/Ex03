@@ -89,6 +89,19 @@ public class Loan {
         return partToReturn;
     }
 
+    public int amountOfPartInLoanOfLender(BankClient lender) {
+        int amountOfPartInLoan = 0;
+
+        for (PartInLoan part : m_LendersAndAmountsSet) {
+            if (part.getLender().getClientName().equals(lender.getClientName())) {
+                amountOfPartInLoan = (int) (loanFundLeftToPay() * part.getAmountPercentageOfLoan());
+                break;
+            }
+        }
+
+        return amountOfPartInLoan;
+    }
+
     public void addPaymentToPaymentInfoListInRisk(int paymentTimeUnit, boolean wasItPaid, int howManyPaymentsToPay) {
         int wasChangedCounter = 0;
 
@@ -348,7 +361,9 @@ public class Loan {
         m_LastPaidTimeUnit = currentTimeUnit;
         takePaymentsFromBorrowerToLenders(currentTimeUnit, (int) sumAmountToPayEveryTimeUnit());
 
-        timeunitOfFirstUnPaidPayment += f_TimeUnitsBetweenPayment; //TODO: check
+        if (timeunitOfFirstUnPaidPayment < (m_BeginningTimeUnit + f_SumOfTimeUnit -1)) {
+            timeunitOfFirstUnPaidPayment += f_TimeUnitsBetweenPayment;
+        }
     }
 
     public void checkIfPaymentNeededAndPay(int i_CurrentTimeUnit) throws Exception {
@@ -486,5 +501,12 @@ public class Loan {
 
     public int getDebt() {
         return m_Payment.getDebt();
+    }
+
+    public void switchLenders(BankClient seller, BankClient newLender) {
+        PartInLoan partToSwitch = findPartInLoanByLender(seller);
+        partToSwitch.setLender(newLender);
+        seller.getClientAsLenderSet().removeIf(Loan ->(Loan.getLoanNameID().equals(f_LoanNameID))); //todo:check
+        newLender.getClientAsLenderSet().add(this);
     }
 }
