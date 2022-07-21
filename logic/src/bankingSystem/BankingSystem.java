@@ -230,7 +230,7 @@ public class BankingSystem implements LogicInterface {
         loanDTO.setStatus(loan.getLoanStatus().toString());
         loanDTO.setLenderSetAndAmounts(lenderSetAndAmountInDTO(loan.getLendersSet()));
         loanDTO.setBeginningTimeUnit(loan.getBeginningTimeUnit());
-        loanDTO.setEndingTimeUnit(loan.getBeginningTimeUnit() + loan.getSumOfTimeUnit() - 1);
+        loanDTO.setEndingTimeUnit(loan.getEndingTimeunit());
         loanDTO.setFundAmount(loan.getLoanStartSum());
         loanDTO.setInterestAmount((int) Math.round(loan.interestLoanToPayAmount()));
         loanDTO.setSumAmount(loanDTO.getFundAmount() + loanDTO.getInterestAmount());

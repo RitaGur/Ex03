@@ -72,6 +72,10 @@ public class Loan {
         }
     }
 
+    public int getEndingTimeunit() {
+        return m_EndingTimeunit;
+    }
+
     private PartInLoan findPartInLoanByLender(BankClient i_newLender) {
         PartInLoan partToReturn = null;
 
