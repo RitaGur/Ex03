@@ -138,7 +138,7 @@ public class LoanInfoController implements Initializable {
                     mainController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
                     mainController.fillLoanPriceLoanForSale(loanTableView.getSelectionModel().getSelectedItem());
                     mainController.setSellLoanButtonAble(loanTableView.getSelectionModel().getSelectedItem());
-                    mainController.setBuyLoanButtonAble(loanTableView.getSelectionModel().getSelectedItem()); //todo: delete?
+                    mainController.setBuyLoanButtonAble(loanTableView.getSelectionModel().getSelectedItem());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

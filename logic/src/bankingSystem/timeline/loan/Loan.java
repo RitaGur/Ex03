@@ -506,7 +506,7 @@ public class Loan {
     public void switchLenders(BankClient seller, BankClient newLender) {
         PartInLoan partToSwitch = findPartInLoanByLender(seller);
         partToSwitch.setLender(newLender);
-        seller.getClientAsLenderSet().removeIf(Loan ->(Loan.getLoanNameID().equals(f_LoanNameID))); //todo:check
+        seller.getClientAsLenderSet().removeIf(Loan ->(Loan.getLoanNameID().equals(f_LoanNameID)));
         newLender.getClientAsLenderSet().add(this);
     }
 }

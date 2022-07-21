@@ -406,7 +406,7 @@ public class CustomerController implements Initializable {
                             rawBody = response.body().string();
                             LoanForSaleListDTO loanForSaleListDTO = GSON_INSTANCE.fromJson(rawBody, LoanForSaleListDTO.class);
                             loanToBuy = checkInLoansListForLoanToBuy(loanForSaleListDTO.getLoanForSaleDTOList(), selectedItem);
-                            buyLoanCountinue(loanToBuy, selectedItem);
+                            buyLoanContinue(loanToBuy, selectedItem);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -416,7 +416,7 @@ public class CustomerController implements Initializable {
         });
     }
 
-    private void buyLoanCountinue(LoanForSaleDTO loanToBuy, LoanInformationDTO selectedItem) {
+    private void buyLoanContinue(LoanForSaleDTO loanToBuy, LoanInformationDTO selectedItem) {
         if (loanToBuy != null) {
             String finalUrl = HttpUrl
                     .parse(CUSTOMER_BUY_LOAN)
@@ -445,6 +445,8 @@ public class CustomerController implements Initializable {
                     } else {
                         Platform.runLater(() -> {
                             buyLoanButton.setDisable(true);
+                            loanPriceLabel.setText("");
+                            setCustomerTableViewVisibilityAndUnselected();
                         });
                     }
                 }
@@ -821,11 +823,24 @@ public class CustomerController implements Initializable {
     }
 
     private void checkForLoansForSalesRiskLoans(List<LoanInformationDTO> customerLenderLoansList) {
-        for (LoanInformationDTO loan : customerLenderLoansList) { //todo: fix
-           if (loan.getLoanStatus().equals("RISK") && loansForSaleTableView.getItems().contains(loan)) {
+        for (LoanInformationDTO loan : customerLenderLoansList) {
+           if (loan.getLoanStatus().equals("RISK") && checkIfTableContainsLoan(loansForSaleTableView.getItems(), loan)) {
                alertPopUp("Attention!","Loans For Sale list has changed","The loan: " + loan.getLoanNameID() + "is in RISK now.");
+                loansForSaleTableView.getSelectionModel().clearSelection();
+                loanPriceLabel.setText("");
+                buyLoanButton.setDisable(true);
            }
         }
+    }
+
+    private Boolean checkIfTableContainsLoan(List<LoanInformationDTO> items, LoanInformationDTO loan) {
+        for (LoanInformationDTO loanFromTable : items) {
+            if (loan.getLoanNameID().equals(loanFromTable.getLoanNameID())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void checkForChangesInNotificationArea(ObservableList<PaymentsNotificationsDTO> oldPaymentsNotificationsList, List<PaymentsNotificationsDTO> newPaymentsNotificationsList) {
@@ -1999,7 +2014,7 @@ public class CustomerController implements Initializable {
     }
 
     public void setBuyLoanButtonAble(LoanInformationDTO selectedItem) {
-        if (loansForSaleTableView.getItems().contains(selectedItem) && !(selectedItem.getBorrowerName().equals(customerName))) {
+        if (checkIfTableContainsLoan(loansForSaleTableView.getItems(), selectedItem) && !(selectedItem.getBorrowerName().equals(customerName))) {
             buyLoanButton.setDisable(false);
         }
     }

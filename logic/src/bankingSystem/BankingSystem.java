@@ -744,12 +744,32 @@ public class BankingSystem implements LogicInterface {
         if (newLenderName.equals(sellerName)) {
             throw new Exception("You can't buy a loan you put on sale");
         }
+
         Loan loanToSwitchLenders = findLoanById(loanForSaleID);
         BankClient seller = findBankAccountByName(sellerName);
         BankClient newLender = findBankAccountByName(newLenderName);
+        LoanForSale loanInSale = findLoanForSaleByID(loanForSaleID);
+
+        if (loanInSale == null) {
+            throw new Exception("Could not find loan");
+        }
+        else if (newLender.getAccountBalance() < loanInSale.getLoanPrice()) {
+            throw new Exception("There is not enough money in the account");
+        }
+
         loanToSwitchLenders.switchLenders(seller, newLender);
         transferMoneyOfLenders(seller, newLender, loanForSaleID);
         loansForSaleList.removeIf(Loan ->(Loan.getLoanForSale().getLoanNameID().equals(loanForSaleID)));
+    }
+
+    private LoanForSale findLoanForSaleByID(String loanForSaleID) {
+        for (LoanForSale loanforSale : loansForSaleList) {
+            if (loanforSale.getLoanForSale().getLoanNameID().equals(loanForSaleID)) {
+                return loanforSale;
+            }
+        }
+
+        return null;
     }
 
     private void transferMoneyOfLenders(BankClient seller, BankClient newLender, String loanForSaleID) throws Exception {
