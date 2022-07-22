@@ -12,6 +12,7 @@ import utils.SessionUtils;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static constants.Constants.YAZ_NUMBER;
 import static utils.ServletUtils.GSON_INSTANCE;
 
 @WebServlet(name = "ForCustomerRefresherServlet", urlPatterns = "/customer/customerRefresher")
@@ -23,9 +24,12 @@ public class ForCustomerRefresherServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
         String customerFromSession = SessionUtils.getCustomer(request);
-        ForCustomerRefresherDTO forCustomerRefresherDTO = new ForCustomerRefresherDTO();
-        synchronized (this) {
-            setCustomerRefresherParams(forCustomerRefresherDTO, bankingSystem, customerFromSession);
+        String yazOfRefresher = request.getParameter(YAZ_NUMBER);
+        int yazOfRefresherInt = Integer.parseInt(yazOfRefresher);
+        ForCustomerRefresherDTO forCustomerRefresherDTO = bankingSystem.getCustomerRefresherFromList(yazOfRefresherInt, customerFromSession);
+
+        if (forCustomerRefresherDTO == null) {
+           forCustomerRefresherDTO = bankingSystem.getEmptyRefresher();
         }
         String json = GSON_INSTANCE.toJson(forCustomerRefresherDTO);
         out.println(json);
@@ -33,17 +37,5 @@ public class ForCustomerRefresherServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void setCustomerRefresherParams(ForCustomerRefresherDTO customerRefresherDTO, BankingSystem bankingSystem, String customerFromSession) throws Exception {
-        customerRefresherDTO.setCustomerBalance(bankingSystem.getCustomerBalanceByName(customerFromSession));
-        customerRefresherDTO.setCurrentYaz(bankingSystem.getCurrentTimeUnit().getCurrentTimeUnit());
-        customerRefresherDTO.setCustomerPaymentNotificationsList(bankingSystem.getPaymentsNotificationInDTO(customerFromSession));
-        customerRefresherDTO.setCustomerRecentTransactionsList(bankingSystem.getCustomerRecentTransactionByName(customerFromSession));
-        customerRefresherDTO.setCustomerLenderLoansList(bankingSystem.getCustomerLenderLoans(customerFromSession));
-        customerRefresherDTO.setCustomerLonerLoansList(bankingSystem.getCustomerLoanerLoans(customerFromSession));
-        customerRefresherDTO.setCustomerPaymentLoanerLoansList(bankingSystem.getCustomerOpenLoansToPay(customerFromSession));
-        customerRefresherDTO.setLoanCategoryList(bankingSystem.getLoanCategoryList());
-        customerRefresherDTO.setLoansForSaleList(bankingSystem.getLoanForSaleForRefresher(customerFromSession));
     }
 }

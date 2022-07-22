@@ -9,6 +9,7 @@ import DTO.loan.LoanInformationDTO;
 import java.util.List;
 
 public class ForCustomerRefresherDTO {
+    private String customerName;
     private List<LoanInformationDTO> customerLonerLoansList;
     private List<LoanInformationDTO> customerLenderLoansList;
     private List<RecentTransactionDTO> customerRecentTransactionsList;
@@ -18,6 +19,14 @@ public class ForCustomerRefresherDTO {
     private int currentYaz;
     private List<String> loanCategoryList;
     private LoanForSaleListDTO loansForSaleList;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
 
     public LoanForSaleListDTO getLoansForSaleList() {
         return loansForSaleList;

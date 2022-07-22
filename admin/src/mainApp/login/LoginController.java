@@ -95,6 +95,7 @@ public class LoginController {
                         }
                     });
                 }
+                response.close();
             }
         });
     }

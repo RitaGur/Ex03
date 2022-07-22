@@ -41,7 +41,8 @@ import java.net.URL;
 import java.util.*;
 
 import static client.util.Constants.*;
-import static client.util.popup.AlertPopUp.alertPopUp;
+import static client.util.popup.AlertPopUp.alertErrorPopUp;
+import static client.util.popup.AlertPopUp.alertInformationPopUp;
 
 public class CustomerController implements Initializable {
     private AppController mainController;
@@ -62,7 +63,7 @@ public class CustomerController implements Initializable {
     private SimpleIntegerProperty scrambleOwnershipPercentageSliderValue;
 
     private Timer timer;
-    private TimerTask listRefresher;
+    private CustomerRefresher listRefresher;
 
     @FXML private TableView lendersComponent;
     @FXML private LendersController lendersComponentController;
@@ -349,7 +350,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Sell Loan Error", "Could not put your loan to sale", e.getMessage())
+                        alertErrorPopUp("Sell Loan Error", "Could not put your loan to sale", e.getMessage())
                 );
             }
 
@@ -358,7 +359,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Sell Loan Error", "Could not put your loan to sale", responseBody)
+                            alertErrorPopUp("Sell Loan Error", "Could not put your loan to sale", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -388,7 +389,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -397,7 +398,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customer Loans for sale error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -431,7 +432,7 @@ public class CustomerController implements Initializable {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     Platform.runLater(() ->
-                            alertPopUp("Buy loan error", "Could not buy loan", e.getMessage())
+                            alertErrorPopUp("Buy loan error", "Could not buy loan", e.getMessage())
                     );
                 }
 
@@ -440,7 +441,7 @@ public class CustomerController implements Initializable {
                     if (response.code() != 200) {
                         String responseBody = response.body().string();
                         Platform.runLater(() ->
-                                alertPopUp("Buy loan error", "Could not buy loan", responseBody)
+                                alertErrorPopUp("Buy loan error", "Could not buy loan", responseBody)
                         );
                     } else {
                         Platform.runLater(() -> {
@@ -453,7 +454,7 @@ public class CustomerController implements Initializable {
             }, loanToBuyJson);
         }
         else {
-            alertPopUp("Error", "Something went wrong", "");
+            alertErrorPopUp("Error", "Something went wrong", "");
         }
     }
 
@@ -503,7 +504,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Add New Loan error", "Could not add new loan", e.getMessage())
+                        alertErrorPopUp("Add New Loan error", "Could not add new loan", e.getMessage())
                 );
             }
 
@@ -512,7 +513,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Add New Loan error", "Could not add new loan", responseBody)
+                            alertErrorPopUp("Add New Loan error", "Could not add new loan", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -597,6 +598,7 @@ public class CustomerController implements Initializable {
                 } else {
                     Platform.runLater(() -> {
                         mainController.updateFilePath(chosenFile);
+                        alertInformationPopUp("Load File", "File was loaded successfully!", "All loans information is ready");
                     });
                 }
                 response.close();
@@ -647,7 +649,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Close Loan error", "Could not close loan", e.getMessage())
+                        alertErrorPopUp("Close Loan error", "Could not close loan", e.getMessage())
                 );
             }
 
@@ -656,7 +658,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Close Loan error", "Could not close loan", responseBody)
+                            alertErrorPopUp("Close Loan error", "Could not close loan", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -705,7 +707,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Loan Payment error","Something went wrong: ", e.getMessage())
+                        alertErrorPopUp("Loan Payment error","Something went wrong: ", e.getMessage())
                 );
             }
 
@@ -714,7 +716,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Loan Payment error","Something went wrong: ", responseBody)
+                            alertErrorPopUp("Loan Payment error","Something went wrong: ", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -799,14 +801,8 @@ public class CustomerController implements Initializable {
                 notificationAreaTable.refresh();
 
                 // Current Yaz:
-                if (customerRefresherDTO.getCurrentYaz() > mainController.getSavedCurrentYaz()) {
-                    setCustomerTableViewVisibilityAndUnselected();
-                    payPaymentButton.setDisable(true);
-                    paymentCloseLoanButton.setDisable(true);
-                    mainController.setSavedCurrentYaz(customerRefresherDTO.getCurrentYaz());
-                    checkForLoansForSalesRiskLoans(customerRefresherDTO.getCustomerLenderLoansList());
-                }
-                mainController.updateCurrentYazByNumber(String.valueOf(customerRefresherDTO.getCurrentYaz()));
+                takeCareOfYaz(customerRefresherDTO);
+                checkForLoansForSalesRiskLoans(customerRefresherDTO.getCustomerLenderLoansList());
 
                 // Categories List:
                 fillCategoriesOnScrambleTab(customerRefresherDTO.getLoanCategoryList());
@@ -814,18 +810,138 @@ public class CustomerController implements Initializable {
                 // buy/sell loans
                 ObservableList<LoanInformationDTO> loansForSaleFromTableView = loansForSaleTableView.getItems();
                 checkForChangesLoans(loansForSaleFromTableView, customerRefresherDTO.getLoansForSaleList().getLoanForSaleListInformationDTO());
-                //fillLoanPriceLoansForSale(customerRefresherDTO.getLoansForSaleList().getLoanForSaleDTOList());
                 loansForSaleTableView.refresh();
+
+                // Rewind
+                checkIfRewindState();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
 
+    private void checkIfRewindState() {
+        String finalUrl = HttpUrl
+                .parse(Constants.ADMIN_IS_REWIND)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        {
+                            alertErrorPopUp("Is Rewind Error", "Could not load information", e.getMessage());
+                        }
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() -> {
+                        alertErrorPopUp("Is Rewind Error", "Could not load information", responseBody);
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            String isRewind = response.body().string();
+                            if (isRewind.trim().equals("true")) {
+                                setDisableToAllButtons();
+                            }
+                            else {
+                                setAbleToAllButtons();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void takeCareOfYaz(ForCustomerRefresherDTO customerRefresherDTO) {
+        String finalUrl = HttpUrl
+                .parse(Constants.CUSTOMER_YAZ_REFRESHER)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        {
+                            alertErrorPopUp("Current Yaz Error", "Could not load current yaz", e.getMessage());
+                        }
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() -> {
+                        alertErrorPopUp("Current Yaz Error", "Could not load current yaz", responseBody);
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            String currentRefresherYaz = response.body().string();
+                            int currentRefresherYazInt = Integer.parseInt(currentRefresherYaz.trim());
+                            if (currentRefresherYazInt != mainController.getSavedCurrentYaz()) {
+                                setCustomerTableViewVisibilityAndUnselected();
+                                payPaymentButton.setDisable(true);
+                                paymentCloseLoanButton.setDisable(true);
+                                mainController.setSavedCurrentYaz(currentRefresherYazInt);
+                                mainController.updateCurrentYazByNumber(String.valueOf(currentRefresherYazInt));
+                                listRefresher.setYazOfRefresher(currentRefresherYazInt);
+
+                                /*if (currentRefresherYazInt < mainController.getSavedCurrentYaz()) { // Rewind State
+                                    setDisableToAllButtons(true);
+                                }
+                                else {
+                                    setDisableToAllButtons(false);
+                                }*/
+                            }
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void setDisableToAllButtons() {
+        buyLoanButton.setDisable(true);
+        sellLoanButton.setDisable(true);
+        paymentCloseLoanButton.setDisable(true);
+        payPaymentButton.setDisable(true);
+        addNewLoanButton.setDisable(true);
+        loadFileButton.setDisable(true);
+        chargeButton.setDisable(true);
+        withdrawButton.setDisable(true);
+        submitButton.setDisable(true);
+        scrambleChooseLoansToInvestButton.setDisable(true);
+    }
+
+    private void setAbleToAllButtons() {
+        addNewLoanButton.setDisable(false);
+        loadFileButton.setDisable(false);
+        chargeButton.setDisable(false);
+        withdrawButton.setDisable(false);
+        submitButton.setDisable(false);
+        scrambleChooseLoansToInvestButton.setDisable(false);
+    }
+
     private void checkForLoansForSalesRiskLoans(List<LoanInformationDTO> customerLenderLoansList) {
         for (LoanInformationDTO loan : customerLenderLoansList) {
            if (loan.getLoanStatus().equals("RISK") && checkIfTableContainsLoan(loansForSaleTableView.getItems(), loan)) {
-               alertPopUp("Attention!","Loans For Sale list has changed","The loan: " + loan.getLoanNameID() + "is in RISK now.");
+               alertErrorPopUp("Attention!","Loans For Sale list has changed","The loan: " + loan.getLoanNameID() + "is in RISK now.");
                 loansForSaleTableView.getSelectionModel().clearSelection();
                 loanPriceLabel.setText("");
                 buyLoanButton.setDisable(true);
@@ -844,6 +960,11 @@ public class CustomerController implements Initializable {
     }
 
     private void checkForChangesInNotificationArea(ObservableList<PaymentsNotificationsDTO> oldPaymentsNotificationsList, List<PaymentsNotificationsDTO> newPaymentsNotificationsList) {
+        if (newPaymentsNotificationsList.size() < oldPaymentsNotificationsList.size()) {
+            oldPaymentsNotificationsList.clear();
+            oldPaymentsNotificationsList.addAll(newPaymentsNotificationsList);
+        }
+
         int i = 0;
 
         for (PaymentsNotificationsDTO oldPaymentsNotification : oldPaymentsNotificationsList) {
@@ -861,6 +982,11 @@ public class CustomerController implements Initializable {
     }
 
     private void checkForChangesInRecentTransactions(ObservableList<RecentTransactionDTO> oldRecentTransactionList, List<RecentTransactionDTO> newRecentTransactionList) {
+        if (newRecentTransactionList.size() < oldRecentTransactionList.size()) {
+            oldRecentTransactionList.clear();
+            oldRecentTransactionList.addAll(newRecentTransactionList);
+        }
+
         int i = 0;
 
         for (RecentTransactionDTO oldRecentTransactionDTO : oldRecentTransactionList) {
@@ -925,36 +1051,6 @@ public class CustomerController implements Initializable {
         }
     }
 
-/*    private void checkForChangesInPaymentsOfLoan(List<PaymentsDTO> oldPaymentsList, List<PaymentsDTO> newPaymentsList) {
-        int i = 0;
-
-        for (PaymentsDTO oldPaymentDTO : oldPaymentsList) {
-            PaymentsDTO currentPaymentDTO = newPaymentsList.get(i++);
-            if (oldPaymentDTO.g().equals(currentPaymentDTO.getLenderName())) {
-                oldPaymentDTO.setAmountOfLoan(currentPaymentDTO.getAmountOfLoan());
-            }
-        }
-
-        while (newLenderSetAndAmountsList.size() > i) {
-            oldLenderSetAndAmountsList.add(newLenderSetAndAmountsList.get(i++));
-        }
-    }
-
-    private void checkForChangesInLendersOfLoan(List<PartInLoanDTO> oldLenderSetAndAmountsList, List<PartInLoanDTO> newLenderSetAndAmountsList) {
-        int i = 0;
-
-        for (PartInLoanDTO oldPartInLoanDTO : oldLenderSetAndAmountsList) {
-            PartInLoanDTO currentPartInLoanDTO = newLenderSetAndAmountsList.get(i++);
-            if (oldPartInLoanDTO.getLenderName().equals(currentPartInLoanDTO.getLenderName())) {
-                oldPartInLoanDTO.setAmountOfLoan(currentPartInLoanDTO.getAmountOfLoan());
-            }
-        }
-
-        while (newLenderSetAndAmountsList.size() > i) {
-            oldLenderSetAndAmountsList.add(newLenderSetAndAmountsList.get(i++));
-        }
-    }*/
-
     public void startListRefresher() {
         listRefresher = new CustomerRefresher(
                 this::updateCustomersList
@@ -1015,7 +1111,7 @@ public class CustomerController implements Initializable {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     Platform.runLater(() ->
-                            alertPopUp("Charge Error", "Could not charge your payment", e.getMessage())
+                            alertErrorPopUp("Charge Error", "Could not charge your payment", e.getMessage())
                     );
                 }
 
@@ -1024,13 +1120,14 @@ public class CustomerController implements Initializable {
                     if (response.code() != 200) {
                         String responseBody = response.body().string();
                         Platform.runLater(() ->
-                                alertPopUp("Charge Error", "Could not charge your payment", responseBody)
+                                alertErrorPopUp("Charge Error", "Could not charge your payment", responseBody)
                         );
                     } else {
                         Platform.runLater(() -> {
                             fillAccountTransactionTableAndUpdateBalanceLabel();
                         });
                     }
+                    response.close();
                 }
             });
         }
@@ -1047,7 +1144,7 @@ public class CustomerController implements Initializable {
         try {
             checkAmountToWithdraw(dialog.getResult());
         } catch (Exception e) {
-            alertPopUp("Withdraw Error", "Could not withdraw the money", e.getMessage());
+            alertErrorPopUp("Withdraw Error", "Could not withdraw the money", e.getMessage());
             return ;
         }
 
@@ -1064,7 +1161,7 @@ public class CustomerController implements Initializable {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     Platform.runLater(() ->
-                            alertPopUp("Withdraw Error", "Could not withdraw your payment", e.getMessage())
+                            alertErrorPopUp("Withdraw Error", "Could not withdraw your payment", e.getMessage())
                     );
                 }
 
@@ -1073,13 +1170,14 @@ public class CustomerController implements Initializable {
                     if (response.code() != 200) {
                         String responseBody = response.body().string();
                         Platform.runLater(() ->
-                                alertPopUp("Withdraw Error", "Could not withdraw your payment", responseBody)
+                                alertErrorPopUp("Withdraw Error", "Could not withdraw your payment", responseBody)
                         );
                     } else {
                         Platform.runLater(() -> {
                             fillAccountTransactionTableAndUpdateBalanceLabel();
                         });
                     }
+                    response.close();
                 }
             });
         }
@@ -1120,7 +1218,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("There is not Customer by this name","Something went wrong: ", e.getMessage())
+                        alertErrorPopUp("There is not Customer by this name","Something went wrong: ", e.getMessage())
                 );
             }
 
@@ -1129,7 +1227,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Error","Something went wrong: ", responseBody)
+                            alertErrorPopUp("Error","Something went wrong: ", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1206,7 +1304,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Scramble error", "Could not load loan options to invest", e.getMessage())
+                        alertErrorPopUp("Scramble error", "Could not load loan options to invest", e.getMessage())
                 );
             }
 
@@ -1215,7 +1313,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Scramble error", "Could not load loan options to invest", responseBody)
+                            alertErrorPopUp("Scramble error", "Could not load loan options to invest", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1478,7 +1576,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Payment Notifications error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Payment Notifications error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1487,7 +1585,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Payment Notifications error", "Could not load information", responseBody)
+                            alertErrorPopUp("Payment Notifications error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1534,7 +1632,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customers information error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customers information error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1543,7 +1641,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customers information error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customers information error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1632,7 +1730,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customers information error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customers information error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1641,7 +1739,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customers information error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customers information error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1690,7 +1788,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customer information error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customer information error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1699,7 +1797,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customer information error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customer information error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1750,7 +1848,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customers information error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customers information error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1759,7 +1857,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customers information error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customers information error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1806,7 +1904,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1815,7 +1913,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customer Loans for sale error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1827,8 +1925,6 @@ public class CustomerController implements Initializable {
                             loadCustomerTablesFromFXML(loanForSaleScrollPane, "Loans for sale");
                             mainController.showLoanInfo(loanForSaleForTableView, false, false, paymentInfoScrollPane, "Customer Payment Loaner Loans");
                             buyLoanButton.setDisable(true);
-                            // todo: take care of the amount label
-                            //todo: check payment scrollpane
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -1856,7 +1952,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Categories error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Categories error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1865,7 +1961,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Categories error", "Could not load information", responseBody)
+                            alertErrorPopUp("Categories error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1896,7 +1992,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Payment Notifications error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Payment Notifications error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1905,7 +2001,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Payment Notifications error", "Could not load information", responseBody)
+                            alertErrorPopUp("Payment Notifications error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -1977,7 +2073,7 @@ public class CustomerController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -1986,7 +2082,7 @@ public class CustomerController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customer Loans for sale error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {

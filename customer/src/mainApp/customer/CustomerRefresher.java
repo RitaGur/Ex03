@@ -5,6 +5,7 @@ import client.util.Constants;
 import client.util.http.HttpClientUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.HttpUrl;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,21 +14,35 @@ import java.util.TimerTask;
 import java.util.function.Consumer;
 
 import static client.util.Constants.GSON_INSTANCE;
-import static client.util.popup.AlertPopUp.alertPopUp;
+import static client.util.popup.AlertPopUp.alertErrorPopUp;
 
 public class CustomerRefresher extends TimerTask {
     private final Consumer<ForCustomerRefresherDTO> customerRefresherConsumer;
+    private int yazOfRefresher;
 
     public CustomerRefresher(Consumer<ForCustomerRefresherDTO> customerRefresher) {
         this.customerRefresherConsumer = customerRefresher;
+        yazOfRefresher = 1;
     }
+
+    public void setYazOfRefresher(int yazOfRefresher) {
+        this.yazOfRefresher = yazOfRefresher;
+    }
+
     @Override
     public void run() {
-        HttpClientUtil.runAsyncGet(Constants.CUSTOMER_REFRESHER, new Callback() {
+        String finalUrl = HttpUrl
+                .parse(Constants.CUSTOMER_REFRESHER)
+                .newBuilder()
+                .addQueryParameter("yazRefresher", String.valueOf(yazOfRefresher))
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                alertPopUp("Refresh Error", "Something went wrong", e.getMessage());
+                alertErrorPopUp("Refresh Error", "Something went wrong", e.getMessage());
             }
 
             @Override

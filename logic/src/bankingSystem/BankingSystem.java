@@ -8,6 +8,8 @@ import DTO.loan.LoanForSaleDTO;
 import DTO.loan.LoanInformationDTO;
 import DTO.loan.PartInLoanDTO;
 import DTO.loan.PaymentsDTO;
+import DTO.refresher.ForAdminRefresherDTO;
+import DTO.refresher.ForCustomerRefresherDTO;
 import bankingSystem.generated.AbsCustomer;
 import bankingSystem.generated.AbsDescriptor;
 import bankingSystem.generated.AbsLoan;
@@ -32,6 +34,10 @@ public class BankingSystem implements LogicInterface {
     private TimeUnit m_CurrentTimeUnit;
     private List<String> m_LoanCategoryList;
     private List<LoanForSale> loansForSaleList;
+    private List<ForAdminRefresherDTO> adminRefresherListByYaz;
+    private List<ForCustomerRefresherDTO> customerRefresherListByYaz;
+    private Boolean isRewind;
+    private int yazOfRefresher;
 
     public BankingSystem() {
         m_BankAccountList = new ArrayList<>();
@@ -39,6 +45,10 @@ public class BankingSystem implements LogicInterface {
         m_CurrentTimeUnit = new TimeUnit();
         m_LoanCategoryList = new ArrayList<>();
         loansForSaleList = new ArrayList<>();
+        adminRefresherListByYaz = new ArrayList<>();
+        customerRefresherListByYaz = new ArrayList<>();
+        isRewind = false;
+        yazOfRefresher = 1;
     }
 
     @Override
@@ -79,6 +89,9 @@ public class BankingSystem implements LogicInterface {
     @Override
     public void promoteTimeline() throws Exception {
         m_CurrentTimeUnit.addOneToTimeUnit();
+        if (!isRewind) {
+            yazOfRefresher++;
+        }
 
         // loans in risk
         for (Loan loan : m_LoanList) {
@@ -142,9 +155,6 @@ public class BankingSystem implements LogicInterface {
 
         // Loans:
         fillLoanList(descriptor.getAbsLoans().getAbsLoan(), customerName);
-
-        // Timeunit:
-        m_CurrentTimeUnit.setCurrentTimeUnit();
     }
 
     private void fillLoanList(List<AbsLoan> absLoan, String customerName) throws Exception {
@@ -783,5 +793,118 @@ public class BankingSystem implements LogicInterface {
 
         seller.addMoneyToAccount(amountToTransfer, m_CurrentTimeUnit.getCurrentTimeUnit());
         newLender.withdrawMoneyFromAccount(amountToTransfer, m_CurrentTimeUnit.getCurrentTimeUnit());
+    }
+
+    public void addNewAdminRefresher() {
+        ForAdminRefresherDTO newAdminRefresher = new ForAdminRefresherDTO();
+        setAdminRefresherParams(newAdminRefresher);
+
+        adminRefresherListByYaz.add(newAdminRefresher);
+    }
+
+    public void addNewCustomerRefresher(String customerFromSession) throws Exception {
+        ForCustomerRefresherDTO newCustomerRefresher = new ForCustomerRefresherDTO();
+        setCustomerRefresherParams(newCustomerRefresher, customerFromSession);
+
+        customerRefresherListByYaz.add(newCustomerRefresher);
+    }
+
+    private void setAdminRefresherParams(ForAdminRefresherDTO adminRefresherDTO) {
+        adminRefresherDTO.setAdminLoanList(showLoansInformation());
+        adminRefresherDTO.setAdminCustomerList(showClientsInformation());
+        adminRefresherDTO.setCurrentYaz(getCurrentTimeUnit().getCurrentTimeUnit());
+    }
+
+    private void setCustomerRefresherParams(ForCustomerRefresherDTO customerRefresherDTO, String customerFromSession) throws Exception {
+        customerRefresherDTO.setCustomerName(customerFromSession);
+        customerRefresherDTO.setCustomerBalance(getCustomerBalanceByName(customerFromSession));
+        customerRefresherDTO.setCurrentYaz(getCurrentYaz());
+        customerRefresherDTO.setCustomerPaymentNotificationsList(getPaymentsNotificationInDTO(customerFromSession));
+        customerRefresherDTO.setCustomerRecentTransactionsList(getCustomerRecentTransactionByName(customerFromSession));
+        customerRefresherDTO.setCustomerLenderLoansList(getCustomerLenderLoans(customerFromSession));
+        customerRefresherDTO.setCustomerLonerLoansList(getCustomerLoanerLoans(customerFromSession));
+        customerRefresherDTO.setCustomerPaymentLoanerLoansList(getCustomerOpenLoansToPay(customerFromSession));
+        customerRefresherDTO.setLoanCategoryList(getLoanCategoryList());
+        customerRefresherDTO.setLoansForSaleList(getLoanForSaleForRefresher(customerFromSession));
+    }
+
+    public ForCustomerRefresherDTO getCustomerRefresherFromList(int yaz, String customerName) throws Exception {
+        if (yaz == m_CurrentTimeUnit.getCurrentTimeUnit()) {
+            ForCustomerRefresherDTO customerRefresherDTO = new ForCustomerRefresherDTO();
+            setCustomerRefresherParams(customerRefresherDTO, customerName);
+
+            return customerRefresherDTO;
+        }
+        else {
+            return findCustomerRefresherFromListByNameAndYaz(yaz, customerName);
+        }
+    }
+
+    private ForCustomerRefresherDTO findCustomerRefresherFromListByNameAndYaz(int yaz, String customerName) {
+        for (ForCustomerRefresherDTO customerRefresher : customerRefresherListByYaz) {
+            if (customerRefresher.getCustomerName().equals(customerName)) {
+                if (customerRefresher.getCurrentYaz() == yaz) {
+                    return customerRefresher;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public ForAdminRefresherDTO getAdminRefresherFromList(int yaz) {
+        if (yaz == m_CurrentTimeUnit.getCurrentTimeUnit()) {
+            ForAdminRefresherDTO adminRefresherDTO = new ForAdminRefresherDTO();
+            setAdminRefresherParams(adminRefresherDTO);
+
+            return adminRefresherDTO;
+        }
+        else {
+            return adminRefresherListByYaz.get(yaz - 1);
+        }
+    }
+
+    public void updateBankWeInRewind(int yazOfRefresher) {
+        isRewind = true;
+        this.yazOfRefresher = yazOfRefresher;
+    }
+
+    public int getCurrentYaz() {
+        if (isRewind) {
+            return yazOfRefresher;
+        }
+        return m_CurrentTimeUnit.getCurrentTimeUnit();
+    }
+
+    public void updateBackToRealTime() {
+        isRewind = false;
+        yazOfRefresher = m_CurrentTimeUnit.getCurrentTimeUnit();
+    }
+
+    public int getYazOfRefresher() {
+        return yazOfRefresher;
+    }
+
+    public Boolean getRewind() {
+        return isRewind;
+    }
+
+    public ForCustomerRefresherDTO getEmptyRefresher() {
+        ForCustomerRefresherDTO customerRefresherDTO = new ForCustomerRefresherDTO();
+
+        customerRefresherDTO.setCustomerBalance(0);
+        customerRefresherDTO.setCurrentYaz(getCurrentYaz());
+        customerRefresherDTO.setCustomerPaymentNotificationsList(new ArrayList<>());
+        customerRefresherDTO.setCustomerRecentTransactionsList(new ArrayList<>());
+        customerRefresherDTO.setCustomerLenderLoansList(new ArrayList<>());
+        customerRefresherDTO.setCustomerLonerLoansList(new ArrayList<>());
+        customerRefresherDTO.setCustomerPaymentLoanerLoansList(new ArrayList<>());
+        customerRefresherDTO.setLoanCategoryList(new ArrayList<>());
+        LoanForSaleListDTO loanForSaleListDTO = new LoanForSaleListDTO();
+        loanForSaleListDTO.setLoanForSaleDTOList(new ArrayList<>());
+        loanForSaleListDTO.setLoanForSaleListInformationDTO(new ArrayList<>());
+        customerRefresherDTO.setLoansForSaleList(loanForSaleListDTO);
+
+        return customerRefresherDTO;
     }
 }

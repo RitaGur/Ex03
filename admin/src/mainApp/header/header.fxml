@@ -25,13 +25,13 @@
       <RowConstraints maxHeight="30.0" minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
    </rowConstraints>
    <children>
-      <Label fx:id="filePathLabel" maxWidth="1.7976931348623157E308" prefHeight="50.0" style="-fx-border-color: black;" styleClass="header-items" text="  File Path" GridPane.columnIndex="5" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
       <Label fx:id="currentYazLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="50.0" prefWidth="220.0" style="-fx-border-color: black;" styleClass="header-items" text="Current Yaz" GridPane.columnIndex="7" GridPane.rowIndex="1">
          <GridPane.margin>
             <Insets />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="skinComboBox" onAction="#skinComboBoxClicked" prefHeight="50.0" prefWidth="200.0" styleClass="header-items" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+      <ComboBox fx:id="skinComboBox" onAction="#skinComboBoxClicked" prefHeight="50.0" prefWidth="200.0" styleClass="header-items" GridPane.columnIndex="5" GridPane.rowIndex="1" />
       <Label fx:id="userNameLabel" prefHeight="50.0" prefWidth="262.0" text="Hello " GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <ComboBox fx:id="yazComboBox" onAction="#yazComboBoxChanged" prefHeight="117.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
    </children>
 </GridPane>

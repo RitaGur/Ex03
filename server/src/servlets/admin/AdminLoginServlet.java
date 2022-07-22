@@ -39,8 +39,7 @@ public class AdminLoginServlet extends HttpServlet {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         out.println(errorMessage);
                     }
-
-                    if (ServletUtils.isAdminLoggedIn(getServletContext())) {
+                    else if (ServletUtils.isAdminLoggedIn(getServletContext())) {
                         String errorMessage = "Admin is already logged-in!";
 
                         // stands for unauthorized as there is already such user with this name

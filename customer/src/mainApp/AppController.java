@@ -288,7 +288,8 @@ public class AppController implements Initializable {
 
     public void afterCustomerLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName);
-        updateCurrentYaz();
+        //updateCurrentYaz(); //todo: delete?
+
         loadCustomerViewAfterLoginSucceeded();
         customerComponentController.afterCustomerLoginLoading(userName);
         //refresher call

@@ -12,6 +12,7 @@ import utils.ServletUtils;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import static constants.Constants.YAZ_NUMBER;
 import static utils.ServletUtils.GSON_INSTANCE;
 
 @WebServlet(name = "ForAdminRefresherServlet", urlPatterns = "/admin/adminRefresher")
@@ -21,16 +22,21 @@ public class ForAdminRefresherServlet extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
         BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
-        ForAdminRefresherDTO forAdminRefresherDTO = new ForAdminRefresherDTO();
-        setAdminRefresherParams(forAdminRefresherDTO, bankingSystem);
+        int realYaz = bankingSystem.getCurrentTimeUnit().getCurrentTimeUnit();
+        String yazOfRefresher = request.getParameter(YAZ_NUMBER);
+        int yazOfRefresherInt = Integer.parseInt(yazOfRefresher);
+        Boolean isRewind = bankingSystem.getRewind();
+
+        if (yazOfRefresherInt < realYaz) {
+            bankingSystem.updateBankWeInRewind(yazOfRefresherInt);
+        }
+        else {
+            bankingSystem.updateBackToRealTime();
+        }
+
+        ForAdminRefresherDTO forAdminRefresherDTO = bankingSystem.getAdminRefresherFromList(yazOfRefresherInt);
         String json = GSON_INSTANCE.toJson(forAdminRefresherDTO);
         out.println(json);
         out.flush();
-    }
-
-    private void setAdminRefresherParams(ForAdminRefresherDTO adminRefresherDTO, BankingSystem bankingSystem) {
-        adminRefresherDTO.setAdminLoanList(bankingSystem.showLoansInformation());
-        adminRefresherDTO.setAdminCustomerList(bankingSystem.showClientsInformation());
-        adminRefresherDTO.setCurrentYaz(bankingSystem.getCurrentTimeUnit().getCurrentTimeUnit());
     }
 }

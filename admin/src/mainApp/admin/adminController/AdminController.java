@@ -6,6 +6,7 @@ import DTO.lists.LoanListDTO;
 import DTO.loan.LoanInformationDTO;
 import DTO.loan.PaymentsDTO;
 import DTO.refresher.ForAdminRefresherDTO;
+import client.util.Constants;
 import client.util.api.HttpStatusUpdate;
 import client.util.http.HttpClientUtil;
 import javafx.animation.FadeTransition;
@@ -47,10 +48,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import static client.util.Constants.*;
-import static client.util.popup.AlertPopUp.alertPopUp;
+import static client.util.popup.AlertPopUp.alertErrorPopUp;
 
 public class AdminController implements Initializable {
     @FXML private TableView lendersComponent;
@@ -66,7 +66,7 @@ public class AdminController implements Initializable {
     private ScrollPane adminView;
 
     private Timer timer;
-    private TimerTask listRefresher;
+    private AdminRefresher listRefresher;
     private HttpStatusUpdate httpStatusUpdate;
     private TableView adminLoansTableView;
 
@@ -160,10 +160,8 @@ public class AdminController implements Initializable {
     @FXML
     private AnchorPane animationAnchorPane;
 
-
     public void setHttpStatusUpdate(HttpStatusUpdate httpStatusUpdate) {
         this.httpStatusUpdate = httpStatusUpdate;
-
     }
 
     @FXML
@@ -208,6 +206,7 @@ public class AdminController implements Initializable {
     @FXML
     void increaseYazButtonActionListener(ActionEvent event) throws Exception {
         mainController.increaseYaz();
+        mainController.addYazToComboBox();
     }
 
     private void setAdminScrollPanesVisibility(boolean visibility) {
@@ -342,6 +341,11 @@ public class AdminController implements Initializable {
     }
 
     private void checkForChangesInLoans(ObservableList<LoanInformationDTO> oldLoansList, List<LoanInformationDTO> newLoanList) {
+        if (newLoanList.size() < oldLoansList.size()) {
+            oldLoansList.clear();
+            oldLoansList.addAll(newLoanList);
+        }
+
         int i = 0;
         for (LoanInformationDTO oldLoanDTO : oldLoansList) {
             LoanInformationDTO currentNewLoan = newLoanList.get(i++);
@@ -375,6 +379,11 @@ public class AdminController implements Initializable {
    }
 
     private void checkForChangesInCustomers(ObservableList<ClientInformationDTO> oldCustomersList, List<ClientInformationDTO> newCustomersList) {
+        if (newCustomersList.size() < oldCustomersList.size()) {
+            oldCustomersList.clear();
+            oldCustomersList.addAll(newCustomersList);
+        }
+
         int i = 0;
         for (ClientInformationDTO oldClientDTO : oldCustomersList) {
             ClientInformationDTO currentNewCustomer = newCustomersList.get(i++);
@@ -416,8 +425,54 @@ public class AdminController implements Initializable {
                     setCustomerTableViewVisibilityAndUnselected();
                     mainController.setSavedCurrentYaz(adminRefresherDTO.getCurrentYaz());
                 }
+
+                // is Rewind State
+                checkIfRewindState();
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        });
+    }
+
+    private void checkIfRewindState() {
+        String finalUrl = HttpUrl
+                .parse(Constants.ADMIN_IS_REWIND)
+                .newBuilder()
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        {
+                            alertErrorPopUp("Is Rewind Error", "Could not load information", e.getMessage());
+                        }
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() -> {
+                        alertErrorPopUp("Is Rewind Error", "Could not load information", responseBody);
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        try {
+                            String isRewind = response.body().string();
+                            if (isRewind.trim().equals("true")) {
+                                increaseYazButton.setDisable(true);
+                            }
+                            else {
+                                increaseYazButton.setDisable(false);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
             }
         });
     }
@@ -447,7 +502,7 @@ public class AdminController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                       alertPopUp("Loans information error", "Could not load information", e.getMessage())
+                       alertErrorPopUp("Loans information error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -456,7 +511,7 @@ public class AdminController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Loans information error", "Could not load information", responseBody)
+                            alertErrorPopUp("Loans information error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -488,7 +543,7 @@ public class AdminController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Customers information error", "Could not load information", e.getMessage())
+                        alertErrorPopUp("Customers information error", "Could not load information", e.getMessage())
                 );
             }
 
@@ -497,7 +552,7 @@ public class AdminController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Customers information error", "Could not load information", responseBody)
+                            alertErrorPopUp("Customers information error", "Could not load information", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -533,7 +588,7 @@ public class AdminController implements Initializable {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
-                        alertPopUp("Increase Yaz error", "Could not increase yaz", e.getMessage())
+                        alertErrorPopUp("Increase Yaz error", "Could not increase yaz", e.getMessage())
                 );
             }
 
@@ -542,7 +597,7 @@ public class AdminController implements Initializable {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            alertPopUp("Increase Yaz error", "Could not increase yaz", responseBody)
+                            alertErrorPopUp("Increase Yaz error", "Could not increase yaz", responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -555,5 +610,9 @@ public class AdminController implements Initializable {
                 }
             }
         });
+    }
+
+    public void updateRefresherYaz(int yazChosen) {
+        listRefresher.setYazOfRefresher(yazChosen);
     }
 }

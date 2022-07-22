@@ -62,6 +62,7 @@ public class HeaderController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        currentYaz = 1; // todo: delete?
         addSkinsCSS();
     }
 

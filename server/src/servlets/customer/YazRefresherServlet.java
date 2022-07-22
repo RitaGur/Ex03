@@ -1,6 +1,5 @@
-package servlets.admin;
+package servlets.customer;
 
-import DTO.client.ClientInformationDTO;
 import bankingSystem.BankingSystem;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,25 +9,19 @@ import utils.ServletUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 
-@WebServlet(name = "IncreaseYaz",urlPatterns = "/admin/increaseYaz")
-public class IncreaseYaz extends HttpServlet {
+@WebServlet(name = "YazRefresherServlet",urlPatterns = "/customer/yazRefresher")
+public class YazRefresherServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain;charset=UTF-8");
         PrintWriter out = response.getWriter();
         BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
 
         synchronized (this) {
             try {
-                bankingSystem.addNewAdminRefresher();
-                List<ClientInformationDTO> clientInformationDTO = ServletUtils.getCustomerList(getServletContext());
-                for (ClientInformationDTO client : clientInformationDTO) {
-                    bankingSystem.addNewCustomerRefresher(client.getClientName());
-                }
-
-                bankingSystem.promoteTimeline();
-                out.println(bankingSystem.getCurrentTimeUnit().getCurrentTimeUnit()); //current yaz
+                int currentRefresherYaz = bankingSystem.getYazOfRefresher();
+                out.println(currentRefresherYaz); //current yaz
             } catch (Exception e) {
                 e.printStackTrace();
             }

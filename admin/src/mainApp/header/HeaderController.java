@@ -31,6 +31,7 @@ public class HeaderController implements Initializable {
     private GridPane header;
     private ScrollPane customerView;
     private int currentYaz;
+    private int counterForYazComboBox = 2;
 
     @FXML
     private GridPane headerComponent;
@@ -48,38 +49,30 @@ public class HeaderController implements Initializable {
     private Label userNameLabel;
 
     @FXML
+    private ComboBox<String> yazComboBox;
+
+    @FXML
+    void yazComboBoxChanged(ActionEvent event) {
+        int yazChosen = Integer.parseInt(yazComboBox.getSelectionModel().getSelectedItem());
+        currentYazLabel.setText("Current Yaz: " + yazChosen);
+        mainController.updateRefresherYaz(yazChosen);
+    }
+
+    @FXML
     void skinComboBoxClicked(ActionEvent event) {
         mainController.setAllStylesheets(skinComboBox.getValue());
     }
 
-/*    @FXML
-    void comboBoxClicked(ActionEvent event) throws Exception {
-        if (!(adminComboBox.getValue().toString().equals("Admin"))) {
-            mainController.putCustomerView(adminComboBox.getValue(), customerView);
-        }
-        else {
-            adminView = loadScene("/mainApp/admin/admin.fxml");
-            mainController.insertAdminView(adminView);
-        }
-    }*/
-
-    private Parent loadScene(String sc) throws IOException {
-        return FXMLLoader.load(getClass().getResource(sc));
-    }
-
     public void setMainController(AdminAppController mainController) {
         this.mainController = mainController;
+        //mainController.updateRefresherYaz(1); //todo: check
     }
-
-    //public void makeComboBoxAble() {
-        //adminComboBox.setDisable(false);
-   // }
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //adminComboBox.getItems().addAll("Admin");
-        //adminComboBox.getSelectionModel().select("Admin");
+        yazComboBox.getItems().addAll("1");
+        yazComboBox.getSelectionModel().select("1");;
+
         addSkinsCSS();
     }
 
@@ -88,15 +81,10 @@ public class HeaderController implements Initializable {
         filePathLabel.setText("  File Path: " + filePath);
     }
 
-
-    public void addCustomersToComboBox(List<ClientInformationDTO> clientsInformationList) {
-        for (ClientInformationDTO clientDTO : clientsInformationList) {
-            //adminComboBox.getItems().add(clientDTO.getClientName().toString());
-        }
-    }
-
-    public void promoteIncreaseYazLabel(int currentYaz) {
-        currentYazLabel.setText("Current Yaz: " + currentYaz);
+    public void addYazToComboBox() {
+        yazComboBox.getItems().add(String.valueOf(counterForYazComboBox));
+        yazComboBox.getSelectionModel().select(String.valueOf(counterForYazComboBox));
+        counterForYazComboBox++;
     }
 
     public void setCustomerViewParameter(ScrollPane customerView) {

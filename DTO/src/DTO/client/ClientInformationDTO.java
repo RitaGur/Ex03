@@ -2,7 +2,6 @@ package DTO.client;
 
 import DTO.loan.LoanInformationDTO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ClientInformationDTO {
@@ -28,26 +27,6 @@ public class ClientInformationDTO {
 
     }
 
- /*   public ClientInformationDTO(BankClient bankClient, int clientNumberI) {
-        clientNumber = clientNumberI;
-        this.clientName = bankClient.getClientName();
-        this.recentTransactionList = recentTransactionListDTO(bankClient.getLastTransactions());
-        this.clientAsBorrowerLoanList = clientLoanListDTO(bankClient.getClientAsBorrowerSet());
-        this.clientAsLenderLoanList = clientLoanListDTO(bankClient.getClientAsLenderSet());
-        this.paymentsNotificationsList = paymentsNotificationListDTO(bankClient.getPaymentsNotificationList());
-        this.clientBalance = (int)Math.round(bankClient.getAccountBalance());
-        newBorrower = bankClient.howManyInBorrower("NEW");
-        pendingBorrower = bankClient.howManyInBorrower("PENDING");
-        activeBorrower = bankClient.howManyInBorrower("ACTIVE");
-        riskBorrower = bankClient.howManyInBorrower("RISK");
-        finishedBorrower = bankClient.howManyInBorrower("FINISHED");
-        newLender = bankClient.howManyInLender("NEW");
-        pendingLender = bankClient.howManyInLender("PENDING");
-        activeLender = bankClient.howManyInLender("ACTIVE");
-        riskLender = bankClient.howManyInLender("RISK");
-        finishedLender = bankClient.howManyInLender("FINISHED");
-    }*/
-
     public String getClientName() {
         return clientName;
     }
@@ -67,7 +46,6 @@ public class ClientInformationDTO {
     public double getClientBalance() {
         return clientBalance;
     }
-
 
     public int getClientNumber() {
         return clientNumber;

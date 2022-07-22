@@ -387,4 +387,12 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
     public void setSavedCurrentYaz(int newCurrentYaz) {
         headerComponentController.setSavedYaz(newCurrentYaz);
     }
+
+    public void addYazToComboBox() {
+        headerComponentController.addYazToComboBox(); //todo: check
+    }
+
+    public void updateRefresherYaz(int yazChosen) {
+        adminComponentController.updateRefresherYaz(yazChosen);
+    }
 }
