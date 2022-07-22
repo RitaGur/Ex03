@@ -1,8 +1,6 @@
 package servlets.customer;
 
-import DTO.lists.LoanListDTO;
 import DTO.loan.LoanInformationDTO;
-import DTO.loan.scramble.InvestmentLoanInformationDTO;
 import bankingSystem.BankingSystem;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,12 +8,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import utils.ServletUtils;
-import utils.SessionUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 
 import static utils.ServletUtils.GSON_INSTANCE;
 
@@ -33,9 +29,11 @@ public class AddNewLoan extends HttpServlet {
         while ((line = rd.readLine()) != null) {
             rawBody.append(line);
         }
+
         synchronized (this) {
-            LoanInformationDTO loanToAdd = GSON_INSTANCE.fromJson(rawBody.toString(), LoanInformationDTO.class);
             try {
+                LoanInformationDTO loanToAdd = GSON_INSTANCE.fromJson(rawBody.toString(), LoanInformationDTO.class);
+                checkLoanID(loanToAdd, bankingSystem);
                 bankingSystem.addLoan(loanToAdd.getLoanNameID(),loanToAdd.getBorrowerName(), loanToAdd.getLoanStartSum(),
                         loanToAdd.getLoanSumOfTimeUnit(), loanToAdd.getTimeUnitsBetweenPayments(), loanToAdd.getLoanInterest(),
                         loanToAdd.getLoanCategory());
@@ -43,6 +41,12 @@ public class AddNewLoan extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 out.println(e.getMessage());
             }
+        }
+    }
+
+    private void checkLoanID(LoanInformationDTO loanToAdd, BankingSystem bankingSystem) throws Exception {
+        if(bankingSystem.isLoanIDExists(loanToAdd.getLoanNameID())) {
+            throw new Exception("Loan ID already exists.");
         }
     }
 }

@@ -1,18 +1,13 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="ABS3">
+  <artifact type="war" name="ABS3">
     <output-path>$PROJECT_DIR$/out/artifacts/ABS3</output-path>
-    <root id="root">
-      <element id="javaee-facet-resources" facet="server/web/Web" />
-      <element id="directory" name="WEB-INF">
-        <element id="directory" name="classes">
-          <element id="module-output" name="server" />
-          <element id="module-output" name="logic" />
-          <element id="module-output" name="DTO" />
-        </element>
-        <element id="directory" name="lib">
-          <element id="library" level="project" name="gson-2.8.8" />
-        </element>
-      </element>
+    <root id="archive" name="ABS3.war">
+      <element id="artifact" artifact-name="ABS_Ex03" />
+      <element id="artifact" artifact-name="admin:jar" />
+      <element id="artifact" artifact-name="customer:jar" />
+      <element id="library" level="project" name="gson-2.8.8" />
+      <element id="library" level="project" name="kotlin-stdlib-common-1.4.10" />
+      <element id="library" level="project" name="okHttp" />
     </root>
   </artifact>
 </component>

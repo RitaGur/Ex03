@@ -1,0 +1,15 @@
+<component name="ArtifactManager">
+  <artifact name="customer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/customer_jar</output-path>
+    <root id="root">
+      <element id="archive" name="customer.jar">
+        <element id="module-output" name="customer" />
+        <element id="module-output" name="DTO" />
+        <element id="module-output" name="clientUtils" />
+      </element>
+      <element id="library" level="project" name="kotlin-stdlib-common-1.4.10" />
+      <element id="library" level="project" name="okHttp" />
+      <element id="library" level="project" name="gson-2.8.8" />
+    </root>
+  </artifact>
+</component>

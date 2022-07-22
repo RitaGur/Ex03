@@ -247,7 +247,6 @@ public class AppController implements Initializable {
 
     public void afterCustomerLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName);
-
         loadCustomerViewAfterLoginSucceeded();
         customerComponentController.afterCustomerLoginLoading(userName);
 

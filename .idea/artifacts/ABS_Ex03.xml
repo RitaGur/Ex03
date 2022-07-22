@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="abs31">
-    <output-path>$PROJECT_DIR$/out/artifacts/abs31</output-path>
+  <artifact type="exploded-war" name="ABS_Ex03">
+    <output-path>$PROJECT_DIR$/out/artifacts/ABS_Ex03</output-path>
     <root id="root">
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
@@ -10,6 +10,8 @@
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="gson-2.8.8" />
+          <element id="artifact" artifact-name="admin:jar" />
+          <element id="artifact" artifact-name="customer:jar" />
         </element>
       </element>
       <element id="javaee-facet-resources" facet="server/web/Web" />

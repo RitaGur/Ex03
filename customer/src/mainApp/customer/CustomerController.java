@@ -462,23 +462,29 @@ public class CustomerController implements Initializable {
     @FXML
     void addNewLoanClicked(ActionEvent event) {
         String loanID = newLoanIDTextField.getText();
-        int loanAmount, totalYazTime, yazBetweenPayment, loanInterest;
-        loanAmount = Integer.parseInt(newLoanAmountTextField.getText());
-        totalYazTime = Integer.parseInt(newLoanTotalYazTimeTextField.getText());
-        yazBetweenPayment = Integer.parseInt(newLoanYazBetweenPaymentTextField.getText());
-        loanInterest = (int) newLoanInterestSlider.getValue();
         String selectedCategory = newLoanCategoryTextField.getText();
+        int loanAmount, totalYazTime, yazBetweenPayment, loanInterest;
+        try {
+            loanAmount = Integer.parseInt(newLoanAmountTextField.getText());
+            totalYazTime = Integer.parseInt(newLoanTotalYazTimeTextField.getText());
+            yazBetweenPayment = Integer.parseInt(newLoanYazBetweenPaymentTextField.getText());
+            loanInterest = (int) newLoanInterestSlider.getValue();
 
-        LoanInformationDTO loanToAdd = new LoanInformationDTO();
-        loanToAdd.setLoanNameID(loanID);
-        loanToAdd.setLoanStartSum(loanAmount);
-        loanToAdd.setLoanSumOfTimeUnit(totalYazTime);
-        loanToAdd.setTimeUnitsBetweenPayments(yazBetweenPayment);
-        loanToAdd.setLoanInterest(loanInterest);
-        loanToAdd.setLoanCategory(selectedCategory);
-        loanToAdd.setBorrowerName(customerName);
+            LoanInformationDTO loanToAdd = new LoanInformationDTO();
+            loanToAdd.setLoanNameID(loanID);
+            loanToAdd.setLoanStartSum(loanAmount);
+            loanToAdd.setLoanSumOfTimeUnit(totalYazTime);
+            loanToAdd.setTimeUnitsBetweenPayments(yazBetweenPayment);
+            loanToAdd.setLoanInterest(loanInterest);
+            loanToAdd.setLoanCategory(selectedCategory);
+            loanToAdd.setBorrowerName(customerName);
 
-        addNewLoanToCustomer(loanToAdd);
+            addNewLoanToCustomer(loanToAdd);
+        }
+        catch (Exception ex) {
+            alertErrorPopUp("Error", "Some of the field are incorrect", ex.getMessage());
+        }
+
     }
 
     private void addNewLoanToCustomer(LoanInformationDTO loanToAdd) {
@@ -864,13 +870,9 @@ public class CustomerController implements Initializable {
                                 mainController.setSavedCurrentYaz(currentRefresherYazInt);
                                 mainController.updateCurrentYazByNumber(String.valueOf(currentRefresherYazInt));
                                 listRefresher.setYazOfRefresher(currentRefresherYazInt);
-
-                                /*if (currentRefresherYazInt < mainController.getSavedCurrentYaz()) { // Rewind State
-                                    setDisableToAllButtons(true);
-                                }
-                                else {
-                                    setDisableToAllButtons(false);
-                                }*/
+                            }
+                            if (currentRefresherYazInt == 1) {
+                                mainController.updateCurrentYazByNumber(String.valueOf(currentRefresherYazInt));
                             }
                         } catch (IOException ex) {
                             ex.printStackTrace();
@@ -1207,8 +1209,6 @@ public class CustomerController implements Initializable {
     }
 
     private void clearAllScrambleFields() {
-        scrambleProgressBar.setVisible(false);
-        scrambleProgressMessage.setVisible(false);
         scrambleMoneyAmountTextField.clear();
         scrambleInterestSlider.setValue(0);
         scrambleInterestRangeLabel.setText("");
@@ -1231,9 +1231,6 @@ public class CustomerController implements Initializable {
             minInterest = (int) scrambleInterestSlider.getValue();
             checkMaxOpenLoans(scrambleMaxOpenLoansTextField.getText());
             maxOwnershipPercentage = scrambleOwnershipPercentageSlider.getValue() == 0 ? 0 : (int) scrambleOwnershipPercentageSlider.getValue();
-
-            scrambleProgressBar.setVisible(true);
-            scrambleProgressMessage.setVisible(true);
 
             startInvest();
         }
@@ -1842,7 +1839,7 @@ public class CustomerController implements Initializable {
     public void afterCustomerLoginLoading(String userName) {
         makeLoanTablesVisible();
         setCustomerNameInCustomerController(userName);
-        setCustomerDTOInCustomerController(userName);
+        //setCustomerDTOInCustomerController(userName); //todo: delete?
         fillCustomerLoansTables(userName);
         fillPaymentLoanerLoansTable();
         loadAndSetNotificationAreaTable(userName);

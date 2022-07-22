@@ -907,4 +907,14 @@ public class BankingSystem implements LogicInterface {
 
         return customerRefresherDTO;
     }
+
+    public boolean isLoanIDExists(String loanNameID) {
+        for (Loan loan : m_LoanList) {
+            if (loan.getLoanNameID().equals(loanNameID)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

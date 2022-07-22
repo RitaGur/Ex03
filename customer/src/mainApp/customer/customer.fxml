@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Tab?>
@@ -171,8 +170,6 @@
                               <Label fx:id="scrambleOwnershipPercentageRangeLabel" GridPane.columnIndex="3" GridPane.rowIndex="13" />
                               <Button fx:id="scrambleChooseLoansToInvestButton" mnemonicParsing="false" onAction="#chooseLoansOnActionListener" prefHeight="31.0" prefWidth="260.0" text="Choose Loans to Invest" GridPane.columnIndex="4" GridPane.rowIndex="7" />
                               <Label fx:id="scrambleSuccessMessageLabel" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="CENTER" />
-                              <ProgressBar fx:id="scrambleProgressBar" prefHeight="23.0" prefWidth="566.0" progress="0.0" GridPane.columnIndex="4" GridPane.columnSpan="2" GridPane.rowIndex="10" />
-                              <Label fx:id="scrambleProgressMessage" text="label" GridPane.columnIndex="4" GridPane.rowIndex="9" />
                            </children>
                         </GridPane>
                      </content>
