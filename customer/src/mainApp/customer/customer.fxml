@@ -21,7 +21,7 @@
 
 <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.customer.CustomerController">
    <content>
-      <BorderPane fx:id="customerBorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="790.0" prefWidth="1300.0">
+      <BorderPane fx:id="customerBorderPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780.0" prefWidth="1300.0">
          <center>
             <TabPane fx:id="customerTabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="700.0" prefWidth="1250.0" styleClass="my-tabPane" tabClosingPolicy="UNAVAILABLE">
               <tabs>
@@ -87,7 +87,6 @@
                               </ScrollPane>
                               <Label text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                               <Label text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                              <Button fx:id="clickMe2Button" mnemonicParsing="false" onAction="#secondAnimationClickOnActionListener" text="Click me!" GridPane.columnIndex="3" GridPane.rowIndex="6" />
                               <Button fx:id="sellLoanButton" mnemonicParsing="false" onAction="#sellLoanClicked" text="Sell Loan" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                            </children>
                         </GridPane>
@@ -327,7 +326,7 @@
             </TabPane>
          </center>
          <top>
-            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <HBox prefHeight="60.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
                   <Button fx:id="loadFileButton" mnemonicParsing="false" onAction="#loadFileButtonActionListener" prefHeight="50.0" prefWidth="206.0" styleClass="admin-Buttons" text="Load File">
                      <HBox.margin>

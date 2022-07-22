@@ -42,15 +42,7 @@ public class HeaderController implements Initializable {
     private Label currentYazLabel;
 
     @FXML
-    private ComboBox<String> skinComboBox;
-
-    @FXML
     private Label userNameLabel;
-
-    @FXML
-    void skinComboBoxClicked(ActionEvent event) {
-        mainController.setAllStylesheets(skinComboBox.getValue());
-    }
 
     private Parent loadScene(String sc) throws IOException {
         return FXMLLoader.load(getClass().getResource(sc));
@@ -62,8 +54,7 @@ public class HeaderController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        currentYaz = 1; // todo: delete?
-        addSkinsCSS();
+        currentYaz = 1;
     }
 
     public void updateLabels(int currentTimeUnit, String filePath) {
@@ -79,33 +70,8 @@ public class HeaderController implements Initializable {
        this.customerView = customerView;
     }
 
-    public void addSkinsCSS() {
-        skinComboBox.getItems().addAll("Default", "Skin1", "Skin2");
-        skinComboBox.getSelectionModel().select("Default");
-    }
-
     public void setHeaderComponent(GridPane headerComponent) {
         header = headerComponent;
-    }
-
-    public void setHeaderStyleSheet(String value) {
-        switch (value) {
-            case "Default":
-                header.getStylesheets().clear();
-                break;
-            case "Skin1":
-                header.getStylesheets().clear();
-                header.getStylesheets().add(getClass().getResource("headerCSS.css").toExternalForm());
-                break;
-            case "Skin2":
-                header.getStylesheets().clear();
-                header.getStylesheets().add(getClass().getResource("headerCSS2.css").toExternalForm());
-                break;
-        }
-    }
-
-    public String getValueOfSkinComboBox() {
-        return skinComboBox.getValue();
     }
 
     public void updateUsernameLabel(String userName) {

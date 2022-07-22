@@ -1,11 +1,9 @@
 package mainApp.header;
-import DTO.client.ClientInformationDTO;
 import client.util.Constants;
 import client.util.http.HttpClientUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
@@ -22,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class HeaderController implements Initializable {
@@ -42,8 +39,8 @@ public class HeaderController implements Initializable {
     @FXML
     private Label currentYazLabel;
 
-    @FXML
-    private ComboBox<String> skinComboBox;
+   /* @FXML
+    private ComboBox<String> skinComboBox;*/
 
     @FXML
     private Label userNameLabel;
@@ -58,22 +55,14 @@ public class HeaderController implements Initializable {
         mainController.updateRefresherYaz(yazChosen);
     }
 
-    @FXML
-    void skinComboBoxClicked(ActionEvent event) {
-        mainController.setAllStylesheets(skinComboBox.getValue());
-    }
-
     public void setMainController(AdminAppController mainController) {
         this.mainController = mainController;
-        //mainController.updateRefresherYaz(1); //todo: check
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         yazComboBox.getItems().addAll("1");
         yazComboBox.getSelectionModel().select("1");;
-
-        addSkinsCSS();
     }
 
     public void updateLabels(int currentTimeUnit, String filePath) {
@@ -89,11 +78,6 @@ public class HeaderController implements Initializable {
 
     public void setCustomerViewParameter(ScrollPane customerView) {
        this.customerView = customerView;
-    }
-
-    public void addSkinsCSS() {
-        skinComboBox.getItems().addAll("Default", "Skin1", "Skin2");
-        skinComboBox.getSelectionModel().select("Default");
     }
 
     public void setHeaderComponent(GridPane headerComponent) {
@@ -114,10 +98,6 @@ public class HeaderController implements Initializable {
                 header.getStylesheets().add(getClass().getResource("headerCSS2.css").toExternalForm());
                 break;
         }
-    }
-
-    public String getValueOfSkinComboBox() {
-        return skinComboBox.getValue();
     }
 
     public void updateUsernameLabel(String userName) {

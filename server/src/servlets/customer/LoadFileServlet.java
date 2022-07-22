@@ -58,26 +58,4 @@ public class LoadFileServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
-
-    //TODO: delete
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("application/json");
-        try (PrintWriter out = response.getWriter()) {
-            Gson gson = new Gson();
-            BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
-            InvestmentLoanInformationDTO investmentLoanInformationDTO = new InvestmentLoanInformationDTO();
-            investmentLoanInformationDTO.setAmountOfMoneyToInvest(2000);
-            investmentLoanInformationDTO.setCustomerOfInvestmentName("avrum");
-            ArrayList<String> categoriesList = new ArrayList<String>();
-            categoriesList.add("damn the banks");
-            investmentLoanInformationDTO.setChosenCategories(categoriesList);
-            investmentLoanInformationDTO.setInterest(2);
-            investmentLoanInformationDTO.setMaxOpenLoans(10);
-            investmentLoanInformationDTO.setMinimumTotalTimeunits(3);
-            investmentLoanInformationDTO.setMaxOwnershipPercentage(100);
-            String json = gson.toJson(investmentLoanInformationDTO);
-            out.println(json);
-            out.flush();
-        }
-    }
 }

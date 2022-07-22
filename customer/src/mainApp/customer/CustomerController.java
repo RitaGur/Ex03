@@ -269,12 +269,6 @@ public class CustomerController implements Initializable {
     private Tab paymentTab;
 
     @FXML
-    private ProgressBar scrambleProgressBar;
-
-    @FXML
-    private Label scrambleProgressMessage;
-
-    @FXML
     private Label scrambleMinTotalYazLabel;
 
     @FXML
@@ -288,9 +282,6 @@ public class CustomerController implements Initializable {
 
     @FXML
     private ScrollPane lenderLoansScrollPane;
-
-    @FXML
-    private Button clickMe2Button;
 
     @FXML
     private Button loadFileButton;
@@ -604,32 +595,6 @@ public class CustomerController implements Initializable {
                 response.close();
             }
         }, body);
-    }
-
-    @FXML
-    void secondAnimationClickOnActionListener(ActionEvent event) {
-        /*TranslateTransition transition = new TranslateTransition();
-        transition.setDuration(Duration.seconds(2));
-        transition.setNode(clickMe2Button);
-        transition.setToY(-100);
-
-        ScaleTransition transition1 = new ScaleTransition(Duration.seconds(2), clickMe2Button);
-        transition1.setToX(2);
-        transition1.setToZ(2);
-
-        RotateTransition transition2 = new RotateTransition(Duration.seconds(2), clickMe2Button);
-        transition2.setByAngle(360);
-
-        ParallelTransition parallelTransition = new ParallelTransition(transition, transition1, transition2);
-
-        parallelTransition.setOnFinished((event1 -> {
-            FadeTransition fadeout = new FadeTransition(Duration.seconds(2), clickMe2Button);
-            fadeout.setFromValue(1.0);
-            fadeout.setToValue(0.0);
-            fadeout.play();
-        }));
-
-        parallelTransition.play();*/
     }
 
     @FXML
@@ -1201,10 +1166,6 @@ public class CustomerController implements Initializable {
 
     @FXML
     void chooseLoansOnActionListener(ActionEvent event) throws Exception {
-        //todo: delete progress details
-        scrambleProgressMessage.setVisible(false);
-        scrambleProgressBar.setVisible(false);
-
         LoanListDTO loanListDTO = new LoanListDTO();
         loanListDTO.setLoanList(chosenLoans);
 

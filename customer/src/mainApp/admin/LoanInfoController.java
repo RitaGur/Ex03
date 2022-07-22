@@ -161,7 +161,6 @@ public class LoanInfoController implements Initializable {
                             PendingInfoController pendingInfoController = fxmlLoader.getController();
                             mainController.setPendingInfoController(pendingInfoController);
                             mainController.setPendingInfoComponent(pendingInfo);
-                            mainController.setPendingInfoStyleSheet();
                             mainController.showPendingInfo(currentLoan);
                             infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(pendingInfo);
@@ -179,7 +178,6 @@ public class LoanInfoController implements Initializable {
                             ActiveInfoController activeInfoController = fxmlLoader.getController();
                             mainController.setActiveInfoController(activeInfoController);
                             mainController.setActiveInfoComponent(activeInfo);
-                            mainController.setActiveInfoStyleSheet();
                             mainController.showActiveInfo(currentLoan);
                             infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(activeInfo);
@@ -197,7 +195,6 @@ public class LoanInfoController implements Initializable {
                             RiskInfoController riskInfoController = fxmlLoader.getController();
                             mainController.setRiskInfoController(riskInfoController);
                             mainController.setRiskInfoComponent(riskInfo);
-                            mainController.setRiskInfoStyleSheet();
                             mainController.showRiskInfo(currentLoan);
                             infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(riskInfo);
@@ -215,7 +212,6 @@ public class LoanInfoController implements Initializable {
                             FinishedInfoController finishedInfoController = fxmlLoader.getController();
                             mainController.setFinishedInfoController(finishedInfoController);
                             mainController.setFinishedInfoComponent(finishedInfo);
-                            mainController.setFinishedInfoStyleSheet();
                             mainController.showFinishedInfo(currentLoan);
                             infoScrollPane.setVisible(true);
                             infoScrollPane.setContent(finishedInfo);

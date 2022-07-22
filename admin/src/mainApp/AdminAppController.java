@@ -310,11 +310,7 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
        // customerComponentController.setCustomerStyleSheet(headerComponentController.getValueOfSkinComboBox());
     }
 
-    public void setAdminStyleSheet() {
-        // customerComponentController.setCustomerStyleSheet(headerComponentController.getValueOfSkinComboBox());
-    }
-
-    public void setPendingInfoStyleSheet() {
+ /*   public void setPendingInfoStyleSheet() {
         pendingInfoComponentController.setPendingInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
     }
 
@@ -330,6 +326,8 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
         finishedInfoComponentController.setFinishedInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
     }
 
+  */
+
     public void updateUserName(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName);
         loadAdminViewAfterLoginSucceeded();
@@ -344,7 +342,6 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
 
         setAdminController(adminController);
         setAdminComponent(adminView);
-        setAdminStyleSheet(); //TODO: style sheet func
         mainBorderpane.setCenter(adminView);
     }
 
@@ -389,7 +386,7 @@ public class AdminAppController implements Initializable, HttpStatusUpdate {
     }
 
     public void addYazToComboBox() {
-        headerComponentController.addYazToComboBox(); //todo: check
+        headerComponentController.addYazToComboBox();
     }
 
     public void updateRefresherYaz(int yazChosen) {

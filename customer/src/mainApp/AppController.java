@@ -221,27 +221,6 @@ public class AppController implements Initializable {
         customerComponentController.setPayPaymentAndCloseLoanDisableByPaymentNotification(currentLoan);
     }
 
-    public void setAllStylesheets(String value) {
-        if (headerComponentController != null) {
-            headerComponentController.setHeaderStyleSheet(value);
-        }
-        if (customerComponentController != null) {
-           // customerComponentController.setCustomerStyleSheet(value);
-        }
-        if (pendingInfoComponentController != null) {
-            pendingInfoComponentController.setPendingInfoStyleSheet(value);
-        }
-        if (activeInfoComponentController != null) {
-            activeInfoComponentController.setActiveInfoStyleSheet(value);
-        }
-        if (riskInfoComponentController != null) {
-            riskInfoComponentController.setRiskInfoStyleSheet(value);
-        }
-        if (finishedInfoComponentController != null) {
-            finishedInfoComponentController.setFinishedInfoStyleSheet(value);
-        }
-    }
-
     public void setHeaderComponent(GridPane headerComponent) {
         headerComponentController.setHeaderComponent(headerComponent);
     }
@@ -266,32 +245,12 @@ public class AppController implements Initializable {
         finishedInfoComponentController.setFinishedInfoComponent(finishedInfo);
     }
 
-    public void setCustomerStyleSheet() {
-       // customerComponentController.setCustomerStyleSheet(headerComponentController.getValueOfSkinComboBox());
-    }
-
-    public void setPendingInfoStyleSheet() {
-        pendingInfoComponentController.setPendingInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
-    }
-
-    public void setActiveInfoStyleSheet() {
-        activeInfoComponentController.setActiveInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
-    }
-
-    public void setRiskInfoStyleSheet() {
-        riskInfoComponentController.setRiskInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
-    }
-
-    public void setFinishedInfoStyleSheet() {
-        finishedInfoComponentController.setFinishedInfoStyleSheet(headerComponentController.getValueOfSkinComboBox());
-    }
-
     public void afterCustomerLogin(String userName) throws IOException {
         headerComponentController.updateUsernameLabel(userName);
-        //updateCurrentYaz(); //todo: delete?
 
         loadCustomerViewAfterLoginSucceeded();
         customerComponentController.afterCustomerLoginLoading(userName);
+
         //refresher call
         setActive();
     }
@@ -306,7 +265,6 @@ public class AppController implements Initializable {
 
         setCustomerViewParameter(customerView);
         setCustomerComponent(customerView);
-        setCustomerStyleSheet();
 
         mainBorderpane.setCenter(customerView);
     }

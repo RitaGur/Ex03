@@ -155,52 +155,10 @@ public class AdminController implements Initializable {
     private ScrollPane customersInformationScrollPane;
 
     @FXML
-    private Button clickMeButton;
-
-    @FXML
     private AnchorPane animationAnchorPane;
 
     public void setHttpStatusUpdate(HttpStatusUpdate httpStatusUpdate) {
         this.httpStatusUpdate = httpStatusUpdate;
-    }
-
-    @FXML
-    void clickMeOnActionListener(ActionEvent event) {
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Fill Transitions");
-        stage.setResizable(false);
-
-        Group root = new Group();
-        Node square = new ImageView("/mainApp/admin/st,small,507x507-pad,600x600,f8f8f8.jpg");
-
-        final Rotate rotationTransform = new Rotate(0, 50, 50);
-        square.getTransforms().add(rotationTransform);
-
-        // rotate a square using timeline attached to the rotation transform's angle property.
-        final Timeline rotationAnimation = new Timeline();
-        rotationAnimation.getKeyFrames()
-                .add(
-                        new KeyFrame(
-                                Duration.seconds(5),
-                                new KeyValue(
-                                        rotationTransform.angleProperty(),
-                                        360
-                                )
-                        )
-                );
-        rotationAnimation.setCycleCount(1);
-        rotationAnimation.play();
-
-        animationAnchorPane.getChildren().add(square);
-
-        rotationAnimation.setOnFinished((event1) -> {
-            FadeTransition fadeout = new FadeTransition(Duration.seconds(2), animationAnchorPane);
-            fadeout.setFromValue(1.0);
-            fadeout.setToValue(0.0);
-            fadeout.play();
-            clickMeButton.setVisible(false);
-        });
     }
 
     @FXML

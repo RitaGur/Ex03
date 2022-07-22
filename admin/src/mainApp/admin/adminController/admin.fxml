@@ -61,11 +61,7 @@
             <Label fx:id="topInfoLabel" styleClass="admin-labels" text="Status Information" GridPane.columnIndex="3" GridPane.rowIndex="2" />
             <Button fx:id="increaseYazButton" disable="true" mnemonicParsing="false" onAction="#increaseYazButtonActionListener" prefHeight="50.0" prefWidth="200.0" styleClass="admin-Buttons" text="Increase Yaz" GridPane.columnIndex="1" />
             <AnchorPane fx:id="animationAnchorPane" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="6" />
-            <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="7">
-              <buttons>
-                  <Button fx:id="clickMeButton" mnemonicParsing="false" onAction="#clickMeOnActionListener" prefHeight="31.0" prefWidth="735.0" text="Click Me!" />
-              </buttons>
-            </ButtonBar>
+            <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="7" />
          </children>
       </GridPane>
    </content>

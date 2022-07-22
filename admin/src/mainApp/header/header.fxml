@@ -10,9 +10,9 @@
 <GridPane id="header" fx:id="headerComponent" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainApp.header.HeaderController">
    <columnConstraints>
       <ColumnConstraints hgrow="NEVER" maxWidth="30.0" minWidth="30.0" prefWidth="30.0" />
-      <ColumnConstraints hgrow="ALWAYS" prefWidth="200.0" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="-Infinity" prefWidth="200.0" />
       <ColumnConstraints hgrow="NEVER" maxWidth="108.0" minWidth="15.0" prefWidth="15.0" />
-      <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="200.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="ALWAYS" maxWidth="-Infinity" minWidth="200.0" prefWidth="100.0" />
       <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="15.0" prefWidth="15.0" />
       <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="600.0" />
       <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="15.0" prefWidth="15.0" />
@@ -30,7 +30,6 @@
             <Insets />
          </GridPane.margin>
       </Label>
-      <ComboBox fx:id="skinComboBox" onAction="#skinComboBoxClicked" prefHeight="50.0" prefWidth="200.0" styleClass="header-items" GridPane.columnIndex="5" GridPane.rowIndex="1" />
       <Label fx:id="userNameLabel" prefHeight="50.0" prefWidth="262.0" text="Hello " GridPane.columnIndex="1" GridPane.rowIndex="1" />
       <ComboBox fx:id="yazComboBox" onAction="#yazComboBoxChanged" prefHeight="117.0" prefWidth="200.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
    </children>
