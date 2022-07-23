@@ -42,7 +42,7 @@ public class ScrambleServlet extends HttpServlet {
         List<LoanInformationDTO> listOfChosenLoansDTO = new ArrayList<>();
         int counter = 1;
 
-        for (Part part:Parts){
+        for (Part part : Parts){
             String partValue = new BufferedReader(new InputStreamReader(part.getInputStream())).readLine();
             listOfChosenLoansDTO.add(bankingSystem.getLoanDTOByLoanID(partValue, counter++));
         }

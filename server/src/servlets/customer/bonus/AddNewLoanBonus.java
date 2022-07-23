@@ -1,4 +1,4 @@
-package servlets.customer;
+package servlets.customer.bonus;
 
 import DTO.client.ClientInformationDTO;
 import bankingSystem.BankingSystem;
@@ -13,16 +13,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-@WebServlet(name = "Add New Loan Bonus", urlPatterns = "/customer/newLoanBonus")
+@WebServlet(name = "Add New Loan Bonus", urlPatterns = "/customer/bonus/newLoanBonus")
 public class AddNewLoanBonus extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        /*response.setContentType("text/plain;charset=UTF-8");
+        response.setContentType("text/plain;charset=UTF-8");
         PrintWriter out = response.getWriter();
         List<ClientInformationDTO> clientList = ServletUtils.getCustomerList(getServletContext());
         BankingSystem bankingSystem = ServletUtils.getBankingSystem(getServletContext());
-        String errorMessage;
+        String errorMessage = "";
 
         String userName = request.getParameter("username");
         String loanID = request.getParameter("loanID");
@@ -32,53 +32,72 @@ public class AddNewLoanBonus extends HttpServlet {
         String yazBetweenPayment = request.getParameter("yazBetweenPayment");
         String loanInterest = request.getParameter("loanInterest");
 
-        if (!checkUserName(clientList, userName)) {
-            errorMessage = "User name " + userName + " does not exists in banking system.";
+        int loanAmountInt = 0, totalYazInt = 0, yazBetweenPaymentInt = 0, loanInterestInt = 0;
+
+        if (userName.equals("") || loanID.equals("") || loanCategory.equals("") || loanAmount.equals("") ||
+            totalYaz.equals("") || loanInterest.equals("")) {
+            errorMessage = "Please fill all fields.\n";
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            out.println(errorMessage);
+        }
+        else if (!checkUserName(clientList, userName)) {
+            errorMessage = "User name " + userName + " does not exists in banking system.\n";
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             out.println(errorMessage);
         }
         else if (checkLoanID(bankingSystem, loanID)) {
-            errorMessage = "Loan ID " + loanID + " already exists in banking system.";
+            errorMessage = "Loan ID " + loanID + " already exists in banking system.\n";
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             out.println(errorMessage);
         }
         else {
             try {
-                int loanAmountInt = Integer.parseInt(loanAmount);
+                loanAmountInt = Integer.parseInt(loanAmount);
             } catch (NumberFormatException ex) {
-                errorMessage = "loan amount needs to be numbers only.";
+                errorMessage = "loan amount needs to be numbers only.\n";
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 out.println(errorMessage);
+                return ;
             }
             try {
-                int totalYazInt = Integer.parseInt(totalYaz);
+                totalYazInt = Integer.parseInt(totalYaz);
             } catch (NumberFormatException ex) {
-                errorMessage = "Total Yaz needs to be numbers only.";
+                errorMessage = "Total Yaz needs to be numbers only.\n";
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 out.println(errorMessage);
+                return ;
             }
             try {
-                int yazBetweenPaymentInt = Integer.parseInt(yazBetweenPayment);
+                yazBetweenPaymentInt = Integer.parseInt(yazBetweenPayment);
             } catch (NumberFormatException ex) {
-                errorMessage = "Yaz between payments needs to be numbers only.";
+                errorMessage = "Yaz between payments needs to be numbers only.\n";
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 out.println(errorMessage);
+                return ;
             }
             try {
-                int loanInterestInt = Integer.parseInt(loanInterest);
+                loanInterestInt = Integer.parseInt(loanInterest);
+                checkLoanInterest(loanInterestInt);
+
+                bankingSystem.addLoan(loanID, userName, loanAmountInt, totalYazInt, yazBetweenPaymentInt, loanInterestInt, loanCategory);
+                response.setStatus(HttpServletResponse.SC_OK);
+                out.print("The loan was added successfully!\n");
             } catch (NumberFormatException ex) {
-                errorMessage = "loan interest needs to be numbers only.";
+                errorMessage = "loan interest needs to be numbers only\n.";
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 out.println(errorMessage);
+                return ;
+            } catch (Exception e) {
+                out.println(e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
         }
+    }
 
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getOutputStream().print("Work!");
-        //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);*/
-
-        response.getOutputStream().print("WORK");
-        response.setStatus(HttpServletResponse.SC_OK);
+    private void checkLoanInterest(int loanInterestInt) throws Exception {
+        if (loanInterestInt <= 0 || loanInterestInt > 100) {
+            throw new Exception("loan interest needs to be a number between 1 to 100.");
+        }
     }
 
     private boolean checkLoanID(BankingSystem bankingSystem, String loanID) {

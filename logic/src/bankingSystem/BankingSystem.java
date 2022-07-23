@@ -73,6 +73,7 @@ public class BankingSystem implements LogicInterface {
     }
 
     public void addLoan(String i_LoanID, String i_BorrowerName, int i_LoanStartSum, int i_SumOfTimeUnit, int i_HowOftenToPay, double i_Interest, String i_LoanCategory) throws Exception {
+        checkParamsRange(i_LoanStartSum, i_SumOfTimeUnit, i_HowOftenToPay, i_Interest);
         checkLoanParams(i_SumOfTimeUnit, i_HowOftenToPay, i_LoanID);
 
         BankAccount borrowerAccount = findBankAccountByName(i_BorrowerName);
@@ -83,6 +84,21 @@ public class BankingSystem implements LogicInterface {
 
         if (!checkIfCategoryExists(i_LoanCategory)) {
             m_LoanCategoryList.add(i_LoanCategory);
+        }
+    }
+
+    private void checkParamsRange(int loanStartSum, int sumOfTimeUnit, int howOftenToPay, double interest) throws Exception {
+        if (loanStartSum <= 0  ) {
+            throw new Exception("Loan amount needs to be a number bigger than 0.");
+        }
+        if (sumOfTimeUnit <= 0) {
+            throw new Exception("Total yaz needs to be a number bigger than 0.");
+        }
+        if (howOftenToPay <= 0) {
+            throw new Exception("Yaz between payments needs to be a number bigger than 0.");
+        }
+        if (interest <= 0 || interest > 100) {
+            throw new Exception("loan interest needs to be numbers only");
         }
     }
 
@@ -531,6 +547,9 @@ public class BankingSystem implements LogicInterface {
             }
             for (Loan loanOfBankingSystem : m_LoanList) {
                 openLoansOfCustomer = howManyOpenLoans(loanOfBankingSystem.getLoanOwner());
+                if (loanOfBankingSystem.getLoanOwner().getClientName().equals(clientName)) {
+                    throw new Exception("You can't invest in your own loans.");
+                }
                 //check the client is not the loan owner
                 if (!loanOfBankingSystem.getLoanOwner().getClientName().equals(clientName) &&
                         (loanOfBankingSystem.getLoanStatus() == LoanStatus.NEW ||
@@ -911,6 +930,16 @@ public class BankingSystem implements LogicInterface {
     public boolean isLoanIDExists(String loanNameID) {
         for (Loan loan : m_LoanList) {
             if (loan.getLoanNameID().equals(loanNameID)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isCategoryExist(String categoryToCheck) {
+        for (String category : m_LoanCategoryList) {
+            if (category.equals(categoryToCheck)) {
                 return true;
             }
         }
