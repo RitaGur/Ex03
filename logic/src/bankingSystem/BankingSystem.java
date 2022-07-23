@@ -768,6 +768,20 @@ public class BankingSystem implements LogicInterface {
         return listToReturn;
     }
 
+    public List<LoanInformationDTO> allLoansForSaleByCustomer(String customerName) {
+        List<LoanInformationDTO> listToReturn = new ArrayList<>();
+
+        for (LoanForSale loanForSale : loansForSaleList) {
+            if (!(loanForSale.getLoanForSale().getLoanOwner().getClientName().equals(customerName))) {
+                LoanInformationDTO loanToAdd = new LoanInformationDTO();
+                loanToAdd.setLoanNameID(loanForSale.getLoanForSale().getLoanNameID());
+
+                listToReturn.add(loanToAdd);
+            }
+        }
+        return listToReturn;
+    }
+
 
     public void buyLoan(String loanForSaleID, String sellerName, String newLenderName) throws Exception {
         if (newLenderName.equals(sellerName)) {

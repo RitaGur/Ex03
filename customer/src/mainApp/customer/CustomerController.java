@@ -324,6 +324,7 @@ public class CustomerController implements Initializable {
 
     @FXML
     private Button sellLoanButton;
+    private boolean isSystemInRewind = false;
 
     @FXML
     void sellLoanClicked(ActionEvent event) {
@@ -465,6 +466,7 @@ public class CustomerController implements Initializable {
         String selectedCategory = newLoanCategoryTextField.getText();
         int loanAmount, totalYazTime, yazBetweenPayment, loanInterest;
         try {
+            checkFieldsAreNotEmpty();
             loanAmount = Integer.parseInt(newLoanAmountTextField.getText());
             totalYazTime = Integer.parseInt(newLoanTotalYazTimeTextField.getText());
             yazBetweenPayment = Integer.parseInt(newLoanYazBetweenPaymentTextField.getText());
@@ -481,10 +483,30 @@ public class CustomerController implements Initializable {
 
             addNewLoanToCustomer(loanToAdd);
         }
-        catch (Exception ex) {
+        catch (NumberFormatException ex) {
             alertErrorPopUp("Error", "Some of the field are incorrect", ex.getMessage());
         }
+        catch (Exception e) {
+            alertErrorPopUp("Error", "Not all fields are filled", e.getMessage());
+        }
+    }
 
+    private void checkFieldsAreNotEmpty() throws Exception {
+        if (newLoanIDTextField.getText().equals("")) {
+            throw new Exception("Loan ID Field is required");
+        }
+        else if (newLoanCategoryTextField.getText().equals("")) {
+            throw new Exception("Loan Category Field is required" );
+        }
+        else if (newLoanAmountTextField.getText().equals("")) {
+            throw new Exception("Loan Amount Field is required" );
+        }
+        else if (newLoanTotalYazTimeTextField.getText().equals("")) {
+            throw new Exception("Total Yaz Time Field is required" );
+        }
+        else if (newLoanYazBetweenPaymentTextField.getText().equals("")) {
+            throw new Exception("Yaz Between Payments Field is required");
+        }
     }
 
     private void addNewLoanToCustomer(LoanInformationDTO loanToAdd) {
@@ -773,7 +795,7 @@ public class CustomerController implements Initializable {
 
                 // Current Yaz:
                 takeCareOfYaz(customerRefresherDTO);
-                checkForLoansForSalesRiskLoans(customerRefresherDTO.getCustomerLenderLoansList());
+               // checkIfLoanIsInRiskLoansForSale(customerRefresherDTO.getCustomerLenderLoansList());
 
                 // Categories List:
                 fillCategoriesOnScrambleTab(customerRefresherDTO.getLoanCategoryList());
@@ -784,14 +806,14 @@ public class CustomerController implements Initializable {
                 loansForSaleTableView.refresh();
 
                 // Rewind
-                checkIfRewindState();
+                checkIfRewindState(customerRefresherDTO);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
     }
 
-    private void checkIfRewindState() {
+    private void checkIfRewindState(ForCustomerRefresherDTO customerRefresherDTO) {
         String finalUrl = HttpUrl
                 .parse(Constants.ADMIN_IS_REWIND)
                 .newBuilder()
@@ -906,14 +928,15 @@ public class CustomerController implements Initializable {
     }
 
     private void checkForLoansForSalesRiskLoans(List<LoanInformationDTO> customerLenderLoansList) {
-        for (LoanInformationDTO loan : customerLenderLoansList) {
+
+       /* for (LoanInformationDTO loan : customerLenderLoansList) {
            if (loan.getLoanStatus().equals("RISK") && checkIfTableContainsLoan(loansForSaleTableView.getItems(), loan)) {
                alertErrorPopUp("Attention!","Loans For Sale list has changed","The loan: " + loan.getLoanNameID() + "is in RISK now.");
-                loansForSaleTableView.getSelectionModel().clearSelection();
-                loanPriceLabel.setText("");
-                buyLoanButton.setDisable(true);
+               loansForSaleTableView.getSelectionModel().clearSelection();
+               loanPriceLabel.setText("");
+               buyLoanButton.setDisable(true);
            }
-        }
+        }*/
     }
 
     private Boolean checkIfTableContainsLoan(List<LoanInformationDTO> items, LoanInformationDTO loan) {
@@ -1015,7 +1038,60 @@ public class CustomerController implements Initializable {
 
         while (newLoanList.size() > i) {
             oldLoansList.add(newLoanList.get(i++));
+
         }
+    }
+
+    private void checkIfLoanIsInRiskLoansForSale(List<LoanInformationDTO> customerLenderLoansList) {
+        String finalUrl = HttpUrl
+                .parse(CUSTOMER_ALL_LOAN_FOR_SALE)
+                .newBuilder()
+                .addQueryParameter("username", customerName)
+                .build()
+                .toString();
+
+        HttpClientUtil.runAsyncGet(finalUrl, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() ->
+                        alertErrorPopUp("Customer Loans for sale error", "Could not load information", e.getMessage())
+                );
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() ->
+                            alertErrorPopUp("Customer Loans for sale error", "Could not load information", responseBody)
+                    );
+                } else {
+                    Platform.runLater(() -> {
+                        String rawBody = null;
+                        try {
+                            rawBody = response.body().string();
+                            LoanListDTO loanForSaleListDTO = GSON_INSTANCE.fromJson(rawBody, LoanListDTO.class);
+                            List<LoanInformationDTO> allLoansForSale = loanForSaleListDTO.getLoanList();
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
+
+        /*for (LoanInformationDTO loan : oldLoansList) {
+            if (!checkIfLoanInList(loan)) {
+                //alertInformationPopUp("Attention!","Loans For Sale list has changed","The loan: " + loan.getLoanNameID() + "is in RISK now.");
+
+                loansForSaleTableView.getSelectionModel().clearSelection();
+                loanPriceLabel.setText("");
+                buyLoanButton.setDisable(true);
+            }
+        }*/
     }
 
     public void startListRefresher() {
